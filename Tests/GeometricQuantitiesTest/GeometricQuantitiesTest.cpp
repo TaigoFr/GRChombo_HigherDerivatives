@@ -357,8 +357,8 @@ int runTest(int argc, char *argv[])
         relative_error(gq.get_rhs_equations().Theta, RHS.Theta, "RHS.Theta");
     failed |=
         relative_error(gq.get_rhs_equations().Gamma, RHS.Gamma, "RHS.Gamma");
-    failed |=
-        relative_error(gq.get_lie_extrinsic_curvature(), LieKij, "LieKij");
+    failed |= relative_error(gq.get_lie_extrinsic_curvature(), LieKij, "LieKij",
+                             1.e-11);
     failed |= relative_error(gq.get_eom_double_normal_projection(),
                              eom_double_normal_projection,
                              "eom_double_normal_projection");

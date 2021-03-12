@@ -145,7 +145,6 @@ int runTest(int argc, char *argv[])
     // SET MATHEMATICA CALCULATIONS
 
     emtensor_t<double> em_tensor;
-    // Tensor<4, double, 4> riemann_LLLL_ST;
 
 #include "randomData.hpp" //Including the auto generated file with calculations
 
@@ -159,8 +158,6 @@ int runTest(int argc, char *argv[])
                              2.e-12);
     failed |=
         relative_error(em_tensor_def.S, em_tensor.S, "emtensor.S", 2.e-12);
-    // failed |= relative_error(gq.get_riemann_LLLL_ST(), riemann_LLLL_ST,
-    // "riemann_LLLL_ST");
 
     return failed;
 }
