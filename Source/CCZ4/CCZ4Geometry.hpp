@@ -61,14 +61,9 @@ class CCZ4Geometry
             data_t ricci_tilde = 0;
             FOR1(k)
             {
-                // Trick: For CCZ4, we can add Z terms to ricci by changing
-                // Gamma to chrisvec This way of writing it allows the user to
-                // pass Z/chi = {0};
-                // (MR): I disagree with the above comment
                 ricci_tilde += 0.5 * (vars.h[k][i] * d1.Gamma[k][j] +
                                       vars.h[k][j] * d1.Gamma[k][i]);
-                ricci_tilde += 0.5 * /* (vars.Gamma[k] - 2 * Z_over_chi[k]) **/
-                               chris.contracted[k] *
+                ricci_tilde += 0.5 * vars.Gamma[k] *
                                (chris.LLL[i][j][k] + chris.LLL[j][i][k]);
                 FOR1(l)
                 {
@@ -94,10 +89,9 @@ class CCZ4Geometry
             data_t z_terms = 0;
             FOR1(k)
             {
-                z_terms +=
-                    Z_over_chi[k] *
-                    (vars.h[i][k] * d1.chi[j] + vars.h[j][k] * d1.chi[i] -
-                     vars.h[i][j] * d1.chi[k] + d1.h[i][j][k] * vars.chi);
+                z_terms += Z_over_chi[k] * (vars.h[i][k] * d1.chi[j] +
+                                            vars.h[j][k] * d1.chi[i] -
+                                            vars.h[i][j] * d1.chi[k]);
             }
 
             out.LL[i][j] =
@@ -145,6 +139,7 @@ class CCZ4Geometry
         Tensor<1, data_t> Z0 = 0.;
         auto ricci = compute_ricci_Z(vars, d1, d2, h_UU, chris, Z0);
 
+        TensorAlgebra::compute_tensor_max(Z0);
         // need to add term to correct for d1.Gamma as this has contribution
         // from Z
         auto d1_chris_contracted =
@@ -155,6 +150,8 @@ class CCZ4Geometry
                 0.5 *
                 (vars.h[m][i] * (d1_chris_contracted[m][j] - d1.Gamma[m][j]) +
                  vars.h[m][j] * (d1_chris_contracted[m][i] - d1.Gamma[m][i]));
+            ricci.LL[i][j] += 0.5 * (chris.contracted[m] - vars.Gamma[m]) *
+                              (chris.LLL[i][j][m] + chris.LLL[j][i][m]);
         }
         ricci.scalar = vars.chi * TensorAlgebra::compute_trace(ricci.LL, h_UU);
         return ricci;

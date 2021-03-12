@@ -51,7 +51,7 @@ template <class matter_t> class MatterConstraints : public Constraints
          optionally the value of Newton's constant, which is set to one by
        default.
     */
-    MatterConstraints(const matter_t a_matter, double dx,
+    MatterConstraints(const matter_t &a_matter, double dx,
                       double G_Newton = 1.0);
 
     //! The compute member which calculates the constraints at each point in the
@@ -59,8 +59,8 @@ template <class matter_t> class MatterConstraints : public Constraints
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
   protected:
-    matter_t my_matter; //!< The matter object, e.g. a scalar field
-    double m_G_Newton;  //!< Newton's constant, set to one by default.
+    const matter_t &my_matter; //!< The matter object, e.g. a scalar field
+    double m_G_Newton;         //!< Newton's constant, set to one by default.
 };
 
 #include "MatterConstraints.impl.hpp"

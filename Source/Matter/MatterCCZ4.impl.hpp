@@ -12,8 +12,9 @@
 #include "DimensionDefinitions.hpp"
 
 template <class matter_t>
-MatterCCZ4<matter_t>::MatterCCZ4(matter_t a_matter, params_t params, double dx,
-                                 double sigma, int formulation, double G_Newton)
+MatterCCZ4<matter_t>::MatterCCZ4(const matter_t &a_matter, params_t params,
+                                 double dx, double sigma, int formulation,
+                                 double G_Newton)
     : CCZ4(params, dx, sigma, formulation, 0.0 /*No cosmological constant*/),
       my_matter(a_matter), m_G_Newton(G_Newton)
 {

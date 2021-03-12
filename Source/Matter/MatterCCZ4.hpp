@@ -73,8 +73,9 @@ template <class matter_t> class MatterCCZ4 : public CCZ4
        It allows the user to set the value of Newton's constant, which is set to
        one by default.
     */
-    MatterCCZ4(matter_t a_matter, params_t params, double dx, double sigma,
-               int formulation = CCZ4::USE_CCZ4, double G_Newton = 1.0);
+    MatterCCZ4(const matter_t &a_matter, params_t params, double dx,
+               double sigma, int formulation = CCZ4::USE_CCZ4,
+               double G_Newton = 1.0);
 
     //!  The compute member which calculates the RHS at each point in the box
     //!  \sa matter_rhs_equation()
@@ -93,8 +94,8 @@ template <class matter_t> class MatterCCZ4 : public CCZ4
     ) const;
 
     // Class members
-    matter_t my_matter;      //!< The matter object, e.g. a scalar field.
-    const double m_G_Newton; //!< Newton's constant, set to one by default.
+    const matter_t &my_matter; //!< The matter object, e.g. a scalar field.
+    const double m_G_Newton;   //!< Newton's constant, set to one by default.
 };
 
 #include "MatterCCZ4.impl.hpp"

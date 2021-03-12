@@ -12,7 +12,7 @@
 #include "DimensionDefinitions.hpp"
 
 template <class matter_t>
-MatterConstraints<matter_t>::MatterConstraints(const matter_t a_matter,
+MatterConstraints<matter_t>::MatterConstraints(const matter_t &a_matter,
                                                double dx, double G_Newton)
     : Constraints(dx, 0.0 /*No cosmological constant*/), my_matter(a_matter),
       m_G_Newton(G_Newton)

@@ -9,6 +9,7 @@
 #include "AlwaysInline.hpp"
 #include "DimensionDefinitions.hpp"
 #include "Tensor.hpp"
+#include "simd.hpp"
 #include <array>
 
 template <class data_t> struct chris_t
@@ -177,12 +178,14 @@ ALWAYS_INLINE void make_trace_free(Tensor<2, data_t> &tensor_LL,
 template <class data_t>
 ALWAYS_INLINE void make_symmetric(Tensor<2, data_t> &tensor_LL)
 {
-    Tensor<2, data_t> tensor_LL_symmetrized;
-    FOR2(i, j)
+    FOR1(i)
     {
-        tensor_LL_symmetrized[i][j] = 0.5 * (tensor_LL[i][j] + tensor_LL[j][i]);
+        for (int j = i + 1; j < DEFAULT_TENSOR_DIM; ++j)
+        {
+            tensor_LL[i][j] = 0.5 * (tensor_LL[i][j] + tensor_LL[j][i]);
+            tensor_LL[j][i] = tensor_LL[i][j];
+        }
     }
-    tensor_LL = tensor_LL_symmetrized;
 }
 
 /// Raises the index of a covector
@@ -330,6 +333,30 @@ Tensor<3, data_t> compute_phys_chris(const Tensor<1, data_t> &d1_chi,
     }
     return chris_phys;
 }
+
+// for rank==0, return its value
+template <class data_t, int N, int M>
+typename std::enable_if<(N == 0), data_t>::type
+compute_tensor_max(const Tensor<N, data_t, M> &t)
+{
+    return t;
+}
+
+// for rank>=1
+template <class data_t, int N, int M>
+typename std::enable_if<(N > 0), data_t>::type
+compute_tensor_max(const Tensor<N, data_t, M> &t)
+{
+    // looking for maximum in absolute value
+    data_t max = 0.;
+    for (int i = 0; i < M; ++i)
+    {
+        data_t elem = compute_tensor_max<data_t, N - 1, M>(t[i]);
+        max = simd_max(max, abs(elem));
+    }
+    return max;
+}
+
 } // namespace TensorAlgebra
 
 #endif /* TENSORALGEBRA_HPP_ */

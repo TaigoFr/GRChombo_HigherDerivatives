@@ -48,7 +48,7 @@ template <class matter_t> class ChiRelaxation
         Takes in the grid spacing, plus the relaxation speed, a matter object
         and the value of Newton's constant, which is set to one by default.
     */
-    ChiRelaxation(matter_t a_matter, double dx, double relax_speed,
+    ChiRelaxation(const matter_t &a_matter, double dx, double relax_speed,
                   double G_Newton = 1.0);
 
     //! The compute member which calculates the RHS at each point in the box \sa
@@ -56,7 +56,7 @@ template <class matter_t> class ChiRelaxation
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
   protected:
-    matter_t my_matter;         //!< The matter object, e.g. a scalar field.
+    const matter_t &my_matter;  //!< The matter object, e.g. a scalar field.
     const double m_relax_speed; //!< The coefficient of the Hamiltonian used to
                                 //! set relaxation speed.
     const double m_G_Newton;    //!< Newton's constant, set to one by default.
