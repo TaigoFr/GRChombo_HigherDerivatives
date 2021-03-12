@@ -104,7 +104,7 @@ class SimulationParameters : public SimulationParametersBase
 
         pp.load("tau", system_params.tau);
 #ifdef USE_CSYSTEM
-        pp.load("sigma", system_params.sigma);
+        pp.load("c_sigma", system_params.sigma);
 #endif
     }
 
