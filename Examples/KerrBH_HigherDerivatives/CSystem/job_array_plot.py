@@ -49,9 +49,13 @@ if len(sys.argv)>1:
 
     ax.set_xlabel("log2(" + params_to_vary[0] + ")")
     ax.set_ylabel("log2(" + params_to_vary[1] + ")")
-    ax.set_zlabel("Duration of run")
+    ax.set_zlabel("Duration of run (M)")
 
-    # plt.show()
+    # plt.draw()
+    # out_name = 'job_duration.pdf'
+    # plt.savefig(out_name, bbox_inches = 'tight')
+
+    plt.show()
     plt.close()
 
     # PLOT OF AH FINAL MASS
@@ -69,9 +73,15 @@ if len(sys.argv)>1:
 
             ax.set_xlabel("log2(" + params_to_vary[0] + ")")
             ax.set_ylabel("log2(" + params_to_vary[1] + ")")
-            ax.set_zlabel("AH final mass")
+            ax.set_zlabel("AH final mass (M)")
+
+            fig.tight_layout()
+            # plt.draw()
+            # out_name = 'AH_final_mass.pdf'
+            # plt.savefig(out_name, bbox_inches = 'tight')
 
             plt.show()
+            plt.close()
 
 else:
     print("Run as 'python job_array_plot.py summary_file.txt'")

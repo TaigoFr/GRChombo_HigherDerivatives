@@ -81,7 +81,7 @@ plot_interval = 1
 num_plot_vars = 17
 plot_vars = chi lapse shift1 Ham Mom E_diff B_diff WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus rhs_chi diffusion_chi det_h
 dt_multiplier = 0.25
-stop_time = 20.0
+stop_time = 30.0
 #max_steps = 1
 
 #Lapse evolution

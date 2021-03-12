@@ -11,7 +11,7 @@ import math # pow
 
 params_to_vary = ["tau" , "c_sigma"]
 params_max     = [1. , 1.]
-params_ratio   = [0.5 , 0.5] # search range is [1, 0.5, 0.25, 0.125, ...]
+params_ratio   = [math.pow(0.5, 1./3.) , math.pow(0.5, 1./3.)] # cubic root of 0.5, 3x more resolution, to run with 30x30=900 jobs
 
 if len(sys.argv)>2:
     index = int(sys.argv[1]) # indices in job arrays start in 1
