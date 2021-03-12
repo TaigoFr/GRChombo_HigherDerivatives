@@ -31,10 +31,10 @@ track_punctures = 0
 # head-on:
 massA = 0.5
 massB = 0.5
-offsetA = 0.0  8.0 0.0
-offsetB = 0.0 -8.0 0.0
-momentumA = 0.0 0.0 0.0
-momentumB = 0.0 0.0 0.0
+offsetA = 0.0  6.0 0.0
+offsetB = 0.0 -6.0 0.0
+momentumA = 0.0 -0.1 0.0
+momentumB = 0.0  0.1 0.0
 
 # regridding control, specify threshold (same on each level)
 regrid_threshold = 0.05
