@@ -49,33 +49,14 @@ enum
 namespace UserVariables
 {
 static const std::array<std::string, NUM_VARS - NUM_CCZ4_VARS>
-    user_variable_names = {"E11",
-                           "E12",
-                           "E13",
-                           "E22",
-                           "E23",
-                           "E33",
+    user_variable_names = {
+        "E11",     "E12",     "E13",     "E22",     "E23",     "E33",
 
-                           "B11",
-                           "B12",
-                           "B13",
-                           "B22",
-                           "B23",
-                           "B33"
+        "B11",     "B12",     "B13",     "B22",     "B23",     "B33",
 
-                           "Ephys11",
-                           "Ephys12",
-                           "Ephys13",
-                           "Ephys22",
-                           "Ephys23",
-                           "Ephys33",
+        "Ephys11", "Ephys12", "Ephys13", "Ephys22", "Ephys23", "Ephys33",
 
-                           "Bphys11",
-                           "Bphys12",
-                           "Bphys13",
-                           "Bphys22",
-                           "Bphys23",
-                           "Bphys33"};
+        "Bphys11", "Bphys12", "Bphys13", "Bphys22", "Bphys23", "Bphys33"};
 
 static const std::array<std::string, NUM_VARS> variable_names =
     ArrayTools::concatenate(ccz4_variable_names, user_variable_names);
