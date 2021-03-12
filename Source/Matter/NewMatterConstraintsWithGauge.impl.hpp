@@ -46,6 +46,11 @@ void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
     gq.set_cosmological_constant(m_cosmological_constant);
     gq.set_formulation(m_formulation, m_params);
     gq.set_advection(advec);
+    // why need advection to calculate the constraints?
+    // the EM-tensor needs it in the C^2 EFT, because to calculate the
+    // derivatives of 'C' it needs its time derivative, but the time derivative
+    // is computed via the EOM (the RHS) and hence typically requires the
+    // advection
 
     const auto emtensor = my_matter.compute_emtensor(gq);
     gq.set_em_tensor(emtensor, m_G_Newton);

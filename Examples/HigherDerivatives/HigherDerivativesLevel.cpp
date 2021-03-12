@@ -6,11 +6,15 @@
 // General includes common to most GR problems
 #include "HigherDerivativesLevel.hpp"
 #include "BoxLoops.hpp"
+#include "ComputePack.hpp"
+#include "GammaCalculator.hpp"
 #include "NanCheck.hpp"
 #include "PositiveChiAndAlpha.hpp"
+#include "SetValue.hpp"
 #include "TraceARemoval.hpp"
 
 // For RHS update
+#include "ChiRelaxation.hpp"
 #include "MatterCCZ4.hpp"
 
 // For constraints calculation
@@ -21,9 +25,8 @@
 
 // Problem specific includes
 #include "C2EFT.hpp"
-#include "ChiRelaxation.hpp"
-#include "ComputePack.hpp"
-#include "SetValue.hpp"
+#include "ComputeEBdiff.hpp"
+#include "SystemEB.hpp"
 
 // BH ID defined here:
 #include "SimulationParameters.hpp"
@@ -57,20 +60,25 @@ void HigherDerivativesLevel::initialData()
     BoxLoops::loop(make_compute_pack(SetValue(0.0), id), m_state_new,
                    m_state_new, INCLUDE_GHOST_CELLS);
 
-    // fillAllGhosts();
-    // BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
-    // EXCLUDE_GHOST_CELLS);
+    fillAllGhosts();
+    BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
+                   EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do before outputting a checkpoint file
 void HigherDerivativesLevel::prePlotLevel()
 {
     fillAllGhosts();
-    BoxLoops::loop(MatterConstraints<C2EFT>(C2EFT(m_p.hd_params), m_dx,
-                                            m_p.G_Newton, m_p.formulation,
-                                            m_p.ccz4_params, c_Ham,
-                                            Interval(c_Mom, c_Mom)),
-                   m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    SystemEB systemrEB(m_p.eb_params);
+    C2EFT<SystemEB> c2eft(systemrEB, m_p.hd_params);
+
+    MatterConstraints<C2EFT<SystemEB>> constraints(
+        c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
+        Interval(c_Mom, c_Mom));
+    ComputeEBdiff EBdiff(m_dx, m_p.formulation, m_p.ccz4_params);
+
+    BoxLoops::loop(make_compute_pack(constraints, EBdiff), m_state_new,
+                   m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do in RHS update, at each RK4 step
@@ -88,8 +96,10 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
         // satisfied.
         // No evolution in other variables, which are assumed to
         // satisfy constraints per initial conditions
-        ChiRelaxation<C2EFT> relaxation(C2EFT(m_p.hd_params), m_dx,
-                                        m_p.relaxspeed, m_p.G_Newton);
+        SystemEB systemrEB(m_p.eb_params);
+        C2EFT<SystemEB> c2eft(systemrEB, m_p.hd_params);
+        ChiRelaxation<C2EFT<SystemEB>> relaxation(c2eft, m_dx, m_p.relaxspeed,
+                                                  m_p.G_Newton);
         SetValue set_other_values_zero(0.0, Interval(c_h11, NUM_VARS - 1));
         auto compute_pack1 =
             make_compute_pack(relaxation, set_other_values_zero);
@@ -105,9 +115,11 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
             a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
         // Calculate MatterCCZ4 right hand side with matter_t = ScalarField
-        MatterCCZ4<C2EFT> my_ccz4_matter(C2EFT(m_p.hd_params), m_p.ccz4_params,
-                                         m_dx, m_p.sigma, m_p.formulation,
-                                         m_p.G_Newton);
+        SystemEB systemrEB(m_p.eb_params);
+        C2EFT<SystemEB> c2eft(systemrEB, m_p.hd_params);
+        MatterCCZ4<C2EFT<SystemEB>> my_ccz4_matter(c2eft, m_p.ccz4_params, m_dx,
+                                                   m_p.sigma, m_p.formulation,
+                                                   m_p.G_Newton);
         BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
     }
 }

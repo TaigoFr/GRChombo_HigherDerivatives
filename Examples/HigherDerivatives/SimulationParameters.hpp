@@ -13,14 +13,15 @@
 // Problem specific includes:
 #include "C2EFT.hpp"
 #include "CCZ4.hpp"
+#include "SystemEB.hpp"
 
 #include "MinkowskiPerturbed.hpp"
-// #include "SchwarzschildIsotropic.hpp"
-// #include "SchwarzschildKS.hpp"
+#include "SchwarzschildIsotropic.hpp"
+#include "SchwarzschildKS.hpp"
 
 // which one to use:
-typedef MinkowskiPerturbed InitialData;
-// typedef SchwarzschildIsotropic InitialData;
+// typedef MinkowskiPerturbed InitialData;
+typedef SchwarzschildIsotropic InitialData;
 // typedef SchwarzschildKS InitialData;
 
 class SimulationParameters : public SimulationParametersBase
@@ -39,27 +40,28 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("relaxspeed", relaxspeed);
 
         // Initial data
-        // pp.load("mass", id_params.mass);
-        pp.load("amplitude", id_params.amplitude);
-        pp.load("r0", id_params.r0);
+        pp.load("mass", id_params.mass);
+        // pp.load("amplitude", id_params.amplitude);
+        // pp.load("r0", id_params.r0);
         id_params.center = center;
 
-        pp.load("energy_scale", energy_scale);
+        pp.load("epsilon", hd_params.epsilon);
+        G_Newton = 1.;
 
-        // this is such that the ''epsilon' in the EOM is replaced by
-        // 'energy_scale' when doing 'kappa / 2 * EM-tensor'
-        G_Newton = energy_scale / (8. * M_PI);
+        // this is such that the  'epsilon' in the EOM is replaced by
+        // 'epsilon' when doing 'kappa / 2 * EM-tensor'
+        hd_params.epsilon /= (G_Newton * 8. * M_PI);
 
-        pp.load("sigma", hd_params.sigma);
-        pp.load("tau", hd_params.tau);
+        pp.load("tau", eb_params.tau);
     }
 
-    double energy_scale, G_Newton;
+    double G_Newton;
 
     // Schwarzschild bh initial data
     InitialData::params_t id_params;
 
-    C2EFT::params_t hd_params;
+    C2EFT<SystemEB>::params_t hd_params;
+    SystemEB::params_t eb_params;
 
     // Relaxation params
     Real relaxtime, relaxspeed;

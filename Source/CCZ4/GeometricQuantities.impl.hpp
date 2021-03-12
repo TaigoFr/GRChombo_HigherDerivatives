@@ -74,6 +74,7 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_codazzi_mainardi = nullptr;
     m_Gamma_spatial = nullptr;
     m_Gamma_L_spatial = nullptr;
+    m_acceleration_spatial = nullptr;
 
     m_momentum_constraints = nullptr;
     m_weyl_electric_part = nullptr;
@@ -99,6 +100,7 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_Z_L_ST = nullptr;
     m_grad_normal_LL = nullptr;
     m_covd_Z_L_ST = nullptr;
+    m_acceleration_ST = nullptr;
 
     m_em_tensor_ST = nullptr;
     m_em_tensor_trace_ST = nullptr;
@@ -289,6 +291,11 @@ template_GQ void GeometricQuantities_t::clean()
         delete m_Gamma_L_spatial;
         m_Gamma_L_spatial = nullptr;
     }
+    if (m_acceleration_spatial != nullptr)
+    {
+        delete m_acceleration_spatial;
+        m_acceleration_spatial = nullptr;
+    }
 
     if (m_metric_ST != nullptr)
     {
@@ -344,6 +351,11 @@ template_GQ void GeometricQuantities_t::clean()
     {
         delete m_covd_Z_L_ST;
         m_covd_Z_L_ST = nullptr;
+    }
+    if (m_acceleration_ST != nullptr)
+    {
+        delete m_acceleration_ST;
+        m_acceleration_ST = nullptr;
     }
 
     clean_em_tensor_dependent();
@@ -857,6 +869,13 @@ GeometricQuantities_t::get_Gamma_L_spatial()
         compute_Gamma_L_spatial();
     return *m_Gamma_L_spatial;
 }
+template_GQ const Tensor<1, data_t> &
+GeometricQuantities_t::get_acceleration_spatial()
+{
+    if (m_acceleration_spatial == nullptr)
+        compute_acceleration_spatial();
+    return *m_acceleration_spatial;
+}
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<1, data_t> &
 GeometricQuantities_t::get_momentum_constraints()
@@ -1018,6 +1037,13 @@ GeometricQuantities_t::get_covd_Z_L_ST()
     if (m_covd_Z_L_ST == nullptr)
         compute_covd_Z_L_ST();
     return *m_covd_Z_L_ST;
+}
+template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+GeometricQuantities_t::get_acceleration_ST()
+{
+    if (m_acceleration_ST == nullptr)
+        compute_acceleration_ST();
+    return *m_acceleration_ST;
 }
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
@@ -1740,6 +1766,17 @@ template_GQ void GeometricQuantities_t::compute_Gamma_L_spatial()
             Gamma_L[i] + (GR_SPACEDIM - 2.) / 2. * d1.chi[i] / vars.chi;
     }
 }
+template_GQ void GeometricQuantities_t::compute_acceleration_spatial()
+{
+    if (m_acceleration_spatial != nullptr)
+        delete m_acceleration_spatial;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+
+    m_acceleration_spatial = new Tensor<1, data_t>;
+    FOR(i) { (*m_acceleration_spatial)[i] = d1.lapse[i] / vars.lapse; }
+}
 //////////////////////////////////////////////////////////////////////////
 template_GQ void GeometricQuantities_t::compute_momentum_constraints()
 {
@@ -2044,6 +2081,11 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations()
     if (m_rhs_equations != nullptr)
         delete m_rhs_equations;
 
+    m_rhs_equations = new Vars;
+    compute_rhs_equations(*m_rhs_equations);
+}
+template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
+{
     const auto &vars = get_vars();
     const auto &d1 = get_d1_vars();
     const auto &advec = get_advection();
@@ -2055,37 +2097,33 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations()
     {
         CH_TIME("GeometricQuantities::compute_rhs_equations::RHS");
 
-        m_rhs_equations = new Vars;
-
-        m_rhs_equations->chi = vars.lapse * LIE.chi + advec.chi -
-                               2. / GR_SPACEDIM * vars.chi * div_shift;
-        m_rhs_equations->K = vars.lapse * LIE.K + advec.K;
-        m_rhs_equations->Theta = vars.lapse * LIE.Theta + advec.Theta;
+        rhs.chi = vars.lapse * LIE.chi + advec.chi -
+                  2. / GR_SPACEDIM * vars.chi * div_shift;
+        rhs.K = vars.lapse * LIE.K + advec.K;
+        rhs.Theta = vars.lapse * LIE.Theta + advec.Theta;
 
         // Gauge evolution equations
-        m_rhs_equations->lapse =
-            m_ccz4_params->lapse_advec_coeff * advec.lapse -
-            m_ccz4_params->lapse_coeff *
-                pow(vars.lapse, m_ccz4_params->lapse_power) *
-                (vars.K - 2 * vars.Theta);
+        rhs.lapse = m_ccz4_params->lapse_advec_coeff * advec.lapse -
+                    m_ccz4_params->lapse_coeff *
+                        pow(vars.lapse, m_ccz4_params->lapse_power) *
+                        (vars.K - 2 * vars.Theta);
 
         FOR(i)
         {
-            m_rhs_equations->shift[i] =
-                m_ccz4_params->shift_advec_coeff * advec.shift[i] +
-                m_ccz4_params->shift_Gamma_coeff * vars.B[i];
-            m_rhs_equations->B[i] = m_rhs_equations->Gamma[i] +
-                                    m_ccz4_params->shift_advec_coeff *
-                                        (advec.B[i] - advec.Gamma[i]) -
-                                    m_ccz4_params->eta * vars.B[i];
+            rhs.shift[i] = m_ccz4_params->shift_advec_coeff * advec.shift[i] +
+                           m_ccz4_params->shift_Gamma_coeff * vars.B[i];
+            rhs.B[i] = rhs.Gamma[i] +
+                       m_ccz4_params->shift_advec_coeff *
+                           (advec.B[i] - advec.Gamma[i]) -
+                       m_ccz4_params->eta * vars.B[i];
 
             // Use the calculated christoffels in the lie derivative terms, not
             // the evolved ones, for BSSN (as according to the old code for BSSN
-            // and according with Alcubierre page 87) m_rhs_equations->Gamma =
+            // and according with Alcubierre page 87) rhs.Gamma =
             // TensorAlgebra::lie_derivative(advec.Gamma, vars.Gamma, d1.shift,
             // vars.shift, div_shift,
             // 2. / GR_SPACEDIM, {true});
-            m_rhs_equations->Gamma[i] =
+            rhs.Gamma[i] =
                 advec.Gamma[i] + LIE.Gamma[i] * vars.lapse +
                 2. / GR_SPACEDIM *
                     (m_formulation == CCZ4::USE_CCZ4 ? vars.Gamma[i]
@@ -2094,21 +2132,19 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations()
 
             FOR1(j)
             {
-                m_rhs_equations->Gamma[i] -= vars.Gamma[j] * d1.shift[i][j];
+                rhs.Gamma[i] -= vars.Gamma[j] * d1.shift[i][j];
 
-                m_rhs_equations->h[i][j] =
-                    advec.h[i][j] + LIE.h[i][j] * vars.lapse -
-                    2. / GR_SPACEDIM * vars.h[i][j] * div_shift;
-                m_rhs_equations->A[i][j] =
-                    advec.A[i][j] + LIE.A[i][j] * vars.lapse -
-                    2. / GR_SPACEDIM * vars.A[i][j] * div_shift;
+                rhs.h[i][j] = advec.h[i][j] + LIE.h[i][j] * vars.lapse -
+                              2. / GR_SPACEDIM * vars.h[i][j] * div_shift;
+                rhs.A[i][j] = advec.A[i][j] + LIE.A[i][j] * vars.lapse -
+                              2. / GR_SPACEDIM * vars.A[i][j] * div_shift;
 
                 FOR1(k)
                 {
-                    m_rhs_equations->h[i][j] += vars.h[i][k] * d1.shift[k][j] +
-                                                vars.h[j][k] * d1.shift[k][i];
-                    m_rhs_equations->A[i][j] += vars.A[i][k] * d1.shift[k][j] +
-                                                vars.A[j][k] * d1.shift[k][i];
+                    rhs.h[i][j] += vars.h[i][k] * d1.shift[k][j] +
+                                   vars.h[j][k] * d1.shift[k][i];
+                    rhs.A[i][j] += vars.A[i][k] * d1.shift[k][j] +
+                                   vars.A[j][k] * d1.shift[k][i];
                 }
             }
         }
@@ -2117,42 +2153,42 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations()
         // Alternative using TensorAlgebra::lie_derivative (is correct, but
         slower)
 
-        m_rhs_equations->chi =
+        rhs.chi =
             vars.lapse * LIE.chi +
             TensorAlgebra::lie_derivative(advec.chi, vars.chi, div_shift,
                                           -2. / GR_SPACEDIM);
-        m_rhs_equations->h =
+        rhs.h =
             TensorAlgebra::lie_derivative(advec.h, vars.h, d1.shift, vars.shift,
                                           div_shift, -2. / GR_SPACEDIM);
-        FOR(i, j) { m_rhs_equations->h[i][j] += LIE.h[i][j] * vars.lapse; }
+        FOR(i, j) { rhs.h[i][j] += LIE.h[i][j] * vars.lapse; }
 
-        m_rhs_equations->K =
+        rhs.K =
             vars.lapse * LIE.K +
             TensorAlgebra::lie_derivative(advec.K, vars.K, div_shift, 0.);
 
-        m_rhs_equations->A =
+        rhs.A =
             TensorAlgebra::lie_derivative(advec.A, vars.A, d1.shift, vars.shift,
                                           div_shift, -2. / GR_SPACEDIM);
-        FOR(i, j) { m_rhs_equations->A[i][j] += LIE.A[i][j] * vars.lapse; }
+        FOR(i, j) { rhs.A[i][j] += LIE.A[i][j] * vars.lapse; }
 
-        m_rhs_equations->Theta = vars.lapse * LIE.Theta +
+        rhs.Theta = vars.lapse * LIE.Theta +
                                  TensorAlgebra::lie_derivative(
                                      advec.Theta, vars.Theta, div_shift, 0.);
 
         // Use the calculated christoffels in the lie derivative terms, not the
         // evolved ones, for BSSN (as according to the old code for BSSN and
         // according with Alcubierre page 87)
-        // m_rhs_equations->Gamma = TensorAlgebra::lie_derivative(advec.Gamma,
+        // rhs.Gamma = TensorAlgebra::lie_derivative(advec.Gamma,
         // vars.Gamma, d1.shift, vars.shift, div_shift,
         // 2. / GR_SPACEDIM, {true});
-        m_rhs_equations->Gamma = TensorAlgebra::lie_derivative(
+        rhs.Gamma = TensorAlgebra::lie_derivative(
             advec.Gamma,
             (m_formulation == CCZ4::USE_CCZ4 ? vars.Gamma : chris.contracted),
             d1.shift, vars.shift, div_shift, 2. / GR_SPACEDIM, {true});
-        FOR(i) { m_rhs_equations->Gamma[i] += LIE.Gamma[i] * vars.lapse; }
+        FOR(i) { rhs.Gamma[i] += LIE.Gamma[i] * vars.lapse; }
 
         // Gauge evolution equations
-        m_rhs_equations->lapse =
+        rhs.lapse =
             m_ccz4_params->lapse_advec_coeff * advec.lapse -
             m_ccz4_params->lapse_coeff *
                 pow(vars.lapse, m_ccz4_params->lapse_power) *
@@ -2160,17 +2196,17 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations()
 
         FOR(i)
         {
-            m_rhs_equations->shift[i] =
+            rhs.shift[i] =
                 m_ccz4_params->shift_advec_coeff * advec.shift[i] +
                 m_ccz4_params->shift_Gamma_coeff * vars.B[i];
-            m_rhs_equations->B[i] = m_rhs_equations->Gamma[i] +
+            rhs.B[i] = rhs.Gamma[i] +
                                     m_ccz4_params->shift_advec_coeff *
                                         (advec.B[i] - advec.Gamma[i]) -
                                     m_ccz4_params->eta * vars.B[i];
         }
-        // m_rhs_equations->lapse = 0.;
-        // m_rhs_equations->shift = 0.;
-        // m_rhs_equations->B = 0.;
+        // rhs.lapse = 0.;
+        // rhs.shift = 0.;
+        // rhs.B = 0.;
 
         */
     }
@@ -2490,6 +2526,19 @@ template_GQ void GeometricQuantities_t::compute_covd_Z_L_ST()
                                  normal_L_ST[n] * Qi_ST[m] + Qij_ST[m][n];
     }
 }
+template_GQ void GeometricQuantities_t::compute_acceleration_ST()
+{
+    if (m_acceleration_ST != nullptr)
+        delete m_acceleration_ST;
+
+    const auto &vars = get_vars();
+    const auto &acceleration = get_acceleration_spatial();
+
+    m_acceleration_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>;
+    (*m_acceleration_ST)[0] =
+        TensorAlgebra::compute_dot_product(vars.shift, acceleration);
+    FOR(i) { (*m_acceleration_ST)[i + 1] = acceleration[i]; }
+}
 //////////////////////////////////////////////////////////////////////////
 template_GQ void GeometricQuantities_t::compute_em_tensor_ST()
 {
@@ -2525,16 +2574,26 @@ template_GQ void GeometricQuantities_t::compute_em_tensor_trace_ST()
 }
 template_GQ void GeometricQuantities_t::compute_weyl_tensor_LLLL()
 {
+
     if (m_weyl_tensor_LLLL != nullptr)
         delete m_weyl_tensor_LLLL;
+
+    const auto &Eij = get_weyl_electric_part();
+    const auto &Bij = get_weyl_magnetic_part();
+
+    m_weyl_tensor_LLLL = new Tensor<4, data_t, CH_SPACEDIM + 1>(
+        compute_weyl_tensor_LLLL(Eij, Bij));
+}
+template_GQ Tensor<4, data_t, CH_SPACEDIM + 1>
+GeometricQuantities_t::compute_weyl_tensor_LLLL(const Tensor<2, data_t> &Eij,
+                                                const Tensor<2, data_t> &Bij)
+{
 
     const auto &g = get_metric_ST();
     const auto &g_UU = get_metric_UU_ST();
     const auto &n_L = get_normal_L_ST();
     const auto &levi_civita_spatial_ST = get_levi_civita_spatial_ST();
     const auto &shift_ST = get_shift_ST();
-    const auto &Eij = get_weyl_electric_part();
-    const auto &Bij = get_weyl_magnetic_part();
 
     Tensor<2, data_t, 4> l_LL; // l[a][b] = g[a][b] + 2n[a]n[b]
     Tensor<3, data_t, CH_SPACEDIM + 1> epsilon3_ULL = {0.};
@@ -2559,16 +2618,18 @@ template_GQ void GeometricQuantities_t::compute_weyl_tensor_LLLL()
     }
 
     // Weyl
-    m_weyl_tensor_LLLL = new Tensor<4, data_t, CH_SPACEDIM + 1>;
+    Tensor<4, data_t, CH_SPACEDIM + 1> weyl_LLLL;
     FOR_ST(m, n, r, s)
     {
-        (*m_weyl_tensor_LLLL)[m][n][r][s] =
+        weyl_LLLL[m][n][r][s] =
             (l_LL[m][r] * E_LL[s][n] - l_LL[m][s] * E_LL[r][n]) -
             (l_LL[n][r] * E_LL[s][m] - l_LL[n][s] * E_LL[r][m]) -
             (n_L[r] * B_dot_epsilon[s][m][n] -
              n_L[s] * B_dot_epsilon[r][m][n]) -
             (n_L[m] * B_dot_epsilon[n][r][s] - n_L[n] * B_dot_epsilon[m][r][s]);
     }
+
+    return weyl_LLLL;
 }
 template_GQ void GeometricQuantities_t::compute_weyl_squared()
 {
@@ -2949,4 +3010,144 @@ template_GQ void GeometricQuantities_t::compute_d1_Z_L_ST()
     }
 }
 */
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+template_GQ Tensor<2, data_t>
+GeometricQuantities_t::compute_LieD_weyl_electric_part(
+    const Tensor<2, Tensor<1, data_t>> &d1Eij,
+    const Tensor<2, Tensor<1, data_t>> &d1Bij, const Tensor<2, data_t> &Eij,
+    const Tensor<2, data_t> &Bij)
+{
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+
+    const auto &metric_spatial = get_metric_spatial();
+    const auto &metric_UU_spatial = get_metric_UU_spatial();
+    const auto &extrinsic_curvature = get_extrinsic_curvature();
+    const auto &acceleration = get_acceleration_spatial();
+    const auto &chris_spatial = get_chris_spatial();
+    const auto &levi_civita_LUU = get_levi_civita_spatial_LUU();
+
+    Tensor<3, data_t> covd_B =
+        TensorAlgebra::covariant_derivative(d1Bij, Bij, chris_spatial);
+
+    Tensor<2, data_t> Eij_dot_Kij = TensorAlgebra::compute_dot_product(
+        Eij, extrinsic_curvature, metric_UU_spatial);
+
+    data_t Eij_dot_Kij_trace =
+        TensorAlgebra::compute_trace(Eij_dot_Kij, metric_UU_spatial);
+
+    Tensor<2, data_t> LieD_E;
+    FOR(i, j)
+    {
+        LieD_E[i][j] = 2. * vars.K * Eij[i][j] +
+                       Eij_dot_Kij_trace * metric_spatial[i][j] -
+                       5. * Eij_dot_Kij[i][j];
+        FOR(k, l)
+        {
+            LieD_E[i][j] +=
+                levi_civita_LUU[i][k][l] * covd_B[k][j][l] -
+                2. * levi_civita_LUU[i][k][l] * acceleration[k] * Bij[j][l];
+        }
+    }
+
+    TensorAlgebra::make_symmetric(LieD_E);
+
+    return LieD_E;
+}
+template_GQ Tensor<2, data_t>
+GeometricQuantities_t::compute_LieD_weyl_magnetic_part(
+    const Tensor<2, Tensor<1, data_t>> &d1Eij,
+    const Tensor<2, Tensor<1, data_t>> &d1Bij, const Tensor<2, data_t> &Eij,
+    const Tensor<2, data_t> &Bij)
+{
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+
+    const auto &metric_spatial = get_metric_spatial();
+    const auto &metric_UU_spatial = get_metric_UU_spatial();
+    const auto &extrinsic_curvature = get_extrinsic_curvature();
+    const auto &acceleration = get_acceleration_spatial();
+    const auto &chris_spatial = get_chris_spatial();
+    const auto &levi_civita_LUU = get_levi_civita_spatial_LUU();
+
+    Tensor<3, data_t> covd_E =
+        TensorAlgebra::covariant_derivative(d1Eij, Eij, chris_spatial);
+
+    Tensor<2, data_t> Bij_dot_Kij = TensorAlgebra::compute_dot_product(
+        Bij, extrinsic_curvature, metric_UU_spatial);
+
+    data_t Bij_dot_Kij_trace =
+        TensorAlgebra::compute_trace(Bij_dot_Kij, metric_UU_spatial);
+
+    Tensor<2, data_t> LieD_B;
+    FOR(i, j)
+    {
+        LieD_B[i][j] = 2. * vars.K * Bij[i][j] +
+                       Bij_dot_Kij_trace * metric_spatial[i][j] -
+                       5. * Bij_dot_Kij[i][j];
+        FOR(k, l)
+        {
+            LieD_B[i][j] +=
+                -levi_civita_LUU[i][k][l] * covd_E[k][j][l] +
+                2. * levi_civita_LUU[i][k][l] * acceleration[k] * Eij[j][l];
+        }
+    }
+
+    TensorAlgebra::make_symmetric(LieD_B);
+
+    return LieD_B;
+}
+template_GQ Tensor<2, data_t>
+GeometricQuantities_t::compute_dt_weyl_electric_part(
+    const Tensor<2, Tensor<1, data_t>> &d1Eij,
+    const Tensor<2, Tensor<1, data_t>> &d1Bij, const Tensor<2, data_t> &Eij,
+    const Tensor<2, data_t> &Bij, const Tensor<2, data_t> &advec_Eij,
+    const Tensor<2, data_t> &advec_Bij)
+{
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &advec = get_advection();
+
+    const Tensor<2, data_t> LieD_E =
+        compute_LieD_weyl_electric_part(d1Eij, d1Bij, Eij, Bij);
+
+    Tensor<2, data_t> dt_E;
+    FOR(i, j)
+    {
+        dt_E[i][j] = advec_Eij[i][j] + LieD_E[i][j] * vars.lapse;
+        FOR1(k)
+        {
+            dt_E[i][j] +=
+                Eij[i][k] * d1.shift[k][j] + Eij[j][k] * d1.shift[k][i];
+        }
+    }
+    return dt_E;
+}
+template_GQ Tensor<2, data_t>
+GeometricQuantities_t::compute_dt_weyl_magnetic_part(
+    const Tensor<2, Tensor<1, data_t>> &d1Eij,
+    const Tensor<2, Tensor<1, data_t>> &d1Bij, const Tensor<2, data_t> &Eij,
+    const Tensor<2, data_t> &Bij, const Tensor<2, data_t> &advec_Eij,
+    const Tensor<2, data_t> &advec_Bij)
+{
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &advec = get_advection();
+
+    const Tensor<2, data_t> LieD_B =
+        compute_LieD_weyl_magnetic_part(d1Eij, d1Bij, Eij, Bij);
+
+    Tensor<2, data_t> dt_B;
+    FOR(i, j)
+    {
+        dt_B[i][j] = advec_Bij[i][j] + LieD_B[i][j] * vars.lapse;
+        FOR1(k)
+        {
+            dt_B[i][j] +=
+                Bij[i][k] * d1.shift[k][j] + Bij[j][k] * d1.shift[k][i];
+        }
+    }
+    return dt_B;
+}
 #endif /* GEOMETRICQUANTITIES_IMPL_HPP_ */

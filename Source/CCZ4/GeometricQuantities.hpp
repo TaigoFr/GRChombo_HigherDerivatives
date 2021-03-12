@@ -133,6 +133,7 @@ class GeometricQuantities
     const Tensor<3, data_t> &get_codazzi_mainardi();
     const Tensor<1, data_t> &get_Gamma_spatial();
     const Tensor<1, data_t> &get_Gamma_L_spatial();
+    const Tensor<1, data_t> &get_acceleration_spatial();
 
     // EM-tensor dependent
     const Tensor<1, data_t> &get_momentum_constraints();
@@ -166,6 +167,7 @@ class GeometricQuantities
     const Tensor<1, data_t, CH_SPACEDIM + 1> &get_Z_L_ST();
     const Tensor<2, data_t, CH_SPACEDIM + 1> &get_grad_normal_LL();
     const Tensor<2, data_t, CH_SPACEDIM + 1> &get_covd_Z_L_ST();
+    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_acceleration_ST();
 
     // EM-tensor dependent
     const Tensor<2, data_t, CH_SPACEDIM + 1> &get_em_tensor_ST();
@@ -195,9 +197,36 @@ class GeometricQuantities
 
     //////// EXTRA ////////
     ricci_t<data_t> compute_ricci_qDZ(int q); // computes Rij + q * DiZj
-    // do we always need the scalar? Should it be separated?
+    void compute_rhs_equations(Vars &);
+    Tensor<4, data_t, CH_SPACEDIM + 1>
+    compute_weyl_tensor_LLLL(const Tensor<2, data_t> &Eij,
+                             const Tensor<2, data_t> &Bij);
 
-    // extra ideas: extrinsic curvature ST? Acceleration? ST christoffels?
+    //////// NON-STANDARD ////////
+    // ignores matter, assumes E is variable
+    Tensor<2, data_t>
+    compute_LieD_weyl_electric_part(const Tensor<2, Tensor<1, data_t>> &d1Eij,
+                                    const Tensor<2, Tensor<1, data_t>> &d1Bij,
+                                    const Tensor<2, data_t> &Eij,
+                                    const Tensor<2, data_t> &Bij);
+    Tensor<2, data_t>
+    compute_LieD_weyl_magnetic_part(const Tensor<2, Tensor<1, data_t>> &d1Eij,
+                                    const Tensor<2, Tensor<1, data_t>> &d1Bij,
+                                    const Tensor<2, data_t> &Eij,
+                                    const Tensor<2, data_t> &Bij);
+    // require advection:
+    Tensor<2, data_t> compute_dt_weyl_electric_part(
+        const Tensor<2, Tensor<1, data_t>> &d1Eij,
+        const Tensor<2, Tensor<1, data_t>> &d1Bij, const Tensor<2, data_t> &Eij,
+        const Tensor<2, data_t> &Bij, const Tensor<2, data_t> &advec_Eij,
+        const Tensor<2, data_t> &advec_Bij);
+    Tensor<2, data_t> compute_dt_weyl_magnetic_part(
+        const Tensor<2, Tensor<1, data_t>> &d1Eij,
+        const Tensor<2, Tensor<1, data_t>> &d1Bij, const Tensor<2, data_t> &Eij,
+        const Tensor<2, data_t> &Bij, const Tensor<2, data_t> &advec_Eij,
+        const Tensor<2, data_t> &advec_Bij);
+
+    // extra ideas: extrinsic curvature ST? Acceleration?
 
     void clean(); // clean all computations made so far
   protected:
@@ -255,6 +284,7 @@ class GeometricQuantities
     Tensor<2, data_t> *m_covd_lapse;
     Tensor<1, data_t> *m_Gamma_spatial;
     Tensor<1, data_t> *m_Gamma_L_spatial;
+    Tensor<1, data_t> *m_acceleration_spatial;
 
     // EM-tensor dependent
     Tensor<1, data_t> *m_momentum_constraints;
@@ -283,8 +313,9 @@ class GeometricQuantities
     Tensor<3, data_t, CH_SPACEDIM + 1> *m_levi_civita_spatial_ST;
     Tensor<4, data_t, CH_SPACEDIM + 1> *m_levi_civita_ST;
     Tensor<1, data_t, CH_SPACEDIM + 1> *m_Z_L_ST;
-    Tensor<2, data_t, CH_SPACEDIM + 1> *m_covd_Z_L_ST;
     Tensor<2, data_t, CH_SPACEDIM + 1> *m_grad_normal_LL;
+    Tensor<2, data_t, CH_SPACEDIM + 1> *m_covd_Z_L_ST;
+    Tensor<1, data_t, CH_SPACEDIM + 1> *m_acceleration_ST;
 
     // EM-tensor
     Tensor<2, data_t, CH_SPACEDIM + 1> *m_em_tensor_ST;
@@ -347,6 +378,7 @@ class GeometricQuantities
     void compute_covd_lapse();
     void compute_Gamma_spatial();
     void compute_Gamma_L_spatial();
+    void compute_acceleration_spatial();
 
     // EM-tensor dependent
     void compute_momentum_constraints();
@@ -375,8 +407,9 @@ class GeometricQuantities
     void compute_levi_civita_spatial_ST();
     void compute_levi_civita_ST();
     void compute_Z_L_ST();
-    void compute_covd_Z_L_ST();
     void compute_grad_normal_LL();
+    void compute_covd_Z_L_ST();
+    void compute_acceleration_ST();
 
     // EM-tensor
     void compute_em_tensor_ST();

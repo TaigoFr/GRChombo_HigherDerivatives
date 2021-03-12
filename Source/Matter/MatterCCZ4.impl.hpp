@@ -38,18 +38,20 @@ void MatterCCZ4<matter_t>::compute(Cell<data_t> current_cell) const
     gq.set_formulation(m_formulation, m_params);
     gq.set_cosmological_constant(m_cosmological_constant);
 
+    // add evolution of matter fields themselves
+    // done before to avoid getting contributions from the EM-tensor
+    Vars<data_t> matter_rhs;
+    my_matter.add_matter_rhs(matter_rhs, gq);
+
     const auto emtensor = my_matter.compute_emtensor(gq);
     gq.set_em_tensor(emtensor, m_G_Newton);
 
-    Vars<data_t> matter_rhs = gq.get_rhs_equations();
-
-    // add evolution of matter fields themselves
-    my_matter.add_matter_rhs(matter_rhs, gq);
+    gq.compute_rhs_equations(matter_rhs);
 
     // Add dissipation to all terms
     m_deriv.add_dissipation(matter_rhs, current_cell, m_sigma);
 
-    // Write the rhs into the output FArrayBox
+    // Write the matter_rhs into the output FArrayBox
     current_cell.store_vars(matter_rhs);
 }
 

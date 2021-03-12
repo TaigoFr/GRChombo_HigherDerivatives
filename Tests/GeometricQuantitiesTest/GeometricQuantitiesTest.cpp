@@ -19,7 +19,28 @@
 #include "MatterCCZ4.hpp"
 #include "ScalarField.hpp"
 
-template <class data_t> using Vars = MatterCCZ4<ScalarField<>>::Vars<data_t>;
+template <class data_t>
+using MatterVars = MatterCCZ4<ScalarField<>>::Vars<data_t>;
+template <class data_t> struct Vars : public MatterVars<data_t>
+{
+    Tensor<2, data_t> WeylE;
+    Tensor<2, data_t> WeylB;
+
+    /// Defines the mapping between members of Vars and Chombo grid
+    /// variables (enum in User_Variables)
+    template <typename mapping_function_t>
+    void enum_mapping(mapping_function_t mapping_function)
+    {
+        MatterVars<data_t>::enum_mapping(mapping_function);
+
+        using namespace VarsTools; // define_enum_mapping is part of VarsTools
+        // Symmetric 2-tensors
+        define_symmetric_enum_mapping(mapping_function,
+                                      GRInterval<c_E11, c_E33>(), WeylE);
+        define_symmetric_enum_mapping(mapping_function,
+                                      GRInterval<c_B11, c_B33>(), WeylB);
+    }
+};
 template <class data_t>
 using Diff2Vars = MatterCCZ4<ScalarField<>>::Diff2Vars<data_t>;
 
@@ -167,9 +188,11 @@ int runTest(int argc, char *argv[])
     Tensor<3, double> d1_Kij;
     Tensor<3, double> covd_Kij;
     Tensor<3, double> levi_civita_spatial;
+    Tensor<3, double> levi_civita_spatial_LUU;
     Tensor<2, double> covd_lapse;
     Tensor<1, double> Gamma_spatial;
     Tensor<1, double> Gamma_L_spatial;
+    Tensor<1, double> acceleration_spatial;
 
     // xTensor 3D
     ricci_t<double> ricci;
@@ -199,6 +222,7 @@ int runTest(int argc, char *argv[])
     Tensor<4, double, 4> levi_civita_ST;
     Tensor<1, double, 4> Z_L_ST;
     Tensor<2, double, 4> grad_normal_LL;
+    Tensor<1, double, 4> acceleration_ST;
     Tensor<2, double, 4> Tmn;
     double TrTmn;
 
@@ -210,12 +234,10 @@ int runTest(int argc, char *argv[])
 
     // xTensor 4D
     Tensor<3, double, 4> chris4D;
-    Tensor<1, double> dtGammaC; // code commented, but working!
-    Tensor<1, double> dtGamma;  // code commented, but working!
-    double LieTheta;
-    double dtTheta;
+    // Tensor<1, double> dtGammaC; // code commented, but working!
+    // Tensor<1, double> dtGamma;  // code commented, but working!
     Tensor<1, double> LieZi;
-    Tensor<2, double, 4> d1_Z_L_ST; // code commented, but working!
+    // Tensor<2, double, 4> d1_Z_L_ST; // code commented, but working!
     Tensor<2, double, 4> covd_Z_L_ST;
     Tensor<4, double, 4> riemann_LLLL_ST;
     Tensor<2, double, 4> ricci_ST;
@@ -228,6 +250,12 @@ int runTest(int argc, char *argv[])
     Tensor<1, double, 4> Gamma_L_ST;
     Tensor<4, double, 4> riemann_LLLU_ST;
     Tensor<4, double, 4> riemann_LULU_ST;
+
+    // extra
+    Tensor<2, double> LieD_weyl_electric_part;
+    Tensor<2, double> LieD_weyl_magnetic_part;
+    Tensor<2, double> dt_weyl_electric_part;
+    Tensor<2, double> dt_weyl_magnetic_part;
 
 #include "randomGeometricQuantities.hpp" //Including the auto generated file with calculations
 
@@ -276,11 +304,16 @@ int runTest(int argc, char *argv[])
         relative_error(gq.get_covd_extrinsic_curvature(), covd_Kij, "covd_Kij");
     failed |= relative_error(gq.get_levi_civita_spatial(), levi_civita_spatial,
                              "levi_civita_spatial");
+    failed |=
+        relative_error(gq.get_levi_civita_spatial_LUU(),
+                       levi_civita_spatial_LUU, "levi_civita_spatial_LUU");
     failed |= relative_error(gq.get_covd_lapse(), covd_lapse, "covd_lapse");
     failed |=
         relative_error(gq.get_Gamma_spatial(), Gamma_spatial, "Gamma_spatial");
     failed |= relative_error(gq.get_Gamma_L_spatial(), Gamma_L_spatial,
                              "Gamma_L_spatial");
+    failed |= relative_error(gq.get_acceleration_spatial(),
+                             acceleration_spatial, "get_acceleration_spatial");
 
     // xTensor 3D
     failed |= relative_error(gq.get_ricci().LL, ricci.LL, "ricci.LL");
@@ -344,6 +377,8 @@ int runTest(int argc, char *argv[])
     failed |= relative_error(gq.get_Z_L_ST(), Z_L_ST, "Z_L_ST");
     failed |= relative_error(gq.get_grad_normal_LL(), grad_normal_LL,
                              "grad_normal_LL");
+    failed |= relative_error(gq.get_acceleration_ST(), acceleration_ST,
+                             "get_acceleration_ST");
     failed |= relative_error(gq.get_em_tensor_ST(), Tmn, "Tmn");
     failed |= relative_error(gq.get_em_tensor_trace_ST(), TrTmn, "TrTmn");
 
@@ -353,12 +388,9 @@ int runTest(int argc, char *argv[])
     // relative_error(gq.get_dt_chris_contracted(), dtGammaC, "dtGammaC");
     // failed |= relative_error(gq.get_dt_chris_spatial_contracted(),
     // dtGamma, "dtGamma");
-    failed |=
-        relative_error(gq.get_lie_derivatives().Theta, LieTheta, "LieTheta");
-    failed |= relative_error(gq.get_rhs_equations().Theta, dtTheta, "dtTheta");
+    failed |= relative_error(gq.get_lie_Z(), LieZi, "LieZi");
     // failed |= relative_error(gq.get_d1_Z_L_ST(), d1_Z_L_ST, "d1_Z_L_ST");
     failed |= relative_error(gq.get_covd_Z_L_ST(), covd_Z_L_ST, "covd_Z_L_ST");
-    failed |= relative_error(gq.get_lie_Z(), LieZi, "LieZi");
     failed |= relative_error(gq.get_riemann_LLLL_ST(), riemann_LLLL_ST,
                              "riemann_LLLL_ST", 2.e-11);
     failed |= relative_error(gq.get_riemann_LLLL_ST_v2(), riemann_LLLL_ST,
@@ -381,6 +413,24 @@ int runTest(int argc, char *argv[])
                              "riemann_LLLU_ST", 2.e-11);
     failed |= relative_error(gq.get_riemann_LULU_ST(), riemann_LULU_ST,
                              "riemann_LULU_ST", 2.e-11);
+
+    // extra
+    failed |=
+        relative_error(gq.compute_LieD_weyl_electric_part(
+                           d1.WeylE, d1.WeylB, vars.WeylE, vars.WeylB),
+                       LieD_weyl_electric_part, "LieD_weyl_electric_part");
+    failed |=
+        relative_error(gq.compute_LieD_weyl_magnetic_part(
+                           d1.WeylE, d1.WeylB, vars.WeylE, vars.WeylB),
+                       LieD_weyl_magnetic_part, "LieD_weyl_magnetic_part");
+    failed |= relative_error(
+        gq.compute_dt_weyl_electric_part(d1.WeylE, d1.WeylB, vars.WeylE,
+                                         vars.WeylB, advec.WeylE, advec.WeylB),
+        dt_weyl_electric_part, "dt_weyl_electric_part");
+    failed |= relative_error(
+        gq.compute_dt_weyl_magnetic_part(d1.WeylE, d1.WeylB, vars.WeylE,
+                                         vars.WeylB, advec.WeylE, advec.WeylB),
+        dt_weyl_magnetic_part, "dt_weyl_magnetic_part");
 
     return failed;
 }

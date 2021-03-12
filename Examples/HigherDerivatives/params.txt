@@ -13,7 +13,7 @@ plot_prefix = HigherDerivativesp_
 # 'N2' or 'N2_full' and 'N3' or 'N3_full' ( then dx_coarsest = L/N(max) )
 # NB - the N values need to be multiples of the block_factor
 N_full = 64
-L_full =  32
+L_full = 32
 
 # Regridding
 # Thresholds on the change across a cell which prompts regrid
@@ -28,7 +28,7 @@ max_level = 2 # There are (max_level+1) grids, so min is zero
 regrid_interval = 32 16 8 4
 # Max and min box size - for load balancing
 max_box_size = 32
-min_box_size = 8
+min_box_size = 16
 
 #boundaries and periodicity of grid
 #Periodic directions - 0 = false, 1 = true
@@ -50,8 +50,10 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 0 4 6 0 5 0    #K and Aij
                          0 1 2 3          #Theta and Gamma
                          0 1 2 3 1 2 3    #lapse shift and B
-                         0 0              #C and dCdt
-vars_parity_diagnostic = 0 1 2 3          #Ham and Mom
+                         0 4 6 0 5 0      #Eij
+                         0 4 6 0 5 0      #Bij
+vars_parity_diagnostic = 0 0	          #Ham and Mom
+					     0 0 			  #Eij and Bij diffs
 
 # if sommerfeld boundaries selected, must select
 # asymptotic values (in order given by UserVariables.hpp)
@@ -60,14 +62,16 @@ vars_asymptotic_values = 1.0 1.0 0.0 0.0 1.0 0.0 1.0 #chi and hij
                          0.0 0.0 0.0 0.0             #Theta and Gamma
                          1.0 0.0 0.0 0.0 0.0 0.0 0.0 #lapse shift and B
                          0.0 0.0                     #phi and Pi
+                         0.0 0.0 0.0 0.0 0.0 0.0	 #Eij
+                         0.0 0.0 0.0 0.0 0.0 0.0 	 #Bij
 
 # Set up time steps
 # dt will be dx*dt_multiplier on each grid level
 # HDF5files are written every dt = L/N*dt_multiplier*checkpoint_interval
 checkpoint_interval = 100
 plot_interval = 1
-num_plot_vars = 4
-plot_vars = chi C Ham Mom
+num_plot_vars = 7
+plot_vars = chi lapse shift1 Ham Mom E_diff B_diff
 dt_multiplier = 0.25
 stop_time = 10.0
 max_steps = 5
@@ -104,8 +108,7 @@ mass = 1.0
 amplitude = 0.05
 r0 = 1.
 
-energy_scale = 0.1
-sigma = 0.01
+energy_scale = 0.0
 tau = 0.1
 
 # Relaxation paramters
