@@ -22,12 +22,12 @@ class SimulationParameters : public SimulationParametersBase
   public:
     SimulationParameters(GRParmParse &pp) : SimulationParametersBase(pp)
     {
-        read_shared_params(pp);
 #ifdef USE_TWOPUNCTURES
         read_tp_params(pp);
 #else
         read_bh_params(pp);
 #endif
+        read_shared_params(pp);
         check_params();
     }
 
@@ -47,6 +47,8 @@ class SimulationParameters : public SimulationParametersBase
                 0.5 * bh1_params.mass);
         pp.load("AH_2_initial_guess", AH_2_initial_guess,
                 0.5 * bh2_params.mass);
+        pp.load("AH_set_origins_to_punctures", AH_set_origins_to_punctures,
+                false);
 #endif
     }
 
@@ -320,6 +322,7 @@ class SimulationParameters : public SimulationParametersBase
 #ifdef USE_AHFINDER
     double AH_1_initial_guess;
     double AH_2_initial_guess;
+    bool AH_set_origins_to_punctures;
 #endif
 };
 
