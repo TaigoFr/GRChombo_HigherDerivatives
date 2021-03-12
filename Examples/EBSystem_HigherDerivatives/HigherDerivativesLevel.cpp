@@ -77,8 +77,9 @@ void HigherDerivativesLevel::initialData()
 void HigherDerivativesLevel::prePlotLevel()
 {
     fillAllGhosts();
+    bool apply_weak_field = false;
     EBSystem EBsystem(m_p.eb_params);
-    C2EFT<EBSystem> c2eft(EBsystem, m_p.hd_params);
+    C2EFT<EBSystem> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
 
     MatterConstraints<C2EFT<EBSystem>> constraints(
         c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
@@ -119,8 +120,11 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
                    m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     fillAllGhosts();
 
+    m_p.hd_params.update_min_chi(a_time, m_p.id_params.spin);
+
+    bool apply_weak_field = true;
     EBSystem EBsystem(m_p.eb_params);
-    C2EFT<EBSystem> c2eft(EBsystem, m_p.hd_params);
+    C2EFT<EBSystem> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
     MatterCCZ4<C2EFT<EBSystem>> my_ccz4_matter(
         c2eft, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation, m_p.G_Newton);
     BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
@@ -151,4 +155,12 @@ void HigherDerivativesLevel::specificPostTimeStep()
     if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
         m_bh_amr.m_ah_finder.solve(m_dt, m_time, m_restart_time);
 #endif
+
+    if (m_level == 0)
+    {
+        pout() << "Used estimation of AH at chi = "
+               << m_p.hd_params.chi_ignore_threshold << std::endl;
+        pout() << "Applied excision at chi ~< " << m_p.hd_params.chi_threshold
+               << std::endl;
+    }
 }

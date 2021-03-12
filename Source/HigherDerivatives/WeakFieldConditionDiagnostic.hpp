@@ -44,7 +44,7 @@ template <class System> class WeakFieldConditionDiagnostic
         gq.set_advection(advec);
         gq.set_formulation(m_formulation, m_ccz4_params);
 
-        const auto emtensor = my_matter.compute_emtensor(gq, false);
+        const auto emtensor = my_matter.compute_emtensor(gq);
         data_t weak_field = my_matter.weak_field_var(emtensor, gq);
         data_t weak_field_condition =
             my_matter.weak_field_condition(weak_field, gq);

@@ -45,11 +45,27 @@ class SimulationParameters : public SimulationParametersBase
         id_params.center = center;
 
         pp.load("epsilon", hd_params.epsilon);
-        pp.load("chi_threshold", hd_params.chi_threshold);
-        pp.load("chi_width", hd_params.chi_width);
+        // pp.load("chi_threshold", hd_params.chi_threshold); // automatic now
         pp.load("weak_field_threshold", hd_params.weak_field_threshold);
         pp.load("weak_field_width", hd_params.weak_field_width);
-        pp.load("chi_ignore_threshold", hd_params.chi_ignore_threshold);
+        // pp.load("chi_ignore_threshold", hd_params.chi_ignore_threshold); //
+        // automatic now
+
+        pp.load("chi_damp_coeff", hd_params.chi_damp_coeff);
+        pp.load("chi_damp_timescale", hd_params.chi_damp_timescale);
+        pp.load("chi_threshold_percentage", hd_params.chi_threshold_percentage);
+        CH_assert(hd_params.chi_threshold_percentage <
+                  0.98); // just to make sure I don't do anything stupid
+
+        if (pp.contains("chi_width"))
+            pp.load("chi_width", hd_params.chi_width);
+        else
+        {
+            // ensure excision is O(10^-4) just before the horizon
+            hd_params.chi_width =
+                (1. - hd_params.chi_threshold_percentage) / 4.;
+        }
+        hd_params.update_min_chi(0., id_params.spin);
 
         // this is such that the  'epsilon' in the EOM is replaced by
         // 'epsilon' when doing 'kappa / 2 * EM-tensor'

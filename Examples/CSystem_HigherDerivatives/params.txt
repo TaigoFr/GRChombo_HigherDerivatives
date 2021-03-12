@@ -107,12 +107,12 @@ epsilon = 0.001 # energy scale
 tau     = 0.05   # damping time scale for evolved C
 sigma   = 1.0    # wave evolution scale for evolved C
 
-chi_threshold = 0.06
-chi_width     = 0.2
-weak_field_threshold = 0.1
-weak_field_width     = 0.1
-chi_ignore_threshold = 0.26
-
+#chi_width     = 0.05 # automatic now
+weak_field_threshold = 1.e-10
+weak_field_width     = 0.05
+chi_damp_coeff = 2.
+chi_damp_timescale = 20.
+chi_threshold_percentage = 0.8
 
 #Apparent Horizon finder 
 AH_activate = 1 
