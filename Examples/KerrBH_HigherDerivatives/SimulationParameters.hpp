@@ -12,7 +12,7 @@
 
 // Problem specific includes:
 #include "C2EFT.hpp"
-#include "CCZ4.hpp"
+#include "MatterCCZ4RHSWithDiffusion.hpp"
 
 #ifdef USE_EBSYSTEM
 #include "EBSystem.hpp"
@@ -86,6 +86,16 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("c_sigma", system_params.sigma);
 #endif
 
+        /////////////
+        // Diffusion parameters
+        pp.load("diffCFLFact", diffusion_params.diffCFLFact, 1e20);
+        pp.load("lapidusCoeff", diffusion_params.lapidusCoeff, 0.001);
+        pp.load("lapidusPower", diffusion_params.lapidusPower, 1.0);
+        pp.load("diffusion_maximum", diffusion_params.diffusion_maximum, 1e20);
+        diffusion_params.chiCutoff = hd_params.chi_threshold;
+        diffusion_params.chiCutoff_width = hd_params.chi_width;
+        /////////////
+
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * id_params.mass);
 #endif
@@ -98,6 +108,8 @@ class SimulationParameters : public SimulationParametersBase
 
     C2EFT<System>::params_t hd_params;
     System::params_t system_params;
+
+    diffusion_params_t diffusion_params;
 
 #ifdef USE_AHFINDER
     double AH_initial_guess;

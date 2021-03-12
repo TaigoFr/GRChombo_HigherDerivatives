@@ -179,3 +179,10 @@ AH_write_vars = chi WeakFieldVar WeakFieldCondition
 calculate_constraint_norms = 1
 
 AH_set_origins_to_punctures = 1
+
+
+#Diffusion parameters
+diffCFLFact = 1E20
+lapidusCoeff = 0.00
+lapidusPower = 1.0
+diffusion_maximum = 1e20

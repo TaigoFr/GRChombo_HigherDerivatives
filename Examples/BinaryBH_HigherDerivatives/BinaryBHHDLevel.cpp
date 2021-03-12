@@ -19,7 +19,7 @@
 #include "WeylExtraction.hpp"
 
 // For RHS update
-#include "MatterCCZ4RHS.hpp"
+#include "MatterCCZ4RHSWithDiffusion.hpp"
 
 // For constraints calculation
 #include "NewMatterConstraintsWithGauge.hpp"
@@ -148,23 +148,25 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 
     double spin = 0.;
     m_p.hd_params.update_min_chi(a_time, spin);
+    m_p.diffusion_params.chiCutoff = m_p.hd_params.chi_threshold;
 
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
     if (m_p.max_spatial_derivative_order == 4)
     {
-        MatterCCZ4RHS<C2EFT<System>, MovingPunctureGauge,
-                      FourthOrderDerivatives>
-            my_ccz4_matter(c2eft, m_p.ccz4_params, m_dx, m_p.sigma,
-                           m_p.formulation, m_p.G_Newton);
+        MatterCCZ4RHSWithDiffusion<C2EFT<System>, MovingPunctureGauge,
+                                   FourthOrderDerivatives>
+            my_ccz4_matter(c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx,
+                           m_dt, m_p.sigma, m_p.formulation, m_p.G_Newton);
         BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
     }
     else if (m_p.max_spatial_derivative_order == 6)
     {
-        MatterCCZ4RHS<C2EFT<System>, MovingPunctureGauge, SixthOrderDerivatives>
-            my_ccz4_matter(c2eft, m_p.ccz4_params, m_dx, m_p.sigma,
-                           m_p.formulation, m_p.G_Newton);
+        MatterCCZ4RHSWithDiffusion<C2EFT<System>, MovingPunctureGauge,
+                                   SixthOrderDerivatives>
+            my_ccz4_matter(c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx,
+                           m_dt, m_p.sigma, m_p.formulation, m_p.G_Newton);
         BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
     }
 }

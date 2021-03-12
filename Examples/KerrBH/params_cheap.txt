@@ -138,5 +138,5 @@ AH_verbose = 2
 
 #look_for_chi_contour = 0.2
 
-AH_num_write_vars = 2
-AH_write_vars = chi d1_Ham
+AH_num_write_vars = 3
+AH_write_vars = chi Ham d1_Ham

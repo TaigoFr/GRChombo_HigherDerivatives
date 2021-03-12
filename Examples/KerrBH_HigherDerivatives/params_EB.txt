@@ -145,3 +145,10 @@ AH_stop_if_max_fails = 1
 
 AH_num_write_vars = 3
 AH_write_vars = chi WeakFieldVar WeakFieldCondition
+
+
+#Diffusion parameters
+diffCFLFact = 1E20
+lapidusCoeff = 0.00
+lapidusPower = 1.0
+diffusion_maximum = 1e20
