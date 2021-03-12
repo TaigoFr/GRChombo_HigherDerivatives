@@ -116,7 +116,7 @@ chi_damp_timescale = 20.
 chi_threshold_percentage = 0.8
 
 #Apparent Horizon finder 
-AH_activate = 0
+AH_activate = 1
 AH_num_ranks = 20
 AH_num_points_u = 31
 AH_num_points_v = 30
