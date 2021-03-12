@@ -134,8 +134,7 @@ int runTest(int argc, char *argv[])
     // make EM Tensor
     DefaultPotential potential;
     ScalarField<> sf(potential);
-    auto em_tensor_def =
-        sf.compute_emtensor(vars, d1, gq.get_h_UU(), gq.get_chris().ULL);
+    auto em_tensor_def = sf.compute_emtensor(gq);
 
     gq.set_em_tensor(em_tensor_def, 1.);
 
@@ -350,6 +349,8 @@ int runTest(int argc, char *argv[])
     failed |=
         relative_error(gq.get_ricci_squared(), ricci_squared, "ricci_squared");
     failed |= relative_error(gq.get_kretschmann(), kretschmann, "kretschmann");
+    failed |= relative_error(gq.get_kretschmann(), gq.get_riemann_squared(),
+                             "riemann_squared");
     failed |= relative_error(gq.get_weyl_tensor_LLLL(), weyl_tensor_LLLL,
                              "weyl_tensor_LLLL");
     failed |=
