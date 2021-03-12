@@ -28,6 +28,7 @@
 #include "ComputeEB.hpp"
 #include "EBSystem.hpp"
 #include "EBdiffDiagnostic.hpp"
+#include "NCCDiagnostic.hpp"
 #include "WeakFieldConditionDiagnostic.hpp"
 
 // BH ID defined here:
@@ -85,13 +86,16 @@ void HigherDerivativesLevel::prePlotLevel()
     EBdiffDiagnostic EBdiff(m_dx, m_p.formulation, m_p.ccz4_params);
     WeakFieldConditionDiagnostic<EBSystem> weakField(
         c2eft, m_dx, m_p.formulation, m_p.ccz4_params);
+    NCCDiagnostic<EBSystem> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
+                                m_p.center, m_p.G_Newton, c_NCC_plus,
+                                c_NCC_minus, c_NCC_Z4_plus, c_NCC_Z4_minus);
 
     BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
                              Interval(c_Ephys11, c_Ephys33),
                              Interval(c_Bphys11, c_Bphys33)),
                    m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 
-    BoxLoops::loop(make_compute_pack(constraints, EBdiff, weakField),
+    BoxLoops::loop(make_compute_pack(constraints, EBdiff, weakField, ncc),
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
 
