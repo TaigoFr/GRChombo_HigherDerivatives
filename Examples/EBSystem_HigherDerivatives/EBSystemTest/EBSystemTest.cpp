@@ -137,8 +137,8 @@ int runTest(int argc, char *argv[])
 
     // make EM Tensor
     EBSystem Csystem(eb_params);
-    C2EFT<EBSystem> c2eft(Csystem, hd_params);
-    const auto em_tensor_def = c2eft.compute_emtensor(gq, false);
+    C2EFT<EBSystem> c2eft(Csystem, hd_params, false);
+    const auto em_tensor_def = c2eft.compute_emtensor(gq);
 
     //////////////////////////////////////////////////////////////////
     // SET MATHEMATICA CALCULATIONS
