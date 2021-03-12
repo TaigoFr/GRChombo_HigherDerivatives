@@ -13,6 +13,7 @@
 #include "PositiveChiAndAlpha.hpp"
 #include "PunctureTracker.hpp"
 #include "SetValue.hpp"
+#include "SixthOrderDerivatives.hpp"
 #include "TraceARemoval.hpp"
 #include "Weyl4.hpp"
 #include "WeylExtraction.hpp"
@@ -150,9 +151,21 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
-    MatterCCZ4RHS<C2EFT<System>> my_ccz4_matter(
-        c2eft, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation, m_p.G_Newton);
-    BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+    if (m_p.max_spatial_derivative_order == 4)
+    {
+        MatterCCZ4RHS<C2EFT<System>, MovingPunctureGauge,
+                      FourthOrderDerivatives>
+            my_ccz4_matter(c2eft, m_p.ccz4_params, m_dx, m_p.sigma,
+                           m_p.formulation, m_p.G_Newton);
+        BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+    }
+    else if (m_p.max_spatial_derivative_order == 6)
+    {
+        MatterCCZ4RHS<C2EFT<System>, MovingPunctureGauge, SixthOrderDerivatives>
+            my_ccz4_matter(c2eft, m_p.ccz4_params, m_dx, m_p.sigma,
+                           m_p.formulation, m_p.G_Newton);
+        BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+    }
 }
 
 // Things to do at ODE update, after soln + rhs

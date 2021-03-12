@@ -15,6 +15,9 @@ plot_prefix = HigherDerivativesp_
 N_full = 64
 L_full = 512
 
+# Spatial derivative order (only affects CCZ4 RHS)
+max_spatial_derivative_order = 6 # can be 4 or 6
+
 # BH params
 track_punctures = 0
 #puncture_tracking_level = 5
