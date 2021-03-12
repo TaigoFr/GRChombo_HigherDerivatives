@@ -96,7 +96,7 @@ eta = 1.0 # This is gamma driver, usually of order 1/M_ADM of spacetime
 
 # CCZ4 parameters
 # if using BSSN the kappa values should be zero
-formulation = 0  # 1 for BSSN, 0 for CCZ4
+formulation = 0 # 1 for BSSN, 0 for CCZ4
 kappa1 = 0.1
 kappa2 = 0
 kappa3 = 1.
@@ -104,7 +104,7 @@ covariantZ4 = 1 # 0: default. 1: dampk1 -> dampk1/lapse
 
 # coefficient for KO numerical dissipation
 # NB must be less than 0.5 for stability
-sigma = 0.3
+sigma = 1.0
 
 # Params for Schw BH in KS coords
 mass = 1.0
@@ -113,8 +113,8 @@ spin = 0.0 # for Kerr BH only
 # amplitude = 0.05
 # r0 = 1.
 
-epsilon = 0.00  # energy scale
-tau     = 0.1   # damping time scale for evolved Eij/Bij
+epsilon = 0.0001 # energy scale
+tau     = 0.1    # damping time scale for evolved Eij/Bij
 
 #chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10
@@ -124,11 +124,11 @@ chi_damp_timescale = 20.
 chi_threshold_percentage = 0.8
 
 #Apparent Horizon finder 
-AH_activate = 1
+AH_activate = 0
 AH_num_ranks = 20
 AH_num_points_u = 31
 AH_num_points_v = 30
-AH_solve_interval = 2
+AH_solve_interval = 1
 AH_print_interval = 1
 AH_track_center = false
 AH_predict_origin = false
