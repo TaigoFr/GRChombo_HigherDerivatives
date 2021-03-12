@@ -19,12 +19,13 @@ emtensor_t<data_t> C2EFT<System>::compute_emtensor(
     GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq,
     bool apply_weak_field) const
 {
-    emtensor_t<data_t> out;
+    emtensor_t<data_t> emtensor;
 
     Tensor<2, data_t, CH_SPACEDIM + 1> Tmn; // 4D
 
     compute_emtensor_4D(Tmn, gq);
 
+    const auto &vars = gq.get_vars();
     const auto &n_U = gq.get_normal_U_ST();
     const auto &proj_LU = gq.get_projector_LU_ST();
 
@@ -38,25 +39,35 @@ emtensor_t<data_t> C2EFT<System>::compute_emtensor(
         TensorAlgebra::compute_dot_product(
             proj_LU, TensorAlgebra::compute_dot_product(Tmn, proj_LU), 1, 0);
 
-    out.rho = TensorAlgebra::compute_dot_product(Tmn_dot_normal_U, n_U);
-
-    // WEAK FIELD BASED ON RHO
-    data_t weak_field_damp = 1.;
-    if (apply_weak_field)
-    {
-        weak_field_damp = 1. - weak_field_condition(out.rho, gq);
-    }
-
-    out.rho *= weak_field_damp;
+    emtensor.rho = TensorAlgebra::compute_dot_product(Tmn_dot_normal_U, n_U);
 
     FOR(i)
     {
-        out.Si[i] = -Si_4D[i + 1] * weak_field_damp;
-        FOR(j) { out.Sij[i][j] = Sij_4D[i + 1][j + 1] * weak_field_damp; }
+        emtensor.Si[i] = -Si_4D[i + 1];
+        FOR(j) { emtensor.Sij[i][j] = Sij_4D[i + 1][j + 1]; }
     }
-    out.S = TensorAlgebra::compute_trace(out.Sij, gq.get_metric_UU_spatial());
 
-    return out;
+    // WEAK FIELD EXCISION
+    // chi_ignore_threshold is just to make it faster, to avoid entering in
+    // cells far from the BH
+    if (apply_weak_field &&
+        simd_compare_lt_any(vars.chi, m_params.chi_ignore_threshold))
+    {
+        data_t weak_field = weak_field_var(emtensor, gq);
+        data_t weak_field_damp = 1. - weak_field_condition(weak_field, gq);
+        emtensor.rho *= weak_field_damp;
+
+        FOR(i)
+        {
+            emtensor.Si[i] *= weak_field_damp;
+            FOR(j) { emtensor.Sij[i][j] *= weak_field_damp; }
+        }
+    }
+
+    emtensor.S =
+        TensorAlgebra::compute_trace(emtensor.Sij, gq.get_metric_UU_spatial());
+
+    return emtensor;
 }
 
 template <class System>
@@ -112,6 +123,24 @@ void C2EFT<System>::add_matter_rhs(
     GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
 {
     m_system.add_matter_rhs(total_rhs, gq);
+}
+
+template <class System>
+template <class data_t, template <typename> class vars_t,
+          template <typename> class diff2_vars_t>
+data_t C2EFT<System>::weak_field_var(
+    const emtensor_t<data_t> &emtensor,
+    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+{
+    // estimate of how big things are:
+    data_t weak_field_var = emtensor.rho * emtensor.rho;
+    FOR(i)
+    {
+        weak_field_var += emtensor.Si[i] * emtensor.Si[i];
+        FOR(j) { weak_field_var += emtensor.Sij[i][j] * emtensor.Sij[i][j]; }
+    }
+
+    return sqrt(weak_field_var);
 }
 
 template <class System>

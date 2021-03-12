@@ -228,8 +228,8 @@ template_GQ void GeometricQuantities_t::clean()
     }
     if (m_covd_extrinsic_curvature != nullptr)
     {
-        delete m_d1_extrinsic_curvature;
-        m_d1_extrinsic_curvature = nullptr;
+        delete m_covd_extrinsic_curvature;
+        m_covd_extrinsic_curvature = nullptr;
     }
     if (m_levi_civita_spatial != nullptr)
     {

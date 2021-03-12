@@ -49,6 +49,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("chi_width", hd_params.chi_width);
         pp.load("weak_field_threshold", hd_params.weak_field_threshold);
         pp.load("weak_field_width", hd_params.weak_field_width);
+        pp.load("chi_ignore_threshold", hd_params.chi_ignore_threshold);
 
         // this is such that the  'epsilon' in the EOM is replaced by
         // 'epsilon' when doing 'kappa / 2 * EM-tensor'

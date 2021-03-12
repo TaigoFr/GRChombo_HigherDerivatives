@@ -139,6 +139,7 @@ template <typename t> ALWAYS_INLINE t simd_max(const t &a, const t &b)
 }
 //<-- End: Defining the simd specific calls for non-simd datatypes.
 
+#include "simd_more.hpp" //extra personal functions
 #include "simdify.hpp"
 
 #endif /* SIMD_HPP_ */

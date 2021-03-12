@@ -50,10 +50,11 @@ class WeakFieldConditionDiagnostic
         gq.set_formulation(m_formulation, m_ccz4_params);
 
         const auto emtensor = my_matter.compute_emtensor(gq, false);
+        data_t weak_field = my_matter.weak_field_var(emtensor, gq);
         data_t weak_field_condition =
-            my_matter.weak_field_condition(emtensor.rho, gq);
+            my_matter.weak_field_condition(weak_field, gq);
 
-        current_cell.store_vars(emtensor.rho, c_rho);
+        current_cell.store_vars(weak_field, c_WeakFieldVar);
         current_cell.store_vars(weak_field_condition, c_WeakFieldCondition);
     }
 

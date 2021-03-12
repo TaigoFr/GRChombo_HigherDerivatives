@@ -21,6 +21,9 @@ template <class System> class C2EFT
         double chi_width;
         double weak_field_threshold;
         double weak_field_width;
+        double chi_ignore_threshold; // don't even try above this chi, just to
+                                     // make it faster, to avoid entering in
+                                     // cells far from the BH
     };
 
     template <class data_t> using Vars = typename System::template Vars<data_t>;
@@ -58,8 +61,14 @@ template <class System> class C2EFT
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t>
+    data_t
+    weak_field_var(const emtensor_t<data_t> &emtensor,
+                   GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
+
+    template <class data_t, template <typename> class vars_t,
+              template <typename> class diff2_vars_t>
     data_t weak_field_condition(
-        const data_t &weak_field_var,
+        const data_t &emtensor,
         GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
 
   private:
