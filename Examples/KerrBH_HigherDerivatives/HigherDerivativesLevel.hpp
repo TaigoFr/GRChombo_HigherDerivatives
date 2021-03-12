@@ -36,6 +36,9 @@ class HigherDerivativesLevel : public GRAMRLevel
     //! routines to do before outputting plot file
     virtual void prePlotLevel();
 
+    // local function
+    virtual void computeDiagnostics();
+
     //! RHS routines used at each RK4 step
     virtual void specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
                                  const double a_time);

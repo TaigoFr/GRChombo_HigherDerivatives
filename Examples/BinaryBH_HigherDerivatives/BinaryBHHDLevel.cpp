@@ -88,10 +88,27 @@ void BinaryBHHDLevel::initialData()
     // BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
     //                m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+
+#ifdef USE_AHFINDER
+    // Diagnostics needed for AHFinder
+    computeDiagnostics();
+#endif
 }
 
 // Things to do before outputting a plot file
 void BinaryBHHDLevel::prePlotLevel()
+{
+#ifdef USE_AHFINDER
+    // already calculated in 'specificPostTimeStep' or in 'initialData'
+    if (m_time == 0. || m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
+        return;
+#endif
+
+    computeDiagnostics();
+}
+
+// Things to do before outputting a plot file
+void BinaryBHHDLevel::computeDiagnostics()
 {
     fillAllGhosts();
     bool apply_weak_field = false;
@@ -293,7 +310,7 @@ void BinaryBHHDLevel::specificPostTimeStep()
 #ifdef USE_AHFINDER
     // if print is on and there are Diagnostics to write, calculate them!
     if (m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
-        prePlotLevel();
+        computeDiagnostics();
     if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
     {
         if (m_p.AH_set_origins_to_punctures && m_p.track_punctures)

@@ -159,9 +159,9 @@ modes = 2 0 # l m for spherical harmonics
 #Apparent Horizon finder 
 AH_activate = 1
 AH_num_ranks = 20
-AH_num_points_u = 49
-AH_num_points_v = 48
-AH_solve_interval = 4
+AH_num_points_u = 31
+AH_num_points_v = 30
+AH_solve_interval = 2
 AH_print_interval = 1
 #AH_track_center = true
 #AH_predict_origin = true
