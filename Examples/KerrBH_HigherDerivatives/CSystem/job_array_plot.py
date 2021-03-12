@@ -66,6 +66,11 @@ if len(sys.argv)>1:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
             ax.scatter(valid_x, valid_y, valid_ah_masses)
+
+            ax.set_xlabel("log2(" + params_to_vary[0] + ")")
+            ax.set_ylabel("log2(" + params_to_vary[1] + ")")
+            ax.set_zlabel("AH final mass")
+
             plt.show()
 
 else:
