@@ -176,3 +176,5 @@ AH_stop_if_max_fails = 1
 
 AH_num_write_vars = 3
 AH_write_vars = chi WeakFieldVar WeakFieldCondition
+
+calculate_constraint_norms = 1
