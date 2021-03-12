@@ -13,9 +13,9 @@
 // Calculate the stress energy tensor elements
 template <class potential_t>
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t>
 emtensor_t<data_t> ScalarField<potential_t>::compute_emtensor(
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     emtensor_t<data_t> out;
 
@@ -72,11 +72,11 @@ void ScalarField<potential_t>::emtensor_excl_potential(
 // Adds in the RHS for the matter vars
 template <class potential_t>
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t,
+          template <typename> class diff2_vars_t, class gauge_t,
           template <typename> class rhs_vars_t>
 void ScalarField<potential_t>::add_matter_rhs(
     rhs_vars_t<data_t> &total_rhs,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     // first get the non potential part of the rhs
     // this may seem a bit long winded, but it makes the function

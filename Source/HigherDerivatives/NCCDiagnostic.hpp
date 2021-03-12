@@ -10,23 +10,24 @@
 #include "Coordinates.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "GeometricQuantities.hpp"
-#include "MatterCCZ4.hpp"
+#include "MatterCCZ4RHS.hpp"
+#include "MovingPunctureGauge.hpp"
 #include "Tensor.hpp"
 
 //! Computes Null Convergence Condition from Stress-Energy Tensor
 template <class System> class NCCDiagnostic
 {
-    // Use the variable definitions in MatterCCZ4
+    // Use the variable definitions in MatterCCZ4RHS
     template <class data_t>
-    using Vars = typename MatterCCZ4<C2EFT<System>>::template Vars<data_t>;
+    using Vars = typename MatterCCZ4RHS<C2EFT<System>>::template Vars<data_t>;
 
     template <class data_t>
     using Diff2Vars =
-        typename MatterCCZ4<C2EFT<System>>::template Diff2Vars<data_t>;
+        typename MatterCCZ4RHS<C2EFT<System>>::template Diff2Vars<data_t>;
 
   public:
     NCCDiagnostic(const C2EFT<System> &a_matter, double m_dx, int a_formulation,
-                  const CCZ4::params_t &a_ccz4_params,
+                  const CCZ4_params_t<> &a_ccz4_params,
                   const std::array<double, CH_SPACEDIM> &a_center,
                   double G_Newton, int a_NCC_plus, int a_NCC_minus,
                   int a_NCC_Z4_plus = -1, int a_NCC_Z4_minus = -1)
@@ -46,9 +47,14 @@ template <class System> class NCCDiagnostic
         const auto advec =
             m_deriv.template advection<Vars>(current_cell, vars.shift);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
+        // make gauge
+        MovingPunctureGauge gauge(m_ccz4_params);
+
+        GeometricQuantities<data_t, Vars, Diff2Vars, MovingPunctureGauge> gq(
+            vars, d1, d2);
         gq.set_formulation(m_formulation, m_ccz4_params);
-        gq.set_advection(advec); // needed for 'compute_emtensor'
+        gq.set_advection_and_gauge(advec,
+                                   gauge); // needed for 'compute_emtensor'
 
         const auto emtensor = m_matter.compute_emtensor(gq);
         gq.set_em_tensor(emtensor, m_G_Newton);
@@ -140,7 +146,7 @@ template <class System> class NCCDiagnostic
   protected:
     const C2EFT<System> &m_matter;
     int m_formulation;
-    const CCZ4::params_t &m_ccz4_params;
+    const CCZ4_params_t<> &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
     std::array<double, CH_SPACEDIM> m_center;
     double m_G_Newton;

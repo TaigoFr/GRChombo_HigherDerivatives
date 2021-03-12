@@ -39,13 +39,16 @@ void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
     const auto advec = m_deriv.template advection<MatterMetricVarsWithGauge>(
         current_cell, vars.shift);
 
+    // make gauge
+    MovingPunctureGauge gauge(m_params);
+
     GeometricQuantities<data_t, MatterMetricVarsWithGauge,
-                        MatterDiff2MetricVarsWithGauge>
+                        MatterDiff2MetricVarsWithGauge, MovingPunctureGauge>
         gq(vars, d1, d2);
 
     gq.set_cosmological_constant(m_cosmological_constant);
     gq.set_formulation(m_formulation, m_params);
-    gq.set_advection(advec);
+    gq.set_advection_and_gauge(advec, gauge);
     // why need advection to calculate the constraints?
     // the EM-tensor needs it in the C^2 EFT, because to calculate the
     // derivatives of 'C' it needs its time derivative, but the time derivative

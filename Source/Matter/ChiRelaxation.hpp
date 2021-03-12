@@ -8,7 +8,7 @@
 
 #include "Cell.hpp"
 #include "FourthOrderDerivatives.hpp"
-#include "MatterCCZ4.hpp"
+#include "MatterCCZ4RHS.hpp"
 #include "Tensor.hpp"
 #include "TensorAlgebra.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
@@ -36,10 +36,11 @@ template <class matter_t> class ChiRelaxation
 
     // Use the variable definitions in MatterCCZ4
     template <class data_t>
-    using Vars = typename MatterCCZ4<matter_t>::template Vars<data_t>;
+    using Vars = typename MatterCCZ4RHS<matter_t>::template Vars<data_t>;
 
     template <class data_t>
-    using Diff2Vars = typename MatterCCZ4<matter_t>::template Diff2Vars<data_t>;
+    using Diff2Vars =
+        typename MatterCCZ4RHS<matter_t>::template Diff2Vars<data_t>;
 
   public:
     //! Constructor of class ChiRelaxation

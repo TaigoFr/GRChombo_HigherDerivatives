@@ -3,10 +3,20 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#include "CCZ4.hpp" // need 'formulations'; should be included before GeometricQuantities (before the #ifndef)
+#include "CCZ4RHS.hpp" // need 'formulations'; should be included before GeometricQuantities (before the #ifndef)
 
 #ifndef GEOMETRICQUANTITIES_HPP_
 #define GEOMETRICQUANTITIES_HPP_
+
+// auxiliary class as default template for when GeometricQuantities doesn't need
+// a gauge
+class EmptyGauge
+{
+  public:
+    struct params_t
+    {
+    };
+};
 
 //! A structure for the decomposed elements of the Energy Momentum Tensor in
 //! 3+1D
@@ -32,7 +42,7 @@ template <class data_t, int size = CH_SPACEDIM> struct ricci_t
    possible. To be used inside compute functions.
 */
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t = EmptyGauge>
 class GeometricQuantities
 {
   public:
@@ -67,8 +77,9 @@ class GeometricQuantities
     void set_vars(const Vars &a_vars);
     void set_d1_vars(const Diff1Vars &a_d1_vars);
     void set_d2_vars(const Diff2Vars &a_d2_vars);
-    void set_advection(const Vars &a_advection);
-    void set_formulation(int formulation, const CCZ4::params_t &a_ccz4_params);
+    void set_advection_and_gauge(const Vars &a_advection,
+                                 const gauge_t &a_gauge);
+    void set_formulation(int formulation, const CCZ4_params_t<> &a_ccz4_params);
     void set_em_tensor(const emtensor_t<data_t> &a_em_tensor, double G_Newton);
     void set_cosmological_constant(double cosmological_constant);
     /*
@@ -87,12 +98,13 @@ class GeometricQuantities
     //////// SET BY USER ////////
     // vars, d1, d2 and emtensor are assumed to stay in scope
     int get_formulation() const;
-    const CCZ4::params_t &get_formulation_params() const;
+    const CCZ4_params_t<> &get_formulation_params() const;
     double get_cosmological_constant() const;
     const Vars &get_vars() const;
     const Diff1Vars &get_d1_vars() const;
     const Diff2Vars &get_d2_vars() const;
     const Vars &get_advection() const;
+    const gauge_t &get_gauge() const;
     const emtensor_t<data_t> &get_em_tensor() const;
 
     //////// spatial ////////
@@ -230,12 +242,12 @@ class GeometricQuantities
     void clean(); // clean all computations made so far
   protected:
     void set_all_to_null();
-    void clean_em_tensor_dependent(); // clean EM-tensor dependent
-    void clean_eom_dependent();       // clean EOM dependent variables
-    void clean_advection_dependent(); // clean EOM dependent variables
+    void clean_em_tensor_dependent();           // clean EM-tensor dependent
+    void clean_eom_dependent();                 // clean EOM dependent variables
+    void clean_advection_and_gauge_dependent(); // clean EOM dependent variables
 
     int m_formulation;
-    const CCZ4::params_t *m_ccz4_params;
+    const CCZ4_params_t<> *m_ccz4_params;
     double m_16_pi_G_Newton;
     double m_cosmological_constant;
 
@@ -244,6 +256,7 @@ class GeometricQuantities
     const Diff1Vars *m_d1_vars;
     const Diff2Vars *m_d2_vars;
     const Vars *m_advection;
+    const gauge_t *m_gauge;
     const emtensor_t<data_t> *m_em_tensor;
 
     //////// spatial ////////

@@ -97,6 +97,11 @@ void AHFinder::solve(double a_dt, double a_time, double a_restart_time)
         SOLVED
     };
 
+    // in case this was called at specificPostTimeStep at t=0 due to
+    // MultiLevelTask (solve already happened when AH was created)
+    if (a_time == 0.)
+        return;
+
     // solve if it has never converged before OR if has already converged in the
     // past this means it will stop solving as soon as it stops converging but
     // keeps trying (with same initial guess) if never found one
@@ -358,7 +363,7 @@ void AHFinder::params::read_params(GRParmParse &pp, const ChomboParameters &a_p)
 
     // load vars to write to coord files
     num_extra_vars = 0;
-    extra_contain_diagnostic = false;
+    extra_contain_diagnostic = 0;
 
     int AH_num_write_vars;
     pp.load("AH_num_write_vars", AH_num_write_vars, 0);
@@ -401,7 +406,7 @@ void AHFinder::params::read_params(GRParmParse &pp, const ChomboParameters &a_p)
                 else
                 {
                     var_type = VariableType::diagnostic;
-                    extra_contain_diagnostic = true;
+                    ++extra_contain_diagnostic;
                 }
             }
             if (var >= 0)

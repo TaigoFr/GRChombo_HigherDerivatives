@@ -42,9 +42,9 @@ void Constraints::compute(Cell<data_t> current_cell) const
 }
 
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t>
 Constraints::Vars<data_t> Constraints::constraint_equations(
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     Vars<data_t> out;
 

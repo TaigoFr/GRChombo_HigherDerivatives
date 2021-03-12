@@ -35,7 +35,7 @@ int main()
     // CCZ4Geometry::compute_ricci_Z(vars, d1, d2, h_UU, chris, Z_over_chi);
 
     GeometricQuantities<double, vars_t, vars_t> gq(vars, d1, d2);
-    gq.set_formulation(CCZ4::USE_CCZ4, CCZ4::params_t());
+    gq.set_formulation(CCZ4::USE_CCZ4, CCZ4_params_t<>());
 
     auto h_UU = gq.get_h_UU();
     auto chris = gq.get_chris();

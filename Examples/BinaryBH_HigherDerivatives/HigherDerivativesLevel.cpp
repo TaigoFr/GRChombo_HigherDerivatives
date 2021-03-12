@@ -18,7 +18,7 @@
 #include "WeylExtraction.hpp"
 
 // For RHS update
-#include "MatterCCZ4.hpp"
+#include "MatterCCZ4RHS.hpp"
 
 // For constraints calculation
 #include "NewMatterConstraintsWithGauge.hpp"
@@ -101,7 +101,7 @@ void HigherDerivativesLevel::prePlotLevel()
         Interval(c_Mom, c_Mom));
 
 #ifdef USE_EBSYSTEM
-    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params);
+    EBdiffDiagnostic diff(m_dx);
 #elif USE_CSYSTEM
     CdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params);
 #endif
@@ -151,7 +151,7 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
-    MatterCCZ4<C2EFT<System>> my_ccz4_matter(
+    MatterCCZ4RHS<C2EFT<System>> my_ccz4_matter(
         c2eft, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation, m_p.G_Newton);
     BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }

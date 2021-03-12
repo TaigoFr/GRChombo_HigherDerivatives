@@ -10,7 +10,7 @@
 #include "Cell.hpp"
 #include "EBSystem.hpp"
 #include "FourthOrderDerivatives.hpp"
-#include "MatterCCZ4.hpp"
+#include "MatterCCZ4RHS.hpp"
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
@@ -21,21 +21,16 @@
 class EBdiffDiagnostic
 {
 
-    // Use the variable definitions in MatterCCZ4
+    // Use the variable definitions in MatterCCZ4RHS
     template <class data_t>
-    using Vars = typename MatterCCZ4<C2EFT<EBSystem>>::template Vars<data_t>;
+    using Vars = typename MatterCCZ4RHS<C2EFT<EBSystem>>::template Vars<data_t>;
 
     template <class data_t>
     using Diff2Vars =
-        typename MatterCCZ4<C2EFT<EBSystem>>::template Diff2Vars<data_t>;
+        typename MatterCCZ4RHS<C2EFT<EBSystem>>::template Diff2Vars<data_t>;
 
   public:
-    EBdiffDiagnostic(double m_dx, int a_formulation,
-                     const CCZ4::params_t &a_ccz4_params)
-        : m_formulation(a_formulation), m_ccz4_params(a_ccz4_params),
-          m_deriv(m_dx)
-    {
-    }
+    EBdiffDiagnostic(double m_dx) : m_deriv(m_dx) {}
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -58,8 +53,6 @@ class EBdiffDiagnostic
     }
 
   protected:
-    int m_formulation;
-    const CCZ4::params_t &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
 };
 

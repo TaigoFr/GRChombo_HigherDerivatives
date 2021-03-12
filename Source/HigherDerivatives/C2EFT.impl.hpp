@@ -36,9 +36,9 @@ void C2EFT<System>::params_t::update_min_chi(double time, double spin)
 // Calculate the stress energy tensor elements
 template <class System>
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t>
 emtensor_t<data_t> C2EFT<System>::compute_emtensor(
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     emtensor_t<data_t> emtensor;
 
@@ -93,10 +93,10 @@ emtensor_t<data_t> C2EFT<System>::compute_emtensor(
 
 template <class System>
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t>
 void C2EFT<System>::compute_emtensor_4D(
     Tensor<2, data_t, CH_SPACEDIM + 1> &Tmn,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     const auto &g = gq.get_metric_ST();
     const auto &chris_ST = gq.get_chris_ST();
@@ -137,21 +137,21 @@ void C2EFT<System>::compute_emtensor_4D(
 // Adds in the RHS for the matter vars
 template <class System>
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t,
+          template <typename> class diff2_vars_t, class gauge_t,
           template <typename> class rhs_vars_t>
 void C2EFT<System>::add_matter_rhs(
     rhs_vars_t<data_t> &total_rhs,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     m_system.add_matter_rhs(total_rhs, gq);
 }
 
 template <class System>
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t>
 data_t C2EFT<System>::weak_field_var(
     const emtensor_t<data_t> &emtensor,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     // estimate of how big things are:
     data_t weak_field_var = emtensor.rho * emtensor.rho;
@@ -166,10 +166,10 @@ data_t C2EFT<System>::weak_field_var(
 
 template <class System>
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t>
 data_t C2EFT<System>::weak_field_condition(
     const data_t &weak_field_var,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     const auto &vars = gq.get_vars();
 

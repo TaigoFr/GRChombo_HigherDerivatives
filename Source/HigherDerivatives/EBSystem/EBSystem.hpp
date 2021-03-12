@@ -73,26 +73,27 @@ class EBSystem
     };
 
     template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t>
-    void compute_C(data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
-                   Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
-                   GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
+              template <typename> class diff2_vars_t, class gauge_t>
+    void compute_C(
+        data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
+        Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
     template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t>
+              template <typename> class diff2_vars_t, class gauge_t>
     void compute_Riemann(
         Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LLLU,
         Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LULU,
-        GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
     //! The function which adds in the RHS for the matter field vars,
     //! including the potential
     template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t,
+              template <typename> class diff2_vars_t, class gauge_t,
               template <typename> class rhs_vars_t>
     void add_matter_rhs(
         rhs_vars_t<data_t> &total_rhs, //!< value of the RHS for all vars
-        GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
   private:
     params_t m_params;

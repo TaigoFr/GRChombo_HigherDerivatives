@@ -61,9 +61,9 @@ class Constraints
     double m_cosmological_constant;
 
     template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t>
+              template <typename> class diff2_vars_t, class gauge_t>
     Vars<data_t> constraint_equations(
-        GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
     template <class data_t>
     void store_vars(Vars<data_t> &out, Cell<data_t> &current_cell) const;

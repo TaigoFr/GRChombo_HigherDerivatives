@@ -18,7 +18,8 @@
 
 #include <array>
 
-class Constraints
+class [
+    [deprecated("Use new Constraints class in NewConstraints.hpp")]] Constraints
 {
   public:
     /// CCZ4 variables

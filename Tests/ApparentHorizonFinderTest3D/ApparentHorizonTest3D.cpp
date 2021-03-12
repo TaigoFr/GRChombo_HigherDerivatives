@@ -30,6 +30,7 @@ using std::endl;
 // Problem specific includes:
 #include "AMRInterpolator.hpp"
 #include "ApparentHorizonTest3DLevel.hpp"
+#include "DimensionDefinitions.hpp"
 #include "InterpolationQuery.hpp"
 #include "Lagrange.hpp"
 #include "SmallDataIO.hpp"

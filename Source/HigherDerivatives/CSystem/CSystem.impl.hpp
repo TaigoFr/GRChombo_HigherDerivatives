@@ -13,11 +13,11 @@
 
 // Calculate the stress energy tensor elements
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t>
 void CSystem::compute_C(
     data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
     Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     const auto &vars = gq.get_vars();
     const auto &d1 = gq.get_d1_vars();
@@ -42,11 +42,11 @@ void CSystem::compute_C(
 }
 
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t>
+          template <typename> class diff2_vars_t, class gauge_t>
 void CSystem::compute_Riemann(
     Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LLLU,
     Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LULU,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     riemann_LLLU = gq.get_riemann_LLLU_ST();
     riemann_LULU = gq.get_riemann_LULU_ST();
@@ -54,11 +54,11 @@ void CSystem::compute_Riemann(
 
 // Adds in the RHS for the matter vars
 template <class data_t, template <typename> class vars_t,
-          template <typename> class diff2_vars_t,
+          template <typename> class diff2_vars_t, class gauge_t,
           template <typename> class rhs_vars_t>
 void CSystem::add_matter_rhs(
     rhs_vars_t<data_t> &total_rhs,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     const auto &vars = gq.get_vars();
     const auto &advec = gq.get_advection();

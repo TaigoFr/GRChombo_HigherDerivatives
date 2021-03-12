@@ -17,13 +17,15 @@
 
 #include "C2EFT.hpp"
 #include "CSystem.hpp"
-#include "MatterCCZ4.hpp"
+#include "MatterCCZ4RHS.hpp"
+#include "MovingPunctureGauge.hpp"
 
 #include "SetupFunctions.hpp" // just to avoid some undefined references of static Derivative::LOCAL and other vars
 
-template <class data_t> using Vars = MatterCCZ4<C2EFT<CSystem>>::Vars<data_t>;
 template <class data_t>
-using Diff2Vars = MatterCCZ4<C2EFT<CSystem>>::Diff2Vars<data_t>;
+using Vars = MatterCCZ4RHS<C2EFT<CSystem>>::Vars<data_t>;
+template <class data_t>
+using Diff2Vars = MatterCCZ4RHS<C2EFT<CSystem>>::Diff2Vars<data_t>;
 
 template <class data_t, int size, int rank>
 ALWAYS_INLINE typename std::enable_if<(rank == 0), bool>::type
@@ -83,7 +85,7 @@ int runTest(int argc, char *argv[])
 {
     int formulation = CCZ4::USE_CCZ4;
 
-    CCZ4::params_t ccz4_params;
+    CCZ4_params_t<> ccz4_params;
 
     // Lapse evolution
     ccz4_params.lapse_advec_coeff = 1.;
@@ -134,9 +136,13 @@ int runTest(int argc, char *argv[])
         });
     });
 
-    GeometricQuantities<double, Vars, Diff2Vars> gq(vars, d1, d2);
+    // make gauge
+    MovingPunctureGauge gauge(ccz4_params);
+
+    GeometricQuantities<double, Vars, Diff2Vars, MovingPunctureGauge> gq(
+        vars, d1, d2);
     gq.set_formulation(formulation, ccz4_params);
-    gq.set_advection(advec);
+    gq.set_advection_and_gauge(advec, gauge);
 
     // make EM Tensor
     CSystem Csystem(c_params);

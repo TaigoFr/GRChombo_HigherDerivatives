@@ -13,8 +13,9 @@
 // helpers to avoid clutter in the code
 #define template_GQ                                                            \
     template <class data_t, template <typename> class vars_t,                  \
-              template <typename> class diff2_vars_t>
-#define GeometricQuantities_t GeometricQuantities<data_t, vars_t, diff2_vars_t>
+              template <typename> class diff2_vars_t, class gauge_t>
+#define GeometricQuantities_t                                                  \
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t>
 
 template_GQ GeometricQuantities_t::GeometricQuantities()
     : m_formulation(-1), m_ccz4_params(nullptr), m_16_pi_G_Newton(0.),
@@ -38,6 +39,7 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_d1_vars = nullptr;
     m_d2_vars = nullptr;
     m_advection = nullptr;
+    m_gauge = nullptr;
     m_em_tensor = nullptr;
 
     m_h_UU = nullptr;
@@ -472,10 +474,10 @@ template_GQ void GeometricQuantities_t::clean_eom_dependent()
         m_riemann_LULU_ST = nullptr;
     }
 
-    clean_advection_dependent();
+    clean_advection_and_gauge_dependent();
 }
 
-template_GQ void GeometricQuantities_t::clean_advection_dependent()
+template_GQ void GeometricQuantities_t::clean_advection_and_gauge_dependent()
 {
     if (m_rhs_equations != nullptr)
     {
@@ -540,14 +542,17 @@ template_GQ void GeometricQuantities_t::set_d2_vars(const Diff2Vars &a_d2_vars)
     m_d2_vars = &a_d2_vars;
     clean();
 }
-template_GQ void GeometricQuantities_t::set_advection(const Vars &a_advection)
+template_GQ void
+GeometricQuantities_t::set_advection_and_gauge(const Vars &a_advection,
+                                               const gauge_t &a_gauge)
 {
     m_advection = &a_advection;
-    clean_advection_dependent();
+    m_gauge = &a_gauge;
+    clean_advection_and_gauge_dependent();
 }
 template_GQ void
 GeometricQuantities_t::set_formulation(int formulation,
-                                       const CCZ4::params_t &a_ccz4_params)
+                                       const CCZ4_params_t<> &a_ccz4_params)
 {
     m_formulation = formulation;
     m_ccz4_params = &a_ccz4_params;
@@ -586,7 +591,7 @@ template_GQ int GeometricQuantities_t::get_formulation() const
 {
     return m_formulation;
 }
-template_GQ const CCZ4::params_t &
+template_GQ const CCZ4_params_t<> &
 GeometricQuantities_t::get_formulation_params() const
 {
     return *m_ccz4_params;
@@ -619,6 +624,11 @@ GeometricQuantities_t::get_advection() const
     CH_assert(m_advection != nullptr);
     return *m_advection;
 }
+template_GQ const gauge_t &GeometricQuantities_t::get_gauge() const
+{
+    CH_assert(m_gauge != nullptr);
+    return *m_gauge;
+}
 template_GQ const emtensor_t<data_t> &
 GeometricQuantities_t::get_em_tensor() const
 {
@@ -640,7 +650,7 @@ template_GQ const chris_t<data_t> &GeometricQuantities_t::get_chris()
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z_U_conformal()
 {
-    CH_assert(m_formulation == CCZ4::USE_CCZ4);
+    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
     if (m_Z_U_conformal == nullptr)
         compute_Z_U_conformal();
     return *m_Z_U_conformal;
@@ -732,21 +742,21 @@ template_GQ const Tensor<3, data_t> &GeometricQuantities_t::get_chris_spatial()
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z_U()
 {
-    CH_assert(m_formulation == CCZ4::USE_CCZ4);
+    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
     if (m_Z_U == nullptr)
         compute_Z_U();
     return *m_Z_U;
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z()
 {
-    CH_assert(m_formulation == CCZ4::USE_CCZ4);
+    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
     if (m_Z == nullptr)
         compute_Z();
     return *m_Z;
 }
 template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_covd_Z()
 {
-    CH_assert(m_formulation == CCZ4::USE_CCZ4);
+    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
     if (m_covd_Z == nullptr)
         compute_covd_Z();
     return *m_covd_Z;
@@ -1020,7 +1030,7 @@ GeometricQuantities_t::get_levi_civita_ST()
 template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_Z_L_ST()
 {
-    CH_assert(m_formulation == CCZ4::USE_CCZ4);
+    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
     if (m_Z_L_ST == nullptr)
         compute_Z_L_ST();
     return *m_Z_L_ST;
@@ -1028,7 +1038,7 @@ GeometricQuantities_t::get_Z_L_ST()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_grad_normal_LL()
 {
-    CH_assert(m_formulation == CCZ4::USE_CCZ4);
+    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
     if (m_grad_normal_LL == nullptr)
         compute_grad_normal_LL();
     return *m_grad_normal_LL;
@@ -1036,7 +1046,7 @@ GeometricQuantities_t::get_grad_normal_LL()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_covd_Z_L_ST()
 {
-    CH_assert(m_formulation == CCZ4::USE_CCZ4);
+    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
     if (m_covd_Z_L_ST == nullptr)
         compute_covd_Z_L_ST();
     return *m_covd_Z_L_ST;
@@ -1177,7 +1187,7 @@ GeometricQuantities_t::get_Gamma_L_ST()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_d1_Z_L_ST()
 {
-    CH_assert(m_formulation == CCZ4::USE_CCZ4);
+    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
     if (m_d1_Z_L_ST == nullptr)
         compute_d1_Z_L_ST();
     return *m_d1_Z_L_ST;
@@ -1733,7 +1743,7 @@ template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
     }
 
     Tensor<1, data_t> Z_U_q = {0.};
-    if (q != 0 && m_formulation == CCZ4::USE_CCZ4) // only if in CCZ4
+    if (q != 0 && m_formulation == CCZ4RHS<>::USE_CCZ4) // only if in CCZ4
         TensorAlgebra::hard_copy(Z_U_q, get_Z_U_conformal());
 
     /*
@@ -1782,7 +1792,7 @@ template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
                 // }
             }
 
-            if (q != 0 && m_formulation == CCZ4::USE_CCZ4)
+            if (q != 0 && m_formulation == CCZ4RHS<>::USE_CCZ4)
             {
                 z_terms += Z_U_q[k] * (vars.h[i][k] * d1.chi[j] +
                                        vars.h[j][k] * d1.chi[i] -
@@ -1833,7 +1843,7 @@ template_GQ void GeometricQuantities_t::compute_weyl_electric_part()
         delete m_weyl_electric_part;
 
     const auto &ricci =
-        get_ricci_qDZ((m_formulation == CCZ4::USE_CCZ4 ? 1 : 0));
+        get_ricci_qDZ((m_formulation == CCZ4RHS<>::USE_CCZ4 ? 1 : 0));
     const auto &Kij = get_extrinsic_curvature();
     const auto &h_UU_spatial = get_metric_UU_spatial();
     const auto &vars = get_vars();
@@ -1842,7 +1852,7 @@ template_GQ void GeometricQuantities_t::compute_weyl_electric_part()
         TensorAlgebra::compute_dot_product(Kij, Kij, h_UU_spatial);
 
     data_t K_minus_Theta = vars.K;
-    if (m_formulation == CCZ4::USE_CCZ4)
+    if (m_formulation == CCZ4RHS<>::USE_CCZ4)
         K_minus_Theta -= vars.Theta;
 
     m_weyl_electric_part = new Tensor<2, data_t>;
@@ -1894,7 +1904,7 @@ template_GQ void GeometricQuantities_t::compute_lie_derivatives()
     const Tensor<2, data_t> covd2lapse =
         get_covd_lapse(); // calculates chris_spatial -> not very efficient
 
-    bool ccz4 = (m_formulation == CCZ4::USE_CCZ4);
+    bool ccz4 = (m_formulation == CCZ4RHS<>::USE_CCZ4);
     bool k3 = (ccz4 && m_ccz4_params->kappa3 != 1.);
     bool vacuum = (m_em_tensor == nullptr);
 
@@ -2083,9 +2093,11 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
 {
     const auto &vars = get_vars();
     const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();
     const auto &advec = get_advection();
     const auto &LIE = get_lie_derivatives();
     const auto &chris = get_chris();
+    const auto &gauge = get_gauge();
 
     const data_t &div_shift = get_div_shift();
 
@@ -2097,33 +2109,27 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
         rhs.K = vars.lapse * LIE.K + advec.K;
         rhs.Theta = vars.lapse * LIE.Theta + advec.Theta;
 
-        // Gauge evolution equations
-        rhs.lapse = m_ccz4_params->lapse_advec_coeff * advec.lapse -
-                    m_ccz4_params->lapse_coeff *
-                        pow(vars.lapse, m_ccz4_params->lapse_power) *
-                        (vars.K - 2 * vars.Theta);
-
         FOR(i)
         {
             // Use the calculated christoffels in the lie derivative terms, not
             // the evolved ones, for BSSN (as according to the old code for BSSN
             // and according with Alcubierre page 87)
-            rhs.Gamma[i] =
-                advec.Gamma[i] + LIE.Gamma[i] * vars.lapse +
-                2. / GR_SPACEDIM *
-                    (m_formulation == CCZ4::USE_CCZ4 ? vars.Gamma[i]
-                                                     : chris.contracted[i]) *
-                    div_shift;
+            rhs.Gamma[i] = advec.Gamma[i] + LIE.Gamma[i] * vars.lapse +
+                           2. / GR_SPACEDIM *
+                               (m_formulation == CCZ4RHS<>::USE_CCZ4
+                                    ? vars.Gamma[i]
+                                    : chris.contracted[i]) *
+                               div_shift;
 
             FOR1(j)
             {
                 // Use the calculated christoffels in the lie derivative terms,
                 // not the evolved ones, for BSSN (as according to the old code
                 // for BSSN and according with Alcubierre page 87)
-                rhs.Gamma[i] -=
-                    (m_formulation == CCZ4::USE_CCZ4 ? vars.Gamma[j]
-                                                     : chris.contracted[j]) *
-                    d1.shift[i][j];
+                rhs.Gamma[i] -= (m_formulation == CCZ4RHS<>::USE_CCZ4
+                                     ? vars.Gamma[j]
+                                     : chris.contracted[j]) *
+                                d1.shift[i][j];
 
                 rhs.h[i][j] = advec.h[i][j] + LIE.h[i][j] * vars.lapse -
                               2. / GR_SPACEDIM * vars.h[i][j] * div_shift;
@@ -2138,14 +2144,10 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
                                    vars.A[j][k] * d1.shift[k][i];
                 }
             }
-
-            rhs.shift[i] = m_ccz4_params->shift_advec_coeff * advec.shift[i] +
-                           m_ccz4_params->shift_Gamma_coeff * vars.B[i];
-            rhs.B[i] = rhs.Gamma[i] +
-                       m_ccz4_params->shift_advec_coeff *
-                           (advec.B[i] - advec.Gamma[i]) -
-                       m_ccz4_params->eta * vars.B[i];
         }
+
+        // Gauge evolution equations
+        gauge.rhs_gauge(rhs, vars, d1, d2, advec);
 
         /*
         // Alternative using TensorAlgebra::lie_derivative (is correct, but
@@ -2181,9 +2183,9 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
         // 2. / GR_SPACEDIM, {true});
         rhs.Gamma = TensorAlgebra::lie_derivative(
             advec.Gamma,
-            (m_formulation == CCZ4::USE_CCZ4 ? vars.Gamma : chris.contracted),
-            d1.shift, vars.shift, div_shift, 2. / GR_SPACEDIM, {true});
-        FOR(i) { rhs.Gamma[i] += LIE.Gamma[i] * vars.lapse; }
+            (m_formulation == CCZ4RHS<>::USE_CCZ4 ? vars.Gamma :
+        chris.contracted), d1.shift, vars.shift, div_shift, 2. / GR_SPACEDIM,
+        {true}); FOR(i) { rhs.Gamma[i] += LIE.Gamma[i] * vars.lapse; }
 
         // Gauge evolution equations
         rhs.lapse =
@@ -2724,7 +2726,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST()
         kappa1 /= vars.lapse;
 
     data_t Z_dot_n = 0.;
-    if (m_formulation == CCZ4::USE_CCZ4)
+    if (m_formulation == CCZ4RHS<>::USE_CCZ4)
         Z_dot_n = TensorAlgebra::compute_dot_product(Z_L_ST, n_U);
 
     m_ricci_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>;
@@ -2739,7 +2741,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST()
                                                      (GR_SPACEDIM - 1.)) +
             m_cosmological_constant * g[m][n] * 2. / (GR_SPACEDIM - 1.);
 
-        if (m_formulation == CCZ4::USE_CCZ4)
+        if (m_formulation == CCZ4RHS<>::USE_CCZ4)
         {
             (*m_ricci_ST)[m][n] +=
                 -covd_Z_L_ST[m][n] - covd_Z_L_ST[n][m] +

@@ -74,9 +74,9 @@ template <class potential_t = DefaultPotential> class ScalarField
     //! The function which calculates the EM Tensor, given the vars and
     //! derivatives, including the potential
     template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t>
-    emtensor_t<data_t>
-    compute_emtensor(GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq)
+              template <typename> class diff2_vars_t, class gauge_t>
+    emtensor_t<data_t> compute_emtensor(
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq)
         const; //!< the conformal christoffel symbol
 
     //! The function which calculates the EM Tensor, given the vars and
@@ -93,11 +93,11 @@ template <class potential_t = DefaultPotential> class ScalarField
     //! The function which adds in the RHS for the matter field vars,
     //! including the potential
     template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t,
+              template <typename> class diff2_vars_t, class gauge_t,
               template <typename> class rhs_vars_t>
     void add_matter_rhs(
         rhs_vars_t<data_t> &total_rhs, //!< value of the RHS for all vars
-        GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq)
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq)
         const; //!< the value of the advection terms
 
     //! The function which calculates the RHS for the matter field vars

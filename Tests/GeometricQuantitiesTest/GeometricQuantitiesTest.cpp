@@ -16,13 +16,14 @@
 #include "parstream.H" //Gives us pout()
 
 // #include "GeometricQuantities.hpp"
-#include "MatterCCZ4.hpp"
+#include "MatterCCZ4RHS.hpp"
+#include "MovingPunctureGauge.hpp"
 #include "ScalarField.hpp"
 
 #include "OldCCZ4.hpp"
 
 template <class data_t>
-using MatterVars = MatterCCZ4<ScalarField<>>::Vars<data_t>;
+using MatterVars = MatterCCZ4RHS<ScalarField<>>::Vars<data_t>;
 template <class data_t> struct Vars : public MatterVars<data_t>
 {
     Tensor<2, data_t> WeylE;
@@ -44,7 +45,7 @@ template <class data_t> struct Vars : public MatterVars<data_t>
     }
 };
 template <class data_t>
-using Diff2Vars = MatterCCZ4<ScalarField<>>::Diff2Vars<data_t>;
+using Diff2Vars = MatterCCZ4RHS<ScalarField<>>::Diff2Vars<data_t>;
 
 template <class data_t, int size, int rank>
 ALWAYS_INLINE typename std::enable_if<(rank == 0), bool>::type
@@ -104,7 +105,7 @@ int runTest(int argc, char *argv[])
 {
     int formulation = CCZ4::USE_CCZ4;
 
-    CCZ4::params_t ccz4_params;
+    CCZ4_params_t<> ccz4_params;
 
     // Lapse evolution
     ccz4_params.lapse_advec_coeff = 1.;
@@ -149,9 +150,13 @@ int runTest(int argc, char *argv[])
         });
     });
 
-    GeometricQuantities<double, Vars, Diff2Vars> gq(vars, d1, d2);
+    // make gauge
+    MovingPunctureGauge gauge(ccz4_params);
+
+    GeometricQuantities<double, Vars, Diff2Vars, MovingPunctureGauge> gq(
+        vars, d1, d2);
     gq.set_formulation(formulation, ccz4_params);
-    gq.set_advection(advec);
+    gq.set_advection_and_gauge(advec, gauge);
     gq.set_cosmological_constant(cosmological_constant);
 
     // make EM Tensor
