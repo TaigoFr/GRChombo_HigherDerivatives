@@ -22,8 +22,8 @@ emtensor_t<data_t> ScalarField<potential_t>::compute_emtensor(
     const auto &vars = gq.get_vars();
 
     // call the function which computes the em tensor excluding the potential
-    emtensor_excl_potential(out, vars, gq.get_d1_vars().phi,
-                            gq.get_h_UU(), gq.get_chris().ULL);
+    emtensor_excl_potential(out, vars, gq.get_d1_vars(), gq.get_h_UU(),
+                            gq.get_chris().ULL);
 
     // set the potential values
     data_t V_of_phi = 0.0;
