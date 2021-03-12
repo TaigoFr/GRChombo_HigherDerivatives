@@ -15,6 +15,12 @@ template <class System> class C2EFT
     struct params_t
     {
         double epsilon;
+
+        // weak field parameters
+        double chi_threshold;
+        double chi_width;
+        double weak_field_threshold;
+        double weak_field_width;
     };
 
     template <class data_t> using Vars = typename System::template Vars<data_t>;
@@ -31,8 +37,9 @@ template <class System> class C2EFT
     //! derivatives, including the potential
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t>
-    emtensor_t<data_t> compute_emtensor(
-        GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
+    emtensor_t<data_t>
+    compute_emtensor(GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq,
+                     bool apply_weak_field = true) const;
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t>
@@ -49,9 +56,21 @@ template <class System> class C2EFT
         rhs_vars_t<data_t> &total_rhs, //!< value of the RHS for all vars
         GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
 
+    template <class data_t, template <typename> class vars_t,
+              template <typename> class diff2_vars_t>
+    data_t weak_field_condition(
+        const data_t &weak_field_var,
+        GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
+
   private:
     System m_system;
     params_t m_params;
+
+    template <class data_t>
+    inline static data_t sigmoid(data_t x, double width, double threshold)
+    {
+        return 1. / (1. + exp(2. / width * (x / threshold - 1.)));
+    }
 };
 
 #include "C2EFT.impl.hpp"

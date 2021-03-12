@@ -52,8 +52,9 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 1 2 3 1 2 3    #lapse shift and B
                          0 4 6 0 5 0      #Eij
                          0 4 6 0 5 0      #Bij
-vars_parity_diagnostic = 0 0	          #Ham and Mom
-					     0 0 			  #Eij and Bij diffs
+vars_parity_diagnostic = 0 0	            #Ham and Mom
+					0 0 			  #Eij and Bij diffs
+                         0 0              #rho and Weak field condition
 
 # if sommerfeld boundaries selected, must select
 # asymptotic values (in order given by UserVariables.hpp)
@@ -70,11 +71,11 @@ vars_asymptotic_values = 1.0 1.0 0.0 0.0 1.0 0.0 1.0 #chi and hij
 # HDF5files are written every dt = L/N*dt_multiplier*checkpoint_interval
 checkpoint_interval = 100
 plot_interval = 1
-num_plot_vars = 7
-plot_vars = chi lapse shift1 Ham Mom E_diff B_diff
+num_plot_vars = 9
+plot_vars = chi lapse shift1 Ham Mom E_diff B_diff rho WeakFieldCondition
 dt_multiplier = 0.25
 stop_time = 10.0
-max_steps = 5
+max_steps = 1
 
 #Lapse evolution
 lapse_power = 1.0
@@ -104,16 +105,15 @@ sigma = 0.3
 
 # Params for Schw BH in KS coords
 mass = 1.0
+spin = 0.0 # for Kerr BH only
 # OR params for Minkowski perturbation
 amplitude = 0.05
 r0 = 1.
 
-energy_scale = 0.0
+epsilon = 1.
 tau = 0.1
 
-# Relaxation paramters
-# how long and how fast to relax
-# (should be non zero if starting from phi data
-# for which constraints not solved)
-relaxtime = 0.0
-relaxspeed = 0.01
+chi_threshold = 0.05
+chi_width     = 0.2
+weak_field_threshold = 0.01
+weak_field_width     = 0.1

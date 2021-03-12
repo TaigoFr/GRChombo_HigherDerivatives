@@ -16,7 +16,8 @@ template <class System>
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t>
 emtensor_t<data_t> C2EFT<System>::compute_emtensor(
-    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq,
+    bool apply_weak_field) const
 {
     emtensor_t<data_t> out;
 
@@ -38,10 +39,20 @@ emtensor_t<data_t> C2EFT<System>::compute_emtensor(
             proj_LU, TensorAlgebra::compute_dot_product(Tmn, proj_LU), 1, 0);
 
     out.rho = TensorAlgebra::compute_dot_product(Tmn_dot_normal_U, n_U);
+
+    // WEAK FIELD BASED ON RHO
+    data_t weak_field_damp = 1.;
+    if (apply_weak_field)
+    {
+        weak_field_damp = 1. - weak_field_condition(out.rho, gq);
+    }
+
+    out.rho *= weak_field_damp;
+
     FOR(i)
     {
-        out.Si[i] = -Si_4D[i + 1];
-        FOR(j) { out.Sij[i][j] = Sij_4D[i + 1][j + 1]; }
+        out.Si[i] = -Si_4D[i + 1] * weak_field_damp;
+        FOR(j) { out.Sij[i][j] = Sij_4D[i + 1][j + 1] * weak_field_damp; }
     }
     out.S = TensorAlgebra::compute_trace(out.Sij, gq.get_metric_UU_spatial());
 
@@ -63,9 +74,10 @@ void C2EFT<System>::compute_emtensor_4D(
     Tensor<2, data_t, CH_SPACEDIM + 1> d2_C_4D;
     m_system.compute_C(C, d1_C_4D, d2_C_4D, gq);
 
-    // compute Riemann. Can either be from evolved variables (if evolving Eij or
-    // Bij for example), or otherwise simply use gq.get_riemann_LLLU() and
-    // gq.get_riemann_LULU()
+    // compute Riemann
+    // Can either be from evolved variables (if evolving
+    // Eij or Bij for example), or otherwise simply use
+    // gq.get_riemann_LLLU() and gq.get_riemann_LULU()
     Tensor<4, data_t, CH_SPACEDIM + 1> riemann_LLLU;
     Tensor<4, data_t, CH_SPACEDIM + 1> riemann_LULU;
     m_system.compute_Riemann(riemann_LLLU, riemann_LULU, gq);
@@ -100,6 +112,25 @@ void C2EFT<System>::add_matter_rhs(
     GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
 {
     m_system.add_matter_rhs(total_rhs, gq);
+}
+
+template <class System>
+template <class data_t, template <typename> class vars_t,
+          template <typename> class diff2_vars_t>
+data_t C2EFT<System>::weak_field_condition(
+    const data_t &weak_field_var,
+    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
+{
+    const auto &vars = gq.get_vars();
+
+    data_t condition_chi =
+        sigmoid(vars.chi, m_params.chi_width, m_params.chi_threshold);
+
+    data_t weak_field_condition =
+        condition_chi * sigmoid(weak_field_var, -m_params.weak_field_width,
+                                m_params.weak_field_threshold);
+
+    return weak_field_condition;
 }
 
 #endif /* C2EFT_IMPL_HPP_ */

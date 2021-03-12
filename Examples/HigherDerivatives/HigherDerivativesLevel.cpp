@@ -26,6 +26,7 @@
 // Problem specific includes
 #include "C2EFT.hpp"
 #include "ComputeEBdiff.hpp"
+#include "ComputeWeakFieldCondition.hpp"
 #include "SystemEB.hpp"
 
 // BH ID defined here:
@@ -76,9 +77,11 @@ void HigherDerivativesLevel::prePlotLevel()
         c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
         Interval(c_Mom, c_Mom));
     ComputeEBdiff EBdiff(m_dx, m_p.formulation, m_p.ccz4_params);
+    ComputeWeakFieldCondition weakField(c2eft, m_dx, m_p.formulation,
+                                        m_p.ccz4_params);
 
-    BoxLoops::loop(make_compute_pack(constraints, EBdiff), m_state_new,
-                   m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(make_compute_pack(constraints, EBdiff, weakField),
+                   m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do in RHS update, at each RK4 step
@@ -86,42 +89,18 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
                                              GRLevelData &a_rhs,
                                              const double a_time)
 {
+    // Enforce trace free A_ij and positive chi and alpha
+    BoxLoops::loop(
+        make_compute_pack(TraceARemoval(),
+                          PositiveChiAndAlpha(m_p.min_chi, m_p.min_lapse)),
+        a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
-    // Relaxation function for chi - this will eventually be done separately
-    // with hdf5 as input
-    if (m_time < m_p.relaxtime)
-    {
-        // Calculate chi relaxation right hand side
-        // Note this assumes conformal chi and Mom constraint trivially
-        // satisfied.
-        // No evolution in other variables, which are assumed to
-        // satisfy constraints per initial conditions
-        SystemEB systemrEB(m_p.eb_params);
-        C2EFT<SystemEB> c2eft(systemrEB, m_p.hd_params);
-        ChiRelaxation<C2EFT<SystemEB>> relaxation(c2eft, m_dx, m_p.relaxspeed,
-                                                  m_p.G_Newton);
-        SetValue set_other_values_zero(0.0, Interval(c_h11, NUM_VARS - 1));
-        auto compute_pack1 =
-            make_compute_pack(relaxation, set_other_values_zero);
-        BoxLoops::loop(compute_pack1, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
-    }
-    else
-    {
-
-        // Enforce trace free A_ij and positive chi and alpha
-        BoxLoops::loop(
-            make_compute_pack(TraceARemoval(),
-                              PositiveChiAndAlpha(m_p.min_chi, m_p.min_lapse)),
-            a_soln, a_soln, INCLUDE_GHOST_CELLS);
-
-        // Calculate MatterCCZ4 right hand side with matter_t = ScalarField
-        SystemEB systemrEB(m_p.eb_params);
-        C2EFT<SystemEB> c2eft(systemrEB, m_p.hd_params);
-        MatterCCZ4<C2EFT<SystemEB>> my_ccz4_matter(c2eft, m_p.ccz4_params, m_dx,
-                                                   m_p.sigma, m_p.formulation,
-                                                   m_p.G_Newton);
-        BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
-    }
+    // Calculate MatterCCZ4 right hand side with matter_t = ScalarField
+    SystemEB systemrEB(m_p.eb_params);
+    C2EFT<SystemEB> c2eft(systemrEB, m_p.hd_params);
+    MatterCCZ4<C2EFT<SystemEB>> my_ccz4_matter(
+        c2eft, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation, m_p.G_Newton);
+    BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do at ODE update, after soln + rhs

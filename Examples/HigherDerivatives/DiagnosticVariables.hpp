@@ -15,13 +15,16 @@ enum
     c_E_diff,
     c_B_diff,
 
+    c_rho,
+    c_WeakFieldCondition,
+
     NUM_DIAGNOSTIC_VARS
 };
 
 namespace DiagnosticVariables
 {
 static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
-    "Ham", "Mom", "E_diff", "B_diff"};
+    "Ham", "Mom", "E_diff", "B_diff", "rho", "WeakFieldCondition"};
 }
 
 #endif /* DIAGNOSTICVARIABLES_HPP */

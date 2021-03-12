@@ -15,14 +15,16 @@
 #include "CCZ4.hpp"
 #include "SystemEB.hpp"
 
-#include "MinkowskiPerturbed.hpp"
-#include "SchwarzschildIsotropic.hpp"
-#include "SchwarzschildKS.hpp"
+// #include "MinkowskiPerturbed.hpp"
+// #include "SchwarzschildIsotropic.hpp"
+// #include "SchwarzschildKS.hpp"
+#include "KerrBH.hpp"
 
 // which one to use:
 // typedef MinkowskiPerturbed InitialData;
-typedef SchwarzschildIsotropic InitialData;
+// typedef SchwarzschildIsotropic InitialData;
 // typedef SchwarzschildKS InitialData;
+typedef KerrBH InitialData;
 
 class SimulationParameters : public SimulationParametersBase
 {
@@ -35,12 +37,9 @@ class SimulationParameters : public SimulationParametersBase
 
     void readParams(GRParmParse &pp)
     {
-        // Relaxation params
-        pp.load("relaxtime", relaxtime);
-        pp.load("relaxspeed", relaxspeed);
-
         // Initial data
         pp.load("mass", id_params.mass);
+        pp.load("spin", id_params.spin); // for Kerr only
         // pp.load("amplitude", id_params.amplitude);
         // pp.load("r0", id_params.r0);
         id_params.center = center;
@@ -62,9 +61,6 @@ class SimulationParameters : public SimulationParametersBase
 
     C2EFT<SystemEB>::params_t hd_params;
     SystemEB::params_t eb_params;
-
-    // Relaxation params
-    Real relaxtime, relaxspeed;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */
