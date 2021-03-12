@@ -86,7 +86,8 @@ void BinaryBHHDLevel::initialData()
 
     // not needed for binaries (conformally flag initial metric)
     // BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
-    // m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    //                m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do before outputting a plot file
