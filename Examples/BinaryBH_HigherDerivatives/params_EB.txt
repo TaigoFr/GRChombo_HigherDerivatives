@@ -19,8 +19,9 @@ L_full = 512
 max_spatial_derivative_order = 6 # can be 4 or 6
 
 # BH params
-track_punctures = 0
-#puncture_tracking_level = 5
+track_punctures = 1
+puncture_tracking_level = 5
+
 #massA = 0.48847892320123
 #offsetA = 0.0 6.10679 0.0
 #momentumA = -0.0841746 -0.000510846 0.0
@@ -178,3 +179,5 @@ AH_num_write_vars = 3
 AH_write_vars = chi WeakFieldVar WeakFieldCondition
 
 calculate_constraint_norms = 1
+
+AH_set_origins_to_punctures = 1

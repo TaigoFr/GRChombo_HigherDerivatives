@@ -210,21 +210,6 @@ void BinaryBHHDLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
 void BinaryBHHDLevel::specificPostTimeStep()
 {
     CH_TIME("BinaryBHHDLevel::specificPostTimeStep");
-#ifdef USE_AHFINDER
-    // if print is on and there are Diagnostics to write, calculate them!
-    if (m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
-        prePlotLevel();
-    if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
-        m_bh_amr.m_ah_finder.solve(m_dt, m_time, m_restart_time);
-#endif
-
-    if (m_level == 0 && m_time != 0.)
-    {
-        pout() << "Used estimation of AH at chi = "
-               << m_p.hd_params.chi_ignore_threshold << std::endl;
-        pout() << "Applied excision at chi ~< " << m_p.hd_params.chi_threshold
-               << std::endl;
-    }
 
     bool first_step =
         (m_time == 0.); // this form is used when 'specificPostTimeStep' was
@@ -301,5 +286,28 @@ void BinaryBHHDLevel::specificPostTimeStep()
         bool write_punctures = at_level_timestep_multiple(coarsest_level);
         m_bh_amr.m_puncture_tracker.execute_tracking(m_time, m_restart_time,
                                                      m_dt, write_punctures);
+    }
+
+#ifdef USE_AHFINDER
+    // if print is on and there are Diagnostics to write, calculate them!
+    if (m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
+        prePlotLevel();
+    if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
+    {
+        if (m_p.AH_set_origins_to_punctures && m_p.track_punctures)
+        {
+            m_bh_amr.m_ah_finder.set_origins(
+                m_bh_amr.m_puncture_tracker.get_puncture_coords());
+        }
+        m_bh_amr.m_ah_finder.solve(m_dt, m_time, m_restart_time);
+    }
+#endif
+
+    if (m_level == 0 && m_time != 0.)
+    {
+        pout() << "Used estimation of AH at chi = "
+               << m_p.hd_params.chi_ignore_threshold << std::endl;
+        pout() << "Applied excision at chi ~< " << m_p.hd_params.chi_threshold
+               << std::endl;
     }
 }
