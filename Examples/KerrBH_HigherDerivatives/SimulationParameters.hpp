@@ -91,7 +91,6 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("diffCFLFact", diffusion_params.diffCFLFact, 1e20);
         pp.load("lapidusCoeff", diffusion_params.lapidusCoeff, 0.001);
         pp.load("lapidusPower", diffusion_params.lapidusPower, 1.0);
-        pp.load("diffusion_maximum", diffusion_params.diffusion_maximum, 1e20);
         diffusion_params.chiCutoff = hd_params.chi_threshold;
         diffusion_params.chiCutoff_width = hd_params.chi_width;
         /////////////

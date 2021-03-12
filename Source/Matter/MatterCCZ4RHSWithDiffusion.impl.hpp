@@ -54,7 +54,11 @@ void MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::compute(
 
     gq.compute_rhs_equations(matter_rhs);
 
-    add_diffusion_terms(matter_rhs, matter_vars, d1, d2);
+    data_t diffCoeffSafe =
+        add_diffusion_terms<data_t, Vars, Diff2Vars>(matter_rhs, gq);
+    this->my_matter
+        .template add_diffusion_terms<data_t, Vars, Diff2Vars, gauge_t>(
+            matter_rhs, gq, diffCoeffSafe);
 
     // Add dissipation to all terms
     this->m_deriv.add_dissipation(matter_rhs, current_cell, this->m_sigma);
@@ -63,20 +67,20 @@ void MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::compute(
     current_cell.store_vars(matter_rhs);
 }
 
-/// Adds diffusion terms to the rhs of the GHC equations
 template <class matter_t, class gauge_t, class deriv_t>
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t>
-void MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::
-    add_diffusion_terms(
-        vars_t<data_t> &rhs, //!< Reference to the variables into which the
-                             //! output right hand side is written
-        const vars_t<data_t> &vars, const vars_t<Tensor<1, data_t>> &d1,
-        diff2_vars_t<Tensor<2, data_t>> &d2) const
+data_t
+MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::add_diffusion_terms(
+    vars_t<data_t> &rhs,
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
-    using namespace TensorAlgebra;
-
     // based on arxiv:1512.04532v2 (in Supplemental Material)
+
+    const auto &vars = gq.get_vars();
+    const auto &d1 = gq.get_d1_vars();
+    const auto &d2 = gq.get_d2_vars();
+    const auto &h_UU = gq.get_h_UU();
 
     data_t diffCoeff = 0;
     FOR(i, j, k) { diffCoeff += pow(d1.h[i][j][k], 2); }
@@ -94,30 +98,45 @@ void MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::
 
     // Introduce a smooth cutoff:
     auto chi_above_cutoff =
-        sigmoid(vars.chi, -m_diffusion_params.chiCutoff_width,
+        sigmoid(vars.chi, m_diffusion_params.chiCutoff_width,
                 m_diffusion_params.chiCutoff);
     diffCoeffSafe *= chi_above_cutoff;
 
-    double diffusion_maximum = m_diffusion_params.diffusion_maximum;
-    rhs.enum_mapping([&d2, diffusion_maximum, diffCoeffSafe](const int &ivar,
-                                                             data_t &rhs_var) {
-        d2.enum_mapping([&rhs_var, ivar, diffusion_maximum, diffCoeffSafe](
-                            const int &jvar, const Tensor<2, data_t> &d2_var) {
-            if (ivar == jvar)
-            {
-                data_t space_laplace = 0.;
-                FOR(k) { space_laplace += d2_var[k][k]; }
+    data_t space_laplace_lapse = 0.;
+    data_t space_laplace_chi = 0.;
+    Tensor<1, data_t> space_laplace_shift = {0.};
+    Tensor<2, data_t> space_laplace_h = {0.};
 
-                FOR(i, j)
-                {
-                    rhs_var +=
-                        simd_max(-diffusion_maximum,
-                                 simd_min(diffusion_maximum,
-                                          diffCoeffSafe * space_laplace));
-                }
-            }
-        });
-    });
+    FOR(k)
+    {
+        space_laplace_lapse += d2.lapse[k][k];
+        space_laplace_chi += d2.chi[k][k];
+
+        FOR(i)
+        {
+            space_laplace_shift[i] += d2.shift[i][k][k];
+            FOR(j) { space_laplace_h[i][j] += d2.h[i][j][k][k]; }
+        }
+    }
+
+    data_t tr_space_laplace_h = 0.;
+    FOR(i, j) { tr_space_laplace_h += h_UU[i][j] * space_laplace_h[i][j]; }
+
+    rhs.lapse += diffCoeffSafe * space_laplace_lapse;
+    rhs.chi += diffCoeffSafe * space_laplace_chi;
+
+    FOR(i)
+    {
+        rhs.shift[i] += diffCoeffSafe * space_laplace_shift[i];
+        FOR(j)
+        {
+            rhs.h[i][j] += diffCoeffSafe *
+                           (space_laplace_h[i][j] -
+                            tr_space_laplace_h * vars.h[i][j] / GR_SPACEDIM);
+        }
+    }
+
+    return diffCoeffSafe;
 }
 
 #endif /* MATTERCCZ4RHSWITHDIFFUSION_IMPL_HPP_ */

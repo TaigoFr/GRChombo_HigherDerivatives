@@ -59,6 +59,7 @@ vars_parity_diagnostic = 0 0              #Ham and Mom
                          0 0              #Eij and Bij diffs
                          0 0 0            #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC
                          0 0 0 0          #NCC x 4
+                         0 0              #rhs chi and diffusion chi
 
 # if sommerfeld boundaries selected, must select
 # non zero asymptotic values
@@ -77,8 +78,8 @@ extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33
 # HDF5files are written every dt = L/N*dt_multiplier*checkpoint_interval
 checkpoint_interval = 0
 plot_interval = 1
-num_plot_vars = 14
-plot_vars = chi lapse shift1 Ham Mom E_diff B_diff WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus
+num_plot_vars = 17
+plot_vars = chi lapse shift1 Ham Mom E_diff B_diff WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus rhs_chi diffusion_chi det_h
 dt_multiplier = 0.25
 stop_time = 20.0
 #max_steps = 1
@@ -151,4 +152,3 @@ AH_write_vars = chi WeakFieldVar WeakFieldCondition
 diffCFLFact = 1E20
 lapidusCoeff = 0.00
 lapidusPower = 1.0
-diffusion_maximum = 1e20

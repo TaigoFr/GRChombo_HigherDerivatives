@@ -78,6 +78,14 @@ template <class System> class C2EFT
         const data_t &emtensor,
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
+    template <class data_t, template <typename> class vars_t,
+              template <typename> class diff2_vars_t, class gauge_t>
+    void add_diffusion_terms(
+        vars_t<data_t> &rhs, //!< Reference to the variables into which the
+                             //! output right hand side is written
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+        data_t diffCoeffSafe) const;
+
   private:
     System m_system;
     params_t m_params;

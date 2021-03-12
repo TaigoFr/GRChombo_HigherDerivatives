@@ -280,4 +280,44 @@ void EBSystem::add_matter_rhs(
     }
 }
 
+template <class data_t, template <typename> class vars_t,
+          template <typename> class diff2_vars_t, class gauge_t>
+void EBSystem::add_diffusion_terms(
+    vars_t<data_t> &rhs, //!< Reference to the variables into which the
+                         //! output right hand side is written
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    data_t diffCoeffSafe) const
+{
+    const auto &vars = gq.get_vars();
+    const auto &d2 = gq.get_d2_vars();
+    const auto &h_UU = gq.get_h_UU();
+
+    Tensor<2, data_t> space_laplace_Eij = {0.};
+    Tensor<2, data_t> space_laplace_Bij = {0.};
+
+    FOR(i, j, k)
+    {
+        space_laplace_Eij[i][j] += d2.Eij[i][j][k][k];
+        space_laplace_Bij[i][j] += d2.Bij[i][j][k][k];
+    }
+
+    data_t tr_space_laplace_Eij = 0.;
+    data_t tr_space_laplace_Bij = 0.;
+    FOR(i, j)
+    {
+        tr_space_laplace_Eij += h_UU[i][j] * space_laplace_Eij[i][j];
+        tr_space_laplace_Bij += h_UU[i][j] * space_laplace_Bij[i][j];
+    }
+
+    FOR(i, j)
+    {
+        rhs.Eij[i][j] +=
+            diffCoeffSafe * (space_laplace_Eij[i][j] -
+                             tr_space_laplace_Eij * vars.h[i][j] / GR_SPACEDIM);
+        rhs.Bij[i][j] +=
+            diffCoeffSafe * (space_laplace_Bij[i][j] -
+                             tr_space_laplace_Bij * vars.h[i][j] / GR_SPACEDIM);
+    }
+}
+
 #endif /* EBSYSTEM_IMPL_HPP_ */

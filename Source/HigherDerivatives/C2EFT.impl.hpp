@@ -183,4 +183,17 @@ data_t C2EFT<System>::weak_field_condition(
     return weak_field_condition;
 }
 
+template <class System>
+template <class data_t, template <typename> class vars_t,
+          template <typename> class diff2_vars_t, class gauge_t>
+void C2EFT<System>::add_diffusion_terms(
+    vars_t<data_t> &rhs,
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    data_t diffCoeffSafe) const
+{
+    m_system
+        .template add_diffusion_terms<data_t, vars_t, diff2_vars_t, gauge_t>(
+            rhs, gq, diffCoeffSafe);
+}
+
 #endif /* C2EFT_IMPL_HPP_ */

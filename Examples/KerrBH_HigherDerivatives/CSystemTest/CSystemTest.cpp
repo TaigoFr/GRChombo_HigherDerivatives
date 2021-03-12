@@ -145,8 +145,9 @@ int runTest(int argc, char *argv[])
     gq.set_advection_and_gauge(advec, gauge);
 
     // make EM Tensor
+    bool apply_weak_field = false;
     CSystem Csystem(c_params);
-    C2EFT<CSystem> c2eft(Csystem, hd_params, false);
+    C2EFT<CSystem> c2eft(Csystem, hd_params, apply_weak_field);
     const auto em_tensor_def = c2eft.compute_emtensor(gq);
 
     //////////////////////////////////////////////////////////////////

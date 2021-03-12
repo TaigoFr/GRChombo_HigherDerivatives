@@ -15,7 +15,6 @@ struct diffusion_params_t
     double lapidusPower; //!< Lapidus power
     double chiCutoff;    //!< Cut off for diffusion terms
     double chiCutoff_width;
-    double diffusion_maximum;
 };
 
 template <class matter_t, class gauge_t = MovingPunctureGauge,
@@ -53,14 +52,12 @@ class MatterCCZ4RHSWithDiffusion
     diffusion_params_t m_diffusion_params;
     double m_dt;
 
-    /// Adds diffusion terms to the rhs of the GHC equations
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t>
-    void add_diffusion_terms(
+    data_t add_diffusion_terms(
         vars_t<data_t> &rhs, //!< Reference to the variables into which the
                              //! output right hand side is written
-        const vars_t<data_t> &vars, const vars_t<Tensor<1, data_t>> &d1,
-        diff2_vars_t<Tensor<2, data_t>> &d2) const;
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
     // output is <10^{-k} for x>t(1+k+w) and >1-10^{-k} for x<t(1-k*w)
     template <class data_t>

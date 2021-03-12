@@ -168,4 +168,3 @@ AH_write_vars = chi WeakFieldVar WeakFieldCondition
 diffCFLFact = 1E20
 lapidusCoeff = 0.00
 lapidusPower = 1.0
-diffusion_maximum = 1e20

@@ -99,4 +99,20 @@ void CSystem::add_matter_rhs(
     // }
 }
 
+template <class data_t, template <typename> class vars_t,
+          template <typename> class diff2_vars_t, class gauge_t>
+void CSystem::add_diffusion_terms(
+    vars_t<data_t> &rhs, //!< Reference to the variables into which the
+                         //! output right hand side is written
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    data_t diffCoeffSafe) const
+{
+    const auto &d2 = gq.get_d2_vars();
+
+    data_t space_laplace_C = 0.;
+    FOR(k) { space_laplace_C += d2.C[k][k]; }
+
+    rhs.C += diffCoeffSafe * space_laplace_C;
+}
+
 #endif /* CSYSTEM_IMPL_HPP_ */

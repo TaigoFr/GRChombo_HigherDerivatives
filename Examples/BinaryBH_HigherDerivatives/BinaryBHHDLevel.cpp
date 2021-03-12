@@ -34,6 +34,7 @@
 
 // Problem specific includes
 #include "C2EFT.hpp"
+// #include "DiffusionDiagnostic.hpp"
 #include "NCCDiagnostic.hpp"
 #include "WeakFieldConditionDiagnostic.hpp"
 
@@ -91,7 +92,8 @@ void BinaryBHHDLevel::initialData()
 
 #ifdef USE_AHFINDER
     // Diagnostics needed for AHFinder
-    computeDiagnostics();
+    if (m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
+        computeDiagnostics();
 #endif
 }
 
@@ -100,7 +102,8 @@ void BinaryBHHDLevel::prePlotLevel()
 {
 #ifdef USE_AHFINDER
     // already calculated in 'specificPostTimeStep' or in 'initialData'
-    if (m_time == 0. || m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
+    if ((m_time == 0. && m_p.AH_activate) ||
+        m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
         return;
 #endif
 
@@ -130,6 +133,9 @@ void BinaryBHHDLevel::computeDiagnostics()
     NCCDiagnostic<System> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
                               m_p.center, m_p.G_Newton, c_NCC_plus, c_NCC_minus,
                               c_NCC_Z4_plus, c_NCC_Z4_minus);
+    // DiffusionDiagnostic<C2EFT<System>> diffusion(
+    //     c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, m_p.sigma,
+    //     m_p.formulation, m_p.G_Newton, c_diffusion_h11, c_rhs_h11);
 
 #ifdef USE_EBSYSTEM
     BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
@@ -138,8 +144,9 @@ void BinaryBHHDLevel::computeDiagnostics()
                    m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 #endif
 
-    BoxLoops::loop(make_compute_pack(constraints, diff, weakField, ncc),
-                   m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(
+        make_compute_pack(constraints, diff, weakField, ncc /*, diffusion*/),
+        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do in RHS update, at each RK4 step

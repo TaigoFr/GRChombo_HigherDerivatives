@@ -28,6 +28,10 @@ enum
     c_NCC_Z4_plus,
     c_NCC_Z4_minus,
 
+    c_rhs_chi,
+    c_diffusion_chi,
+    c_det_h,
+
     NUM_DIAGNOSTIC_VARS
 };
 
@@ -51,7 +55,11 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "NCC_plus",
     "NCC_minus",
     "NCC_Z4_plus",
-    "NCC_Z4_minus"};
+    "NCC_Z4_minus",
+
+    "rhs_chi",
+    "diffusion_chi",
+    "det_h"};
 } // namespace DiagnosticVariables
 
 #endif /* DIAGNOSTICVARIABLES_HPP */
