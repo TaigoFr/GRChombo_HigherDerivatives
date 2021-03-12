@@ -6,7 +6,6 @@
 #ifndef CCZ4_HPP_
 #define CCZ4_HPP_
 
-#include "CCZ4Geometry.hpp"
 #include "CCZ4Vars.hpp"
 #include "Cell.hpp"
 #include "FourthOrderDerivatives.hpp"
@@ -87,27 +86,6 @@ class CCZ4
      * cell; there should rarely be a need to call it directly.
      */
     template <class data_t> void compute(Cell<data_t> current_cell) const;
-
-  protected:
-    /// Calculates the rhs for CCZ4
-    /** Calculates the right hand side for CCZ4 with slicing \f$- n \alpha^m (K
-     *- 2\Theta)\f$ and Gamma-Driver shift condition. The variables (the
-     *template argument vars_t) must contain at least the members: chi,
-     *h[i][j], Gamma[i], A[i][j], Theta, lapse and shift[i].
-     **/
-    template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t>
-    void rhs_equation(
-        vars_t<data_t> &rhs, //!< Reference to the variables into which the
-                             //! output right hand side is written
-        const vars_t<data_t> &vars, //!< The values of the current variables
-        const vars_t<Tensor<1, data_t>>
-            &d1, //!< First derivative of the variables
-        const diff2_vars_t<Tensor<2, data_t>>
-            &d2, //!< The second derivative the variables
-        const vars_t<data_t>
-            &advec //!< The advection derivatives of the variables
-    ) const;
 };
 
 #include "CCZ4.impl.hpp"

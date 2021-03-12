@@ -93,16 +93,6 @@ class Weyl4
     Tetrad_t<data_t>
     compute_null_tetrad(const Vars<data_t> &vars,
                         const Coordinates<data_t> &coords) const;
-
-    //! Calulation of the decomposition of the Weyl tensor in Electric and
-    //! Magnetic fields
-    template <class data_t>
-    EBFields_t<data_t>
-    compute_EB_fields(const Tensor<3, data_t> &epsilon3_LUU,
-                      const Vars<data_t> &vars,
-                      const Vars<Tensor<1, data_t>> &d1,
-                      const Diff2Vars<Tensor<2, data_t>> &d2,
-                      const Coordinates<data_t> &coords) const;
 };
 
 #include "Weyl4.impl.hpp"

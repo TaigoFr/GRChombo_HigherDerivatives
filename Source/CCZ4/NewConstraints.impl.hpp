@@ -31,12 +31,12 @@ void Constraints::compute(Cell<data_t> current_cell) const
 {
     const auto vars = current_cell.template load_vars<MetricVars>();
     const auto d1 = m_deriv.template diff1<MetricVars>(current_cell);
-    const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
+    const auto d2 = m_deriv.template diff2<Diff2MetricVars>(current_cell);
 
-    const auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
-    const auto chris = TensorAlgebra::compute_christoffel(d1.h, h_UU);
+    GeometricQuantities<data_t, Vars, Diff2MetricVars> gq(vars, d1, d2);
+    gq.set_cosmological_constant(m_cosmological_constant);
 
-    Vars<data_t> out = constraint_equations(vars, d1, d2, h_UU, chris);
+    Vars<data_t> out = constraint_equations(gq);
 
     store_vars(out, current_cell);
 }
@@ -44,19 +44,21 @@ void Constraints::compute(Cell<data_t> current_cell) const
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t>
 Constraints::Vars<data_t> Constraints::constraint_equations(
-    const vars_t<data_t> &vars, const vars_t<Tensor<1, data_t>> &d1,
-    const diff2_vars_t<Tensor<2, data_t>> &d2, const Tensor<2, data_t> &h_UU,
-    const chris_t<data_t> &chris) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
 {
     Vars<data_t> out;
 
+    const auto &vars = gq.get_vars();
+    const auto &d1 = gq.get_d1_vars();
+
     if (m_c_Ham >= 0 || m_c_Ham_abs_terms >= 0)
     {
-        auto ricci = CCZ4Geometry::compute_ricci(vars, d1, d2, h_UU, chris);
+        auto ricci = gq.get_ricci();
 
-        auto A_UU = TensorAlgebra::raise_all(vars.A, h_UU);
-        data_t tr_A2 = TensorAlgebra::compute_trace(vars.A, A_UU);
+        auto A_UU = gq.get_A_UU();
+        data_t tr_A2 = gq.get_tr_A2();
 
+        // out.Ham = gq.get_hamiltonian_constraint();
         out.Ham = ricci.scalar +
                   (GR_SPACEDIM - 1.) * vars.K * vars.K / GR_SPACEDIM - tr_A2;
         out.Ham -= 2 * m_cosmological_constant;
@@ -69,29 +71,25 @@ Constraints::Vars<data_t> Constraints::constraint_equations(
 
     if (m_c_Moms.size() > 0 || m_c_Moms_abs_terms.size() > 0)
     {
-        Tensor<2, data_t> covd_A[CH_SPACEDIM];
-        FOR3(i, j, k)
-        {
-            covd_A[i][j][k] = d1.A[j][k][i];
-            FOR1(l)
-            {
-                covd_A[i][j][k] += -chris.ULL[l][i][j] * vars.A[l][k] -
-                                   chris.ULL[l][i][k] * vars.A[l][j];
-            }
-        }
+        Tensor<3, data_t> covd_A = TensorAlgebra::covariant_derivative(
+            d1.A, vars.A, gq.get_chris().ULL);
         FOR1(i)
         {
             out.Mom[i] = -(GR_SPACEDIM - 1.) * d1.K[i] / GR_SPACEDIM;
             out.Mom_abs_terms[i] = abs(out.Mom[i]);
         }
-        Tensor<1, data_t> covd_A_term = 0.0;
-        Tensor<1, data_t> d1_chi_term = 0.0;
+        Tensor<1, data_t> covd_A_term = 0.;
+        Tensor<1, data_t> d1_chi_term = 0.;
         const data_t chi_regularised = simd_max(1e-6, vars.chi);
-        FOR3(i, j, k)
+
+        const auto &h_UU = gq.get_h_UU();
+        const auto &A_LU = gq.get_A_LU();
+        FOR2(i, j)
         {
-            covd_A_term[i] += h_UU[j][k] * covd_A[k][j][i];
-            d1_chi_term[i] += -GR_SPACEDIM * h_UU[j][k] * vars.A[i][j] *
-                              d1.chi[k] / (2 * chi_regularised);
+            FOR1(k) { covd_A_term[i] += h_UU[j][k] * covd_A[i][j][k]; }
+
+            d1_chi_term[i] +=
+                -GR_SPACEDIM * A_LU[i][j] * d1.chi[j] / (2 * chi_regularised);
         }
         FOR1(i)
         {

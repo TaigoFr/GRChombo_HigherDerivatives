@@ -12,15 +12,18 @@
 
 // Calculate the stress energy tensor elements
 template <class potential_t>
-template <class data_t, template <typename> class vars_t>
+template <class data_t, template <typename> class vars_t,
+          template <typename> class diff2_vars_t>
 emtensor_t<data_t> ScalarField<potential_t>::compute_emtensor(
-    const vars_t<data_t> &vars, const vars_t<Tensor<1, data_t>> &d1,
-    const Tensor<2, data_t> &h_UU, const Tensor<3, data_t> &chris_ULL) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
 {
     emtensor_t<data_t> out;
 
+    const auto &vars = gq.get_vars();
+
     // call the function which computes the em tensor excluding the potential
-    emtensor_excl_potential(out, vars, d1, h_UU, chris_ULL);
+    emtensor_excl_potential(out, vars, gq.get_d1_vars().phi,
+                            gq.get_h_UU(), gq.get_chris().ULL);
 
     // set the potential values
     data_t V_of_phi = 0.0;
@@ -72,14 +75,17 @@ template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t,
           template <typename> class rhs_vars_t>
 void ScalarField<potential_t>::add_matter_rhs(
-    rhs_vars_t<data_t> &total_rhs, const vars_t<data_t> &vars,
-    const vars_t<Tensor<1, data_t>> &d1,
-    const diff2_vars_t<Tensor<2, data_t>> &d2,
-    const vars_t<data_t> &advec) const
+    rhs_vars_t<data_t> &total_rhs,
+    GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
 {
     // first get the non potential part of the rhs
     // this may seem a bit long winded, but it makes the function
     // work for more multiple fields
+
+    const auto &vars = gq.get_vars();
+    const auto &d1 = gq.get_d1_vars();
+    const auto &d2 = gq.get_d2_vars();
+    const auto &advec = gq.get_advection();
 
     // call the function for the rhs excluding the potential
     matter_rhs_excl_potential(total_rhs, vars, d1, d2, advec);

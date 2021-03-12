@@ -15,7 +15,7 @@
 #include "Tensor.hpp"
 #include "simd.hpp"
 
-#include "CCZ4Geometry.hpp"
+#include "GeometricQuantities.hpp"
 
 #include <array>
 
@@ -27,7 +27,7 @@ class Constraints
 
     /// CCZ4 variables
     template <class data_t>
-    using Diff2Vars = BSSNVars::Diff2VarsNoGauge<data_t>;
+    using Diff2MetricVars = BSSNVars::Diff2VarsNoGauge<data_t>;
 
     /// Vars object for Constraints
     template <class data_t> struct Vars
@@ -62,11 +62,8 @@ class Constraints
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t>
-    Vars<data_t> constraint_equations(const vars_t<data_t> &vars,
-                                      const vars_t<Tensor<1, data_t>> &d1,
-                                      const diff2_vars_t<Tensor<2, data_t>> &d2,
-                                      const Tensor<2, data_t> &h_UU,
-                                      const chris_t<data_t> &chris) const;
+    Vars<data_t> constraint_equations(
+        GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const;
 
     template <class data_t>
     void store_vars(Vars<data_t> &out, Cell<data_t> &current_cell) const;

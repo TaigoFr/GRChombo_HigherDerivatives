@@ -38,14 +38,6 @@ template <class matter_t> class MatterWeyl4 : public Weyl4
   protected:
     const matter_t &m_matter; //!< The matter object, e.g. a scalar field
     const double m_G_Newton;  //!< Newton's constant, set to one by default
-
-    //! Add matter terms to electric and magnetic parts
-    template <class data_t>
-    void add_matter_EB(EBFields_t<data_t> &eb_fields,
-                       const Tensor<3, data_t> &epsilon3_LUU,
-                       const Vars<data_t> &vars,
-                       const Vars<Tensor<1, data_t>> &d1,
-                       const Coordinates<data_t> &coords) const;
 };
 
 #include "MatterWeyl4.impl.hpp"

@@ -6,6 +6,22 @@
 #ifndef GEOMETRICQUANTITIES_HPP_
 #define GEOMETRICQUANTITIES_HPP_
 
+//! A structure for the decomposed elements of the Energy Momentum Tensor in
+//! 3+1D
+template <class data_t, int size = CH_SPACEDIM> struct emtensor_t
+{
+    Tensor<2, data_t, size> Sij; //!< S_ij = T_ij
+    Tensor<1, data_t, size> Si;  //!< S_i = T_ia_n^a
+    data_t S;                    //!< S = S^i_i
+    data_t rho;                  //!< rho = T_ab n^a n^b
+};
+
+template <class data_t, int size = CH_SPACEDIM> struct ricci_t
+{
+    Tensor<2, data_t, size> LL; // Ricci with two indices down
+    data_t scalar;              // Ricci scalar
+};
+
 #include "CCZ4.hpp" // need 'formulations'
 
 //!  Calculates the several spatial and spacetime geometric quantities
@@ -77,6 +93,9 @@ class GeometricQuantities
     const Tensor<2, data_t> &get_d1_chris_contracted();
     const Tensor<2, data_t> &get_covd_chi_conformal();
     const Tensor<4, data_t> &get_riemann_conformal_LLLL();
+    const Tensor<2, data_t> &get_A_LU();
+    const Tensor<2, data_t> &get_A_UU();
+    const data_t &get_tr_A2();
 
     // spatial non-conformal
     const Tensor<1, data_t> &get_shift_L();
@@ -89,7 +108,8 @@ class GeometricQuantities
     const Tensor<2, data_t> &get_covd_Z();
     const Tensor<3, data_t> &get_d1_extrinsic_curvature();
     const Tensor<3, data_t> &get_covd_extrinsic_curvature();
-    const Tensor<3, data_t> &get_levi_civita_spatial(); // LLL
+    const Tensor<3, data_t> &get_levi_civita_spatial();     // LLL
+    const Tensor<3, data_t> &get_levi_civita_spatial_LUU(); // LUU
     const Tensor<2, data_t> &get_covd_lapse();
     const ricci_t<data_t> &get_ricci_qDZ(int q);
     const ricci_t<data_t> &get_ricci(); // original formula
@@ -192,6 +212,9 @@ class GeometricQuantities
     const Tensor<2, data_t> *m_d1_chris_contracted;
     const Tensor<2, data_t> *m_covd_chi_conformal;
     const Tensor<4, data_t> *m_riemann_conformal_LLLL;
+    const Tensor<2, data_t> *m_A_LU;
+    const Tensor<2, data_t> *m_A_UU;
+    const data_t *m_tr_A2;
 
     // spatial non-conformal
     const Tensor<2, data_t> *m_metric_spatial;
@@ -208,6 +231,7 @@ class GeometricQuantities
     const Tensor<3, data_t> *m_d1_extrinsic_curvature;
     const Tensor<3, data_t> *m_covd_extrinsic_curvature;
     const Tensor<3, data_t> *m_levi_civita_spatial;
+    const Tensor<3, data_t> *m_levi_civita_spatial_LUU;
     const Tensor<2, data_t> *m_weyl_magnetic_part;
     const Tensor<4, data_t> *m_riemann_spatial_LLLL;
     const Tensor<4, data_t> *m_gauss_codazzi;
@@ -275,6 +299,9 @@ class GeometricQuantities
     void compute_d1_chris_contracted();
     void compute_covd_chi_conformal();
     void compute_riemann_conformal_LLLL();
+    void compute_A_LU();
+    void compute_A_UU();
+    void compute_tr_A2();
 
     // spatial non-conformal
     void compute_metric_spatial();
@@ -292,6 +319,7 @@ class GeometricQuantities
     void compute_d1_extrinsic_curvature();
     void compute_covd_extrinsic_curvature();
     void compute_levi_civita_spatial();
+    void compute_levi_civita_spatial_LUU();
     void compute_weyl_magnetic_part();
     void compute_riemann_spatial_LLLL();
     void compute_gauss_codazzi();

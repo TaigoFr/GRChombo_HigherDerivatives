@@ -6,7 +6,6 @@
 #ifndef SCALARFIELD_HPP_
 #define SCALARFIELD_HPP_
 
-#include "CCZ4Geometry.hpp"
 #include "DefaultPotential.hpp"
 #include "DimensionDefinitions.hpp"
 #include "FourthOrderDerivatives.hpp"
@@ -14,6 +13,8 @@
 #include "TensorAlgebra.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS, total num of components
 #include "VarsTools.hpp"
+
+#include "GeometricQuantities.hpp"
 
 //!  Calculates the matter type specific elements such as the EMTensor and
 //   matter evolution
@@ -72,12 +73,10 @@ template <class potential_t = DefaultPotential> class ScalarField
 
     //! The function which calculates the EM Tensor, given the vars and
     //! derivatives, including the potential
-    template <class data_t, template <typename> class vars_t>
-    emtensor_t<data_t> compute_emtensor(
-        const vars_t<data_t> &vars,          //!< the value of the variables
-        const vars_t<Tensor<1, data_t>> &d1, //!< the value of the 1st derivs
-        const Tensor<2, data_t> &h_UU, //!< the inverse metric (raised indices)
-        const Tensor<3, data_t> &chris_ULL)
+    template <class data_t, template <typename> class vars_t,
+              template <typename> class diff2_vars_t>
+    emtensor_t<data_t>
+    compute_emtensor(GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq)
         const; //!< the conformal christoffel symbol
 
     //! The function which calculates the EM Tensor, given the vars and
@@ -97,11 +96,8 @@ template <class potential_t = DefaultPotential> class ScalarField
               template <typename> class diff2_vars_t,
               template <typename> class rhs_vars_t>
     void add_matter_rhs(
-        rhs_vars_t<data_t> &total_rhs,       //!< value of the RHS for all vars
-        const vars_t<data_t> &vars,          //!< value of the variables
-        const vars_t<Tensor<1, data_t>> &d1, //!< value of the 1st derivs
-        const diff2_vars_t<Tensor<2, data_t>> &d2, //!< value of the 2nd derivs
-        const vars_t<data_t> &advec)
+        rhs_vars_t<data_t> &total_rhs, //!< value of the RHS for all vars
+        GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq)
         const; //!< the value of the advection terms
 
     //! The function which calculates the RHS for the matter field vars

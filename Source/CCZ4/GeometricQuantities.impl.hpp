@@ -46,6 +46,9 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_d1_chris_contracted = nullptr;
     m_covd_chi_conformal = nullptr;
     m_riemann_conformal_LLLL = nullptr;
+    m_A_LU = nullptr;
+    m_A_UU = nullptr;
+    m_tr_A2 = nullptr;
 
     m_metric_spatial = nullptr;
     m_metric_UU_spatial = nullptr;
@@ -58,6 +61,7 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_d1_extrinsic_curvature = nullptr;
     m_covd_extrinsic_curvature = nullptr;
     m_levi_civita_spatial = nullptr;
+    m_levi_civita_spatial_LUU = nullptr;
     m_covd_lapse = nullptr;
     m_ricci = nullptr;
     m_ricci_1DZ = nullptr;
@@ -144,6 +148,21 @@ template_GQ void GeometricQuantities_t::clean()
         delete m_riemann_conformal_LLLL;
         m_riemann_conformal_LLLL = nullptr;
     }
+    if (m_A_LU != nullptr)
+    {
+        delete m_A_LU;
+        m_A_LU = nullptr;
+    }
+    if (m_A_UU != nullptr)
+    {
+        delete m_A_UU;
+        m_A_UU = nullptr;
+    }
+    if (m_tr_A2 != nullptr)
+    {
+        delete m_tr_A2;
+        m_tr_A2 = nullptr;
+    }
 
     if (m_metric_spatial != nullptr)
     {
@@ -199,6 +218,11 @@ template_GQ void GeometricQuantities_t::clean()
     {
         delete m_levi_civita_spatial;
         m_levi_civita_spatial = nullptr;
+    }
+    if (m_levi_civita_spatial_LUU != nullptr)
+    {
+        delete m_levi_civita_spatial_LUU;
+        m_levi_civita_spatial_LUU = nullptr;
     }
     if (m_covd_lapse != nullptr)
     {
@@ -596,6 +620,24 @@ GeometricQuantities_t::get_riemann_conformal_LLLL()
         compute_riemann_conformal_LLLL();
     return *m_riemann_conformal_LLLL;
 }
+template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_A_LU()
+{
+    if (m_A_LU == nullptr)
+        compute_A_LU();
+    return *m_A_LU;
+}
+template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_A_UU()
+{
+    if (m_A_UU == nullptr)
+        compute_A_UU();
+    return *m_A_UU;
+}
+template_GQ const data_t &GeometricQuantities_t::get_tr_A2()
+{
+    if (m_tr_A2 == nullptr)
+        compute_tr_A2();
+    return *m_tr_A2;
+}
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_metric_spatial()
 {
@@ -671,6 +713,14 @@ GeometricQuantities_t::get_levi_civita_spatial()
     if (m_levi_civita_spatial == nullptr)
         compute_levi_civita_spatial();
     return *m_levi_civita_spatial;
+}
+template_GQ const Tensor<3, data_t> &
+GeometricQuantities_t::get_levi_civita_spatial_LUU()
+{
+    CH_assert(GR_SPACEDIM == 3);
+    if (m_levi_civita_spatial_LUU == nullptr)
+        compute_levi_civita_spatial_LUU();
+    return *m_levi_civita_spatial_LUU;
 }
 template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_covd_lapse()
 {
@@ -1136,6 +1186,31 @@ template_GQ void GeometricQuantities_t::compute_riemann_conformal_LLLL()
     m_riemann_conformal_LLLL =
         new const Tensor<4, data_t>(riemann_conformal_LLLL);
 }
+template_GQ void GeometricQuantities_t::compute_A_LU()
+{
+    if (m_A_LU != nullptr)
+        delete m_A_LU;
+
+    m_A_LU = new Tensor<2, data_t>(
+        TensorAlgebra::compute_dot_product(get_vars().A, get_h_UU()));
+}
+template_GQ void GeometricQuantities_t::compute_A_UU()
+{
+    if (m_A_UU != nullptr)
+        delete m_A_UU;
+
+    m_A_UU = new Tensor<2, data_t>(
+        TensorAlgebra::compute_dot_product(get_A_LU(), get_h_UU(), 0, 0));
+}
+template_GQ void GeometricQuantities_t::compute_tr_A2()
+{
+    if (m_tr_A2 != nullptr)
+        delete m_tr_A2;
+
+    // A^{ij} A_{ij}. - Note the abuse of the compute trace function.
+    m_tr_A2 =
+        new data_t(TensorAlgebra::compute_trace(get_vars().A, get_A_UU()));
+}
 //////////////////////////////////////////////////////////////////////////
 template_GQ void GeometricQuantities_t::compute_metric_spatial()
 {
@@ -1322,6 +1397,28 @@ template_GQ void GeometricQuantities_t::compute_levi_civita_spatial()
 
     m_levi_civita_spatial = new Tensor<3, data_t>(levi_civita_spatial);
 }
+template_GQ void GeometricQuantities_t::compute_levi_civita_spatial_LUU()
+{
+    if (m_levi_civita_spatial_LUU != nullptr)
+        delete m_levi_civita_spatial_LUU;
+
+    Tensor<3, data_t> levi_civita_spatial_LUU = {0.};
+
+    const auto &levi_civita_LLL = get_levi_civita_spatial();
+
+    // rasing indices
+    const auto metric_UU = get_metric_UU_spatial();
+    FOR3(i, j, k)
+    {
+        FOR2(m, n)
+        {
+            levi_civita_spatial_LUU[i][j][k] +=
+                levi_civita_LLL[i][m][n] * metric_UU[m][j] * metric_UU[n][k];
+        }
+    }
+
+    m_levi_civita_spatial_LUU = new Tensor<3, data_t>(levi_civita_spatial_LUU);
+}
 template_GQ void GeometricQuantities_t::compute_covd_lapse()
 {
     if (m_covd_lapse != nullptr)
@@ -1336,6 +1433,8 @@ template_GQ void GeometricQuantities_t::compute_covd_lapse()
 }
 template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
 {
+    CH_TIME("GeometricQuantities_t::compute_ricci_qDZ");
+
     CH_assert(q == 0 || m_formulation >= 0);
     // either q==0 to get the pure Ricci, set BSSN or CCZ4 (for
     // example for q=2 one will get the Ricci with calculated Gammas
@@ -1384,7 +1483,7 @@ template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
         TensorAlgebra::hard_copy(Z_U_q, get_Z_U_conformal());
 
     Tensor<3, data_t> chris_LLU = {0.};
-    FOR4(i, j, k, l) { chris_LLU[i][j][k] += h_UU[k][l] * chris.LLL[i][j][l]; }
+    FOR(i, j, k, l) { chris_LLU[i][j][k] += h_UU[k][l] * chris.LLL[i][j][l]; }
 
     FOR(i, j)
     {
@@ -1468,20 +1567,9 @@ template_GQ void GeometricQuantities_t::compute_weyl_magnetic_part()
     if (m_weyl_magnetic_part != nullptr)
         delete m_weyl_magnetic_part;
 
-    Tensor<3, data_t> levi_civita_spatial_LUU = {0.};
-    const auto &levi_civita_spatial = get_levi_civita_spatial();
-    const auto &h_UU_spatial = get_metric_UU_spatial();
-    FOR(i, j, k)
-    {
-        FOR(m, n)
-        {
-            levi_civita_spatial_LUU[i][j][k] += levi_civita_spatial[i][m][n] *
-                                                h_UU_spatial[m][j] *
-                                                h_UU_spatial[n][k];
-        }
-    }
-
+    const auto &levi_civita_spatial_LUU = get_levi_civita_spatial_LUU();
     const auto &covD_K_tensor = get_covd_extrinsic_curvature();
+
     Tensor<2, data_t> weyl_magnetic_part = {0.};
     FOR4(i, j, k, l)
     {
@@ -1700,9 +1788,8 @@ template_GQ void GeometricQuantities_t::compute_hamiltonian_constraint()
     const auto &h_UU = get_h_UU();
     const auto &ricci = get_ricci();
 
-    const auto A_UU = TensorAlgebra::raise_all(vars.A, h_UU);
-    // A^{ij} A_{ij}. - Note the abuse of the compute trace function.
-    const data_t tr_A2 = TensorAlgebra::compute_trace(vars.A, A_UU);
+    const auto &A_UU = get_A_UU();
+    const data_t &tr_A2 = get_tr_A2();
 
     data_t H = ricci.scalar +
                (GR_SPACEDIM - 1.) * vars.K * vars.K / GR_SPACEDIM - tr_A2;
@@ -1715,6 +1802,8 @@ template_GQ void GeometricQuantities_t::compute_hamiltonian_constraint()
 }
 template_GQ void GeometricQuantities_t::compute_lie_derivatives()
 {
+    CH_TIME("GeometricQuantities::compute_lie_derivatives");
+
     if (m_lie_derivatives != nullptr)
         delete m_lie_derivatives;
 
@@ -1735,6 +1824,7 @@ template_GQ void GeometricQuantities_t::compute_lie_derivatives()
     const auto &d2 = get_d2_vars();
     const auto &h_UU = get_h_UU();
     const auto &chris_spatial = get_chris_spatial();
+    const auto &A_LU = get_A_LU();
 
     const emtensor_t<data_t> *em_tensor_effective = nullptr;
     // if EM-tensor or cosmological constant are set
@@ -1744,8 +1834,6 @@ template_GQ void GeometricQuantities_t::compute_lie_derivatives()
     const ricci_t<data_t> ricci = get_ricci_qDZ(2);
     const Tensor<2, data_t> covd2lapse = get_covd_lapse();
 
-    const Tensor<2, data_t> A_LU =
-        TensorAlgebra::compute_dot_product(vars.A, h_UU);
     const Tensor<2, data_t> Aik_Ajk =
         TensorAlgebra::compute_dot_product(vars.A, A_LU);
     data_t K_minus_2Theta = vars.K;
@@ -1843,8 +1931,8 @@ template_GQ void GeometricQuantities_t::compute_lie_derivatives()
     ///////////////////////////
     // RHS Gamma
 
-    const Tensor<2, data_t> A_UU =
-        TensorAlgebra::compute_dot_product(A_LU, h_UU, 0, 0);
+    const Tensor<2, data_t> &A_UU = get_A_UU();
+
     const Tensor<1, data_t> A_dot_dlapse =
         TensorAlgebra::compute_dot_product(A_UU, d1.lapse);
     // \Gamma^i_^{jk} A^{jk}. - Note the abuse of the compute trace function.
@@ -1962,6 +2050,8 @@ template_GQ void GeometricQuantities_t::compute_eom_double_normal_projection()
 //////////////////////////////////////////////////////////////////////////
 template_GQ void GeometricQuantities_t::compute_rhs_equations()
 {
+    CH_TIME("GeometricQuantities::compute_rhs_equations");
+
     if (m_rhs_equations != nullptr)
         delete m_rhs_equations;
 

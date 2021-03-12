@@ -18,174 +18,22 @@ template <class data_t> void Weyl4::compute(Cell<data_t> current_cell) const
     const auto d1 = m_deriv.template diff1<Vars>(current_cell);
     const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-    // Get the coordinates
-    const Coordinates<data_t> coords(current_cell, m_dx, m_center);
-
-    // Compute the spatial volume element
-    const auto epsilon3_LUU = compute_epsilon3_LUU(vars);
+    GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
+    gq.set_formulation(m_formulation,
+                       CCZ4::params_t() /*params don't matter here*/);
 
     // Compute the E and B fields
-    EBFields_t<data_t> ebfields =
-        compute_EB_fields(epsilon3_LUU, vars, d1, d2, coords);
+    EBFields_t<data_t> ebfields;
+    ebfields.E = gq.get_weyl_electric_part();
+    ebfields.B = gq.get_weyl_magnetic_part();
 
     // work out the Newman Penrose scalar
+    const Coordinates<data_t> coords(current_cell, m_dx, m_center);
     NPScalar_t<data_t> out = compute_Weyl4(ebfields, vars, d1, d2, coords);
 
     // Write the rhs into the output FArrayBox
     current_cell.store_vars(out.Real, c_Weyl4_Re);
     current_cell.store_vars(out.Im, c_Weyl4_Im);
-}
-
-template <class data_t>
-Tensor<3, data_t> Weyl4::compute_epsilon3_LUU(const Vars<data_t> &vars) const
-{
-    // raised normal vector, NB index 3 is time
-    data_t n_U[4];
-    n_U[3] = 1. / vars.lapse;
-    FOR1(i) { n_U[i] = -vars.shift[i] / vars.lapse; }
-
-    // 4D levi civita symbol and 3D levi civita tensor in LLL and LUU form
-    const auto epsilon4 = TensorAlgebra::epsilon4D();
-    Tensor<3, data_t> epsilon3_LLL;
-    Tensor<3, data_t> epsilon3_LUU;
-
-    // Projection of antisymmentric Tensor onto hypersurface - see 8.3.17,
-    // Alcubierre
-    FOR3(i, j, k)
-    {
-        epsilon3_LLL[i][j][k] = 0.0;
-        epsilon3_LUU[i][j][k] = 0.0;
-    }
-    // projection of 4-antisymetric tensor to 3-tensor on hypersurface
-    // note last index contracted as per footnote 86 pg 290 Alcubierre
-    FOR3(i, j, k)
-    {
-        for (int l = 0; l < 4; ++l)
-        {
-            epsilon3_LLL[i][j][k] += n_U[l] * epsilon4[i][j][k][l] *
-                                     vars.lapse * pow(vars.chi, -1.5);
-        }
-    }
-    // rasing indices
-    const auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
-    FOR3(i, j, k)
-    {
-        FOR2(m, n)
-        {
-            epsilon3_LUU[i][j][k] += epsilon3_LLL[i][m][n] * h_UU[m][j] *
-                                     vars.chi * h_UU[n][k] * vars.chi;
-        }
-    }
-
-    return epsilon3_LUU;
-}
-
-// Calculation of E and B fields, using tetrads from gr-qc/0104063
-// BSSN expressions from Alcubierre book
-// CCZ4 expressions calculated by MR and checked with TF see:
-// https://www.overleaf.com/read/tvqjbyhvqqtp
-template <class data_t>
-EBFields_t<data_t> Weyl4::compute_EB_fields(
-    const Tensor<3, data_t> &epsilon3_LUU, const Vars<data_t> &vars,
-    const Vars<Tensor<1, data_t>> &d1, const Diff2Vars<Tensor<2, data_t>> &d2,
-    const Coordinates<data_t> &coords) const
-{
-    EBFields_t<data_t> out;
-
-    // Extrinsic curvature
-    Tensor<2, data_t> K_tensor;
-    Tensor<3, data_t> d1_K_tensor;
-    Tensor<3, data_t> covariant_deriv_K_tensor;
-
-    // Compute inverse, Christoffel symbols, Ricci tensor and Z terms
-    // Note that unlike in CCZ4 equations we want R_ij + 0.5(D_iZ_j + D_jZ_i)
-    // rather than R_ij + D_iZ_j + D_jZ_i so take the mean of R_ij and
-    // R_ij + D_iZ_j + D_jZ_i
-    using namespace TensorAlgebra;
-    const auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
-    const auto chris = compute_christoffel(d1.h, h_UU);
-    const auto ricci = CCZ4Geometry::compute_ricci(vars, d1, d2, h_UU, chris);
-    auto ricci_Z = ricci; // BSSN case will keep it like this
-    if (m_formulation == CCZ4::USE_CCZ4)
-    {
-        Tensor<1, data_t> Z_over_chi;
-        FOR1(i) Z_over_chi[i] = 0.5 * (vars.Gamma[i] - chris.contracted[i]);
-        ricci_Z = CCZ4Geometry::compute_ricci_Z(vars, d1, d2, h_UU, chris,
-                                                Z_over_chi);
-    }
-    ricci_t<data_t> ricci_and_Z_terms;
-    FOR2(i, j)
-    {
-        ricci_and_Z_terms.LL[i][j] = 0.5 * (ricci.LL[i][j] + ricci_Z.LL[i][j]);
-    }
-    // don't need ricci scalar so don't bother calculating it
-
-    // Compute full spatial Christoffel symbols
-    const Tensor<3, data_t> chris_phys =
-        compute_phys_chris(d1.chi, vars.chi, vars.h, h_UU, chris.ULL);
-
-    // Extrinsic curvature and corresponding covariant and partial derivatives
-    FOR2(i, j)
-    {
-        K_tensor[i][j] = vars.A[i][j] / vars.chi +
-                         1. / 3. * (vars.h[i][j] * vars.K) / vars.chi;
-
-        FOR1(k)
-        {
-            d1_K_tensor[i][j][k] = d1.A[i][j][k] / vars.chi -
-                                   d1.chi[k] / vars.chi * K_tensor[i][j] +
-                                   1. / 3. * d1.h[i][j][k] * vars.K / vars.chi +
-                                   1. / 3. * vars.h[i][j] * d1.K[k] / vars.chi;
-        }
-    }
-    // covariant derivative of K
-    FOR3(i, j, k) { covariant_deriv_K_tensor[i][j][k] = d1_K_tensor[i][j][k]; }
-
-    FOR4(i, j, k, l)
-    {
-        covariant_deriv_K_tensor[i][j][k] +=
-            -chris_phys[l][k][i] * K_tensor[l][j] -
-            chris_phys[l][k][j] * K_tensor[i][l];
-    }
-
-    // Calculate electric and magnetic fields
-    FOR2(i, j)
-    {
-        out.E[i][j] = 0.0;
-        out.B[i][j] = 0.0;
-    }
-
-    FOR4(i, j, k, l)
-    {
-        out.B[i][j] +=
-            epsilon3_LUU[i][k][l] * covariant_deriv_K_tensor[l][j][k];
-    }
-
-    FOR2(i, j)
-    {
-        out.E[i][j] += ricci_and_Z_terms.LL[i][j] + vars.K * K_tensor[i][j];
-    }
-
-    FOR4(i, j, k, l)
-    {
-        out.E[i][j] += -K_tensor[i][k] * K_tensor[l][j] * h_UU[k][l] * vars.chi;
-    }
-
-    if (m_formulation == CCZ4::USE_CCZ4)
-    {
-        // In CCZ4 case do explicit symmetrization; BSSN case relies on momentum
-        // constraint satisfaction instead
-        TensorAlgebra::make_symmetric(out.B);
-
-        FOR2(i, j) { out.E[i][j] += -vars.Theta * K_tensor[i][j]; }
-
-        // The expression in CCZ4 is explicitly trace-free but in BSSN it's only
-        // trace-free if the Hamiltonian constraint is satisfied...
-        // Let's keep this CCZ4 only to avoid breaking the test
-        TensorAlgebra::make_trace_free(out.E, vars.h, h_UU);
-    }
-
-    return out;
 }
 
 // Calculation of the Weyl4 scalar

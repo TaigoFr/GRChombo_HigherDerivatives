@@ -27,19 +27,19 @@ template <class data_t>
 void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
 {
     // Load local vars and calculate derivs
-    const auto vars = current_cell.template load_vars<BSSNMatterVars>();
-    const auto d1 = m_deriv.template diff1<BSSNMatterVars>(current_cell);
-    const auto d2 = m_deriv.template diff2<BSSNMatterVars>(current_cell);
+    const auto vars = current_cell.template load_vars<MatterMetricVars>();
+    const auto d1 = m_deriv.template diff1<MatterMetricVars>(current_cell);
+    const auto d2 = m_deriv.template diff2<MatterDiff2MetricVars>(current_cell);
 
-    // Inverse metric and Christoffel symbol
-    const auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
-    const auto chris = TensorAlgebra::compute_christoffel(d1.h, h_UU);
+    GeometricQuantities<data_t, MatterMetricVars, MatterDiff2MetricVars> gq(
+        vars, d1, d2);
+    gq.set_cosmological_constant(m_cosmological_constant);
+
+    const auto emtensor = my_matter.compute_emtensor(gq);
+    gq.set_em_tensor(emtensor, m_G_Newton);
 
     // Get the non matter terms for the constraints
-    Vars<data_t> out = constraint_equations(vars, d1, d2, h_UU, chris);
-
-    // Energy Momentum Tensor
-    const auto emtensor = my_matter.compute_emtensor(vars, d1, h_UU, chris.ULL);
+    Vars<data_t> out = constraint_equations(gq);
 
     // Hamiltonian constraint
     if (m_c_Ham >= 0 || m_c_Ham_abs_terms >= 0)

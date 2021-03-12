@@ -6,7 +6,6 @@
 #ifndef CHIRELAXATION_HPP_
 #define CHIRELAXATION_HPP_
 
-#include "CCZ4Geometry.hpp"
 #include "Cell.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "MatterCCZ4.hpp"
@@ -62,20 +61,6 @@ template <class matter_t> class ChiRelaxation
     const double m_G_Newton;    //!< Newton's constant, set to one by default.
     const FourthOrderDerivatives
         m_deriv; //!< An object for calculating derivatives of the variables
-
-    //! The function which calculates the RHS, given the vars and derivatives
-    //! \sa compute()
-    template <class data_t>
-    void rhs_equation(
-        Vars<data_t> &rhs, //!< the RHS data for each variable at that point.
-        const Vars<data_t> &vars, //!< the value of the variables at the point.
-        const Vars<Tensor<1, data_t>>
-            &d1, //!< the value of the first derivatives of the variables.
-        const Diff2Vars<Tensor<2, data_t>>
-            &d2, //!< the value of the second derivatives of the variables.
-        const Vars<data_t>
-            &advec //!< advec the value of the advection terms beta^i d_i(var)
-    ) const;
 };
 
 #include "ChiRelaxation.impl.hpp"

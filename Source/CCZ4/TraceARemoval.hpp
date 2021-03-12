@@ -7,7 +7,6 @@
 #ifndef TRACEAREMOVAL_HPP_
 #define TRACEAREMOVAL_HPP_
 
-#include "CCZ4Geometry.hpp"
 #include "Cell.hpp"
 #include "Tensor.hpp"
 #include "TensorAlgebra.hpp"

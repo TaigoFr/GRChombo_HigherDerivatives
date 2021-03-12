@@ -38,6 +38,7 @@ num_plot_vars = 4
 plot_vars = chi Ham Weyl4_Re Weyl4_Im
 dt_multiplier = 0.25
 stop_time = 10.0
+max_steps = 50
 
 nan_check = 1
 
@@ -91,6 +92,9 @@ nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0
 track_punctures = 1
 puncture_tracking_level = 1
 
+track_punctures = 1
+puncture_tracking_level = 1
+
 # extraction params
 # default of extraction_center is center, uncomment to change
 activate_extraction = 1
@@ -103,6 +107,3 @@ num_modes = 3
 modes = 2 0 # l m for spherical harmonics
         2 1
         2 2
-
-activate_extraction = 1
-max_steps = 1
