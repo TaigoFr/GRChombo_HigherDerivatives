@@ -45,10 +45,14 @@ class SimulationParameters : public SimulationParametersBase
         id_params.center = center;
 
         pp.load("epsilon", hd_params.epsilon);
-        G_Newton = 1.;
+        pp.load("chi_threshold", hd_params.chi_threshold);
+        pp.load("chi_width", hd_params.chi_width);
+        pp.load("weak_field_threshold", hd_params.weak_field_threshold);
+        pp.load("weak_field_width", hd_params.weak_field_width);
 
         // this is such that the  'epsilon' in the EOM is replaced by
         // 'epsilon' when doing 'kappa / 2 * EM-tensor'
+        G_Newton = 1.;
         hd_params.epsilon /= (G_Newton * 8. * M_PI);
 
         pp.load("tau", eb_params.tau);

@@ -25,9 +25,10 @@
 
 // Problem specific includes
 #include "C2EFT.hpp"
-#include "ComputeEBdiff.hpp"
-#include "ComputeWeakFieldCondition.hpp"
+#include "ComputeInitialEB.hpp"
+#include "EBdiffDiagnostic.hpp"
 #include "SystemEB.hpp"
+#include "WeakFieldConditionDiagnostic.hpp"
 
 // BH ID defined here:
 #include "SimulationParameters.hpp"
@@ -62,23 +63,25 @@ void HigherDerivativesLevel::initialData()
                    m_state_new, INCLUDE_GHOST_CELLS);
 
     fillAllGhosts();
-    BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
-                   EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx),
+                                     ComputeInitialEB(m_dx, m_p.formulation,
+                                                      m_p.ccz4_params)),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 }
 
-// Things to do before outputting a checkpoint file
+// Things to do before outputting a plot file
 void HigherDerivativesLevel::prePlotLevel()
 {
     fillAllGhosts();
-    SystemEB systemrEB(m_p.eb_params);
-    C2EFT<SystemEB> c2eft(systemrEB, m_p.hd_params);
+    SystemEB systemEB(m_p.eb_params);
+    C2EFT<SystemEB> c2eft(systemEB, m_p.hd_params);
 
     MatterConstraints<C2EFT<SystemEB>> constraints(
         c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
         Interval(c_Mom, c_Mom));
-    ComputeEBdiff EBdiff(m_dx, m_p.formulation, m_p.ccz4_params);
-    ComputeWeakFieldCondition weakField(c2eft, m_dx, m_p.formulation,
-                                        m_p.ccz4_params);
+    EBdiffDiagnostic EBdiff(m_dx, m_p.formulation, m_p.ccz4_params);
+    WeakFieldConditionDiagnostic weakField(c2eft, m_dx, m_p.formulation,
+                                           m_p.ccz4_params);
 
     BoxLoops::loop(make_compute_pack(constraints, EBdiff, weakField),
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
@@ -96,8 +99,8 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
         a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
     // Calculate MatterCCZ4 right hand side with matter_t = ScalarField
-    SystemEB systemrEB(m_p.eb_params);
-    C2EFT<SystemEB> c2eft(systemrEB, m_p.hd_params);
+    SystemEB systemEB(m_p.eb_params);
+    C2EFT<SystemEB> c2eft(systemEB, m_p.hd_params);
     MatterCCZ4<C2EFT<SystemEB>> my_ccz4_matter(
         c2eft, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation, m_p.G_Newton);
     BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);

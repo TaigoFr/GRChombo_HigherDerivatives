@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef COMPUTEWEAKFIELDCONDITION
-#define COMPUTEWEAKFIELDCONDITION
+#ifndef WEAKFIELDCONDITIONDIAGNOSTIC
+#define WEAKFIELDCONDITIONDIAGNOSTIC
 
 #include "C2EFT.hpp"
 #include "Cell.hpp"
@@ -14,7 +14,7 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-class ComputeWeakFieldCondition
+class WeakFieldConditionDiagnostic
 {
     // Use the variable definitions in MatterCCZ4
     template <class data_t>
@@ -25,9 +25,9 @@ class ComputeWeakFieldCondition
         typename MatterCCZ4<C2EFT<SystemEB>>::template Diff2Vars<data_t>;
 
   public:
-    ComputeWeakFieldCondition(const C2EFT<SystemEB> &a_matter, double m_dx,
-                              int a_formulation,
-                              const CCZ4::params_t &a_ccz4_params)
+    WeakFieldConditionDiagnostic(const C2EFT<SystemEB> &a_matter, double m_dx,
+                                 int a_formulation,
+                                 const CCZ4::params_t &a_ccz4_params)
         : my_matter(a_matter), m_formulation(a_formulation),
           m_ccz4_params(a_ccz4_params), m_deriv(m_dx)
     {
@@ -61,4 +61,4 @@ class ComputeWeakFieldCondition
     FourthOrderDerivatives m_deriv;
 };
 
-#endif /* COMPUTEWEAKFIELDCONDITION */
+#endif /* WEAKFIELDCONDITIONDIAGNOSTIC */
