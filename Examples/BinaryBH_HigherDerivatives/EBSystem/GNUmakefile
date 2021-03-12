@@ -10,7 +10,7 @@ cxxcppflags   := ${cxxcppflags} -DUSE_EBSYSTEM
 
 GRCHOMBO_SOURCE = ../../../Source
 
-ebase := Main_HigherDerivatives_EBSystem
+ebase := Main_BinaryBH_EBSystem
 
 LibNames := AMRTimeDependent AMRTools BoxTools
 

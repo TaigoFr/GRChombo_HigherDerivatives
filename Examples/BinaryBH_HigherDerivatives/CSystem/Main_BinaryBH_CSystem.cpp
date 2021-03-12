@@ -14,11 +14,11 @@
 #include "SimulationParameters.hpp"
 
 // Problem specific includes:
-#include "HigherDerivativesLevel.hpp"
+#include "BinaryBHHDLevel.hpp"
 
 int runGRChombo(int argc, char *argv[])
 {
-    pout() << "############# USING EB SYSTEM #############" << std::endl;
+    pout() << "############# USING C SYSTEM #############" << std::endl;
 
     // Load the parameter file and construct the SimulationParameter class
     // To add more parameters edit the SimulationParameters file.
@@ -45,7 +45,7 @@ int runGRChombo(int argc, char *argv[])
     // The line below selects the problem that is simulated
     // (To simulate a different problem, define a new child of AMRLevel
     // and an associated LevelFactory)
-    DefaultLevelFactory<HigherDerivativesLevel> level_fact(bh_amr, sim_params);
+    DefaultLevelFactory<BinaryBHHDLevel> level_fact(bh_amr, sim_params);
     setupAMRObject(bh_amr, level_fact);
 
     // Set up interpolator:

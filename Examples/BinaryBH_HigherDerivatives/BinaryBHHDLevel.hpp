@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef SCALARFIELDLEVEL_HPP_
-#define SCALARFIELDLEVEL_HPP_
+#ifndef BINARYBHHDLEVEL_HPP_
+#define BINARYBHHDLEVEL_HPP_
 
 #include "BHAMR.hpp"
 #include "DefaultLevelFactory.hpp"
@@ -19,9 +19,9 @@
    time symmetry assuming conformal flatness). \sa MatterCCZ4(),
    ConstraintsMatter(), HigherDerivatives(), RelaxationChi()
 */
-class HigherDerivativesLevel : public GRAMRLevel
+class BinaryBHHDLevel : public GRAMRLevel
 {
-    friend class DefaultLevelFactory<HigherDerivativesLevel>;
+    friend class DefaultLevelFactory<BinaryBHHDLevel>;
     // Inherit the contructors from GRAMRLevel
     using GRAMRLevel::GRAMRLevel;
 
@@ -54,4 +54,4 @@ class HigherDerivativesLevel : public GRAMRLevel
     virtual void specificPostTimeStep() override;
 };
 
-#endif /* SCALARFIELDLEVEL_HPP_ */
+#endif /* BINARYBHHDLEVEL_HPP_ */

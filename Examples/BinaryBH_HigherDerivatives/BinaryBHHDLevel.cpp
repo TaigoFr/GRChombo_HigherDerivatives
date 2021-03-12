@@ -4,7 +4,7 @@
  */
 
 // General includes common to most GR problems
-#include "HigherDerivativesLevel.hpp"
+#include "BinaryBHHDLevel.hpp"
 #include "AMRReductions.hpp"
 #include "BoxLoops.hpp"
 #include "ComputePack.hpp"
@@ -45,7 +45,7 @@
 #endif
 
 // Things to do at each advance step, after the RK4 is calculated
-void HigherDerivativesLevel::specificAdvance()
+void BinaryBHHDLevel::specificAdvance()
 {
     // Enforce trace free A_ij and positive chi and alpha
     BoxLoops::loop(
@@ -61,11 +61,11 @@ void HigherDerivativesLevel::specificAdvance()
 }
 
 // Initial data for field and metric variables
-void HigherDerivativesLevel::initialData()
+void BinaryBHHDLevel::initialData()
 {
-    CH_TIME("HigherDerivativesLevel::initialData");
+    CH_TIME("BinaryBHHDLevel::initialData");
     if (m_verbosity)
-        pout() << "HigherDerivativesLevel::initialData " << m_level << endl;
+        pout() << "BinaryBHHDLevel::initialData " << m_level << endl;
 
     // Set up the compute class for the BinaryBH initial data
     BinaryBH binary(m_p.bh1_params, m_p.bh2_params, m_dx);
@@ -89,7 +89,7 @@ void HigherDerivativesLevel::initialData()
 }
 
 // Things to do before outputting a plot file
-void HigherDerivativesLevel::prePlotLevel()
+void BinaryBHHDLevel::prePlotLevel()
 {
     fillAllGhosts();
     bool apply_weak_field = false;
@@ -124,9 +124,8 @@ void HigherDerivativesLevel::prePlotLevel()
 }
 
 // Things to do in RHS update, at each RK4 step
-void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
-                                             GRLevelData &a_rhs,
-                                             const double a_time)
+void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
+                                      const double a_time)
 {
     // Enforce trace free A_ij and positive chi and alpha
     BoxLoops::loop(
@@ -157,22 +156,21 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
 }
 
 // Things to do at ODE update, after soln + rhs
-void HigherDerivativesLevel::specificUpdateODE(GRLevelData &a_soln,
-                                               const GRLevelData &a_rhs,
-                                               Real a_dt)
+void BinaryBHHDLevel::specificUpdateODE(GRLevelData &a_soln,
+                                        const GRLevelData &a_rhs, Real a_dt)
 {
     // Enforce trace free A_ij
     BoxLoops::loop(TraceARemoval(), a_soln, a_soln, INCLUDE_GHOST_CELLS);
 }
 
-void HigherDerivativesLevel::preTagCells()
+void BinaryBHHDLevel::preTagCells()
 {
     // We only use chi in the tagging criterion so only fill the ghosts for chi
     fillAllGhosts(VariableType::evolution, Interval(c_chi, c_chi));
 }
 
-void HigherDerivativesLevel::computeTaggingCriterion(
-    FArrayBox &tagging_criterion, const FArrayBox &current_state)
+void BinaryBHHDLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
+                                              const FArrayBox &current_state)
 {
     if (m_p.track_punctures)
     {
@@ -195,9 +193,9 @@ void HigherDerivativesLevel::computeTaggingCriterion(
     }
 }
 
-void HigherDerivativesLevel::specificPostTimeStep()
+void BinaryBHHDLevel::specificPostTimeStep()
 {
-    CH_TIME("HigherDerivativesLevel::specificPostTimeStep");
+    CH_TIME("BinaryBHHDLevel::specificPostTimeStep");
 #ifdef USE_AHFINDER
     // if print is on and there are Diagnostics to write, calculate them!
     if (m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))

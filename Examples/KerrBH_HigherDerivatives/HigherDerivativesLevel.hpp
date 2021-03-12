@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef SCALARFIELDLEVEL_HPP_
-#define SCALARFIELDLEVEL_HPP_
+#ifndef HIGHERDERIVATIVESLEVEL_HPP_
+#define HIGHERDERIVATIVESLEVEL_HPP_
 
 #include "BHAMR.hpp"
 #include "DefaultLevelFactory.hpp"
@@ -51,4 +51,4 @@ class HigherDerivativesLevel : public GRAMRLevel
     virtual void specificPostTimeStep() override;
 };
 
-#endif /* SCALARFIELDLEVEL_HPP_ */
+#endif /* HIGHERDERIVATIVESLEVEL_HPP_ */
