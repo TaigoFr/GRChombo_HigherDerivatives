@@ -6,6 +6,7 @@
 #ifndef SCALARFIELDLEVEL_HPP_
 #define SCALARFIELDLEVEL_HPP_
 
+#include "BHAMR.hpp"
 #include "DefaultLevelFactory.hpp"
 #include "GRAMRLevel.hpp"
 
@@ -23,6 +24,8 @@ class HigherDerivativesLevel : public GRAMRLevel
     friend class DefaultLevelFactory<HigherDerivativesLevel>;
     // Inherit the contructors from GRAMRLevel
     using GRAMRLevel::GRAMRLevel;
+
+    BHAMR &m_bh_amr = dynamic_cast<BHAMR &>(m_gr_amr);
 
     //! Things to do at the end of the advance step, after RK4 calculation
     virtual void specificAdvance();
@@ -44,6 +47,8 @@ class HigherDerivativesLevel : public GRAMRLevel
     //! Tell Chombo how to tag cells for regridding
     virtual void computeTaggingCriterion(FArrayBox &tagging_criterion,
                                          const FArrayBox &current_state);
+
+    virtual void specificPostTimeStep() override;
 };
 
 #endif /* SCALARFIELDLEVEL_HPP_ */

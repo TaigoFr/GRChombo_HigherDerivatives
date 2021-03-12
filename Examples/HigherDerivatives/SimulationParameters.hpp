@@ -56,6 +56,10 @@ class SimulationParameters : public SimulationParametersBase
         hd_params.epsilon /= (G_Newton * 8. * M_PI);
 
         pp.load("tau", eb_params.tau);
+
+#ifdef USE_AHFINDER
+        pp.load("AH_initial_guess", AH_initial_guess, 0.5 * id_params.mass);
+#endif
     }
 
     double G_Newton;
@@ -65,6 +69,10 @@ class SimulationParameters : public SimulationParametersBase
 
     C2EFT<SystemEB>::params_t hd_params;
     SystemEB::params_t eb_params;
+
+#ifdef USE_AHFINDER
+    double AH_initial_guess;
+#endif
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */
