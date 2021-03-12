@@ -19,6 +19,6 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/Matter \
             $(GRCHOMBO_SOURCE)/GRChomboCore \
             $(GRCHOMBO_SOURCE)/AMRInterpolator \
-            ../Common
+            $(GRCHOMBO_SOURCE)/HigherDerivatives
 
 include $(CHOMBO_HOME)/mk/Make.test

@@ -23,6 +23,6 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/BlackHoles \
             $(GRCHOMBO_SOURCE)/AMRInterpolator  \
             $(GRCHOMBO_SOURCE)/ApparentHorizonFinder \
-            Common
+            $(GRCHOMBO_SOURCE)/HigherDerivatives
 
 include $(CHOMBO_HOME)/mk/Make.test
