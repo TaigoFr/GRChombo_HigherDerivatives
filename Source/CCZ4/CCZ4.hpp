@@ -50,18 +50,19 @@ class CCZ4
         double kappa1; //!< Damping parameter kappa1 as in arXiv:1106.2254
         double kappa2; //!< Damping parameter kappa2 as in arXiv:1106.2254
         double kappa3; //!< Damping parameter kappa3 as in arXiv:1106.2254
-        double shift_Gamma_coeff = 0.75; //!< Gives the F in \f$\partial_t
-                                         //!  \beta^i =  F B^i\f$
-        double lapse_advec_coeff = 0.;   //!< Switches advection terms in
-                                         //! the lapse condition on/off
-        double shift_advec_coeff = 0.;   //!< Switches advection terms in the
-                                         //! shift condition on/off
-        double eta = 1.; //!< The eta in \f$\partial_t B^i = \partial_t \tilde
-                         //!\Gamma - \eta B^i\f$
-        double lapse_power = 1.; //!< The power p in \f$\partial_t \alpha = - c
-                                 //!\alpha^p(K-2\Theta)\f$
-        double lapse_coeff = 2.; //!< The coefficient c in \f$\partial_t \alpha
-                                 //!= -c \alpha^p(K-2\Theta)\f$
+        double shift_Gamma_coeff; //!< Gives the F in \f$\partial_t
+                                  //!  \beta^i =  F B^i\f$
+        double lapse_advec_coeff; //!< Switches advection terms in
+                                  //! the lapse condition on/off
+        double shift_advec_coeff; //!< Switches advection terms in the
+                                  //! shift condition on/off
+        double eta; //!< The eta in \f$\partial_t B^i = \partial_t \tilde
+                    //!\Gamma - \eta B^i\f$
+        double lapse_power; //!< The power p in \f$\partial_t \alpha = - c
+                            //!\alpha^p(K-2\Theta)\f$
+        double lapse_coeff; //!< The coefficient c in \f$\partial_t \alpha
+                            //!= -c \alpha^p(K-2\Theta)\f$
+        bool covariantZ4;
     };
 
   protected:
@@ -77,7 +78,7 @@ class CCZ4
          double dx,                  //!< The grid spacing
          double sigma,               //!< Kreiss-Oliger dissipation coefficient
          int formulation = USE_CCZ4, //!< Switches between CCZ4, BSSN,...
-         double cosmological_constant = 0 //!< Value of the cosmological const.
+         double cosmological_constant = 0. //!< Value of the cosmological const.
     );
 
     /// Compute function

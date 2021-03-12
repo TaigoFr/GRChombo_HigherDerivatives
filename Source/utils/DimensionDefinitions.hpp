@@ -18,5 +18,24 @@
 #define FOR2(IDX1, IDX2) FOR1(IDX1) FOR1(IDX2)
 #define FOR3(IDX1, IDX2, IDX3) FOR2(IDX1, IDX2) FOR1(IDX3)
 #define FOR4(IDX1, IDX2, IDX3, IDX4) FOR2(IDX1, IDX2) FOR2(IDX3, IDX4)
+#define FOR5(IDX1, IDX2, IDX3, IDX4, IDX5)                                     \
+    FOR4(IDX1, IDX2, IDX3, IDX4) FOR2(IDX5)
+#define DUMMYFOR() // prevents warnings from ISO C++11
+
+#define GET_MACRO6(_1, _2, _3, _4, _5, NAME, ...) NAME
+#define FOR(...)                                                               \
+    GET_MACRO6(__VA_ARGS__, FOR5, FOR4, FOR3, FOR2, FOR1, DUMMYFOR)(__VA_ARGS__)
+
+#define FOR1_ST(IDX) for (int IDX = 0; IDX < GR_SPACEDIM + 1; ++IDX)
+#define FOR2_ST(IDX1, IDX2) FOR1_ST(IDX1) FOR1_ST(IDX2)
+#define FOR3_ST(IDX1, IDX2, IDX3) FOR2_ST(IDX1, IDX2) FOR1_ST(IDX3)
+#define FOR4_ST(IDX1, IDX2, IDX3, IDX4) FOR2_ST(IDX1, IDX2) FOR2_ST(IDX3, IDX4)
+#define FOR5_ST(IDX1, IDX2, IDX3, IDX4, IDX5)                                  \
+    FOR4_ST(IDX1, IDX2, IDX3, IDX4) FOR2_ST(IDX5)
+
+#define FOR_ST(...)                                                            \
+    GET_MACRO6(__VA_ARGS__, FOR5_ST, FOR4_ST, FOR3_ST, FOR2_ST, FOR1_ST,       \
+               DUMMYFOR)                                                       \
+    (__VA_ARGS__)
 
 #endif /* GRUTILS_HPP_*/

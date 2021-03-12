@@ -26,7 +26,7 @@ kerr_spin = 0.5
 
 # Level data
 # Maximum number of times you can regrid above coarsest level
-max_level = 4 #4 There are (max_level+1) grids, so min is zero
+max_level = 1 #4 There are (max_level+1) grids, so min is zero
 
 # Frequency of regridding at each level and thresholds on the tagging
 # Need one for each level, ie max_level+1 items
@@ -74,11 +74,12 @@ vars_asymptotic_values = 1.0 1.0 0.0 0.0 1.0 0.0 1.0 #chi and hij
 # dt will be dx*dt_multiplier on each grid level
 # HDF5files are written every dt = L/N*dt_multiplier*checkpoint_interval
 checkpoint_interval = 1
-plot_interval = 0
-num_plot_vars = 0
+plot_interval = 1
+num_plot_vars = 1
+plot_vars = chi
 dt_multiplier = 0.25
 stop_time = 10.0
-max_steps = 2
+max_steps = 5
 
 #Lapse evolution
 lapse_power = 1.0
@@ -96,7 +97,7 @@ formulation = 1  # 1 for BSSN, 0 for CCZ4
 kappa1 = 0
 kappa2 = 0
 kappa3 = 0
-covariantZ4 = 0 # 0: default. 1: dampk1 -> dampk1/lapse
+covariantZ4 = 1 # 0: default. 1: dampk1 -> dampk1/lapse
 
 # coefficient for KO numerical dissipation
 # NB must be less than 0.5 for stability

@@ -44,6 +44,7 @@ class SimulationParametersBase : public ChomboParameters
         pp.load("kappa1", ccz4_params.kappa1, 0.1);
         pp.load("kappa2", ccz4_params.kappa2, 0.0);
         pp.load("kappa3", ccz4_params.kappa3, 1.0);
+        pp.load("covariantZ4", ccz4_params.covariantZ4, false);
 
         // Dissipation
         pp.load("sigma", sigma, 0.1);

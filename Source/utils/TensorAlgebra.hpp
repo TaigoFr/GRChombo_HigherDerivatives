@@ -11,12 +11,16 @@
 #include "Tensor.hpp"
 #include "simd.hpp"
 #include <array>
+#include <iostream>
+#include <sstream>
 
-template <class data_t> struct chris_t
+#include "TensorAlgebra.aux.hpp"
+
+template <class data_t, int size = CH_SPACEDIM> struct chris_t
 {
-    Tensor<3, data_t> ULL;        //!< standard christoffel symbols
-    Tensor<3, data_t> LLL;        //!< 3 lower indices
-    Tensor<1, data_t> contracted; //!< contracted christoffel
+    Tensor<3, data_t, size> ULL;        //!< standard christoffel symbols
+    Tensor<3, data_t, size> LLL;        //!< 3 lower indices
+    Tensor<1, data_t, size> contracted; //!< contracted christoffel
 };
 
 namespace TensorAlgebra
@@ -104,130 +108,52 @@ Tensor<2, data_t> compute_inverse(const Tensor<2, data_t, 3> &matrix)
 
     return h_UU;
 }
-
-/// Computes the trace of a 2-Tensor with lower indices given an inverse metric.
-template <class data_t>
-ALWAYS_INLINE data_t compute_trace(const Tensor<2, data_t> &tensor_LL,
-                                   const Tensor<2, data_t> &inverse_metric)
-{
-    data_t trace = 0.;
-    FOR2(i, j) { trace += inverse_metric[i][j] * tensor_LL[i][j]; }
-    return trace;
-}
-
-/// Computes the trace of a 1,1 Tensor (a matrix) - no metric required.
-template <class data_t>
-ALWAYS_INLINE data_t compute_trace(const Tensor<2, data_t> &tensor_UL)
-{
-    data_t trace = 0.;
-    FOR1(i) trace += tensor_UL[i][i];
-    return trace;
-}
-
-template <class data_t>
-ALWAYS_INLINE data_t
-compute_trace(const Tensor<1, Tensor<1, data_t>> &tensor_UL)
-{
-    data_t trace = 0.;
-    FOR1(i) trace += tensor_UL[i][i];
-    return trace;
-}
-
-/// Computes dot product of a vector and a covector (no metric required)
-template <class data_t>
-ALWAYS_INLINE data_t compute_dot_product(const Tensor<1, data_t> &vector_U,
-                                         const Tensor<1, data_t> &covector_L)
-{
-    data_t dot_product = 0.;
-    FOR1(i) dot_product += vector_U[i] * covector_L[i];
-    return dot_product;
-}
-
-/// Computes dot product of two covectors given an inverse metric or
-/// the dot product of two vectors given a metric.
-template <class data_t>
-ALWAYS_INLINE data_t compute_dot_product(
-    const Tensor<1, data_t> &covector1_L, const Tensor<1, data_t> &covector2_L,
-    const Tensor<2, data_t> &inverse_metric)
-{
-    data_t dot_product = 0.;
-    FOR2(m, n)
-    {
-        dot_product += inverse_metric[m][n] * covector1_L[m] * covector2_L[n];
-    }
-    return dot_product;
-}
-
-/// Removes the trace of a 2-Tensor with lower indices given a metric and an
-/// inverse metric.  Or a Tensor with upper indices given an inverse metric and
-/// a metric.
-template <class data_t>
-ALWAYS_INLINE void make_trace_free(Tensor<2, data_t> &tensor_LL,
-                                   const Tensor<2, data_t> &metric,
-                                   const Tensor<2, data_t> &inverse_metric)
-{
-    auto trace = compute_trace(tensor_LL, inverse_metric);
-    double one_over_gr_spacedim = 1. / ((double)GR_SPACEDIM);
-    FOR2(i, j)
-    {
-        tensor_LL[i][j] -= one_over_gr_spacedim * metric[i][j] * trace;
-    }
-}
-
-/// Makes a 2-Tensor symmetric
-template <class data_t>
-ALWAYS_INLINE void make_symmetric(Tensor<2, data_t> &tensor_LL)
-{
-    FOR1(i)
-    {
-        for (int j = i + 1; j < DEFAULT_TENSOR_DIM; ++j)
-        {
-            tensor_LL[i][j] = 0.5 * (tensor_LL[i][j] + tensor_LL[j][i]);
-            tensor_LL[j][i] = tensor_LL[i][j];
-        }
-    }
-}
-
 /// Raises the index of a covector
-template <class data_t>
-ALWAYS_INLINE Tensor<1, data_t>
-raise_all(const Tensor<1, data_t> &tensor_L,
-          const Tensor<2, data_t> &inverse_metric)
+template <class data_t, int size>
+ALWAYS_INLINE Tensor<1, data_t, size>
+raise_all(const Tensor<1, data_t, size> &tensor_L,
+          const Tensor<2, data_t, size> &inverse_metric)
 {
-    Tensor<1, data_t> tensor_U = 0.;
-    FOR2(i, j) { tensor_U[i] += inverse_metric[i][j] * tensor_L[j]; }
+    Tensor<1, data_t, size> tensor_U = 0.;
+    for (int i = 0; i < size; ++i)
+        for (int j = 0; j < size; ++j)
+            tensor_U[i] += inverse_metric[i][j] * tensor_L[j];
     return tensor_U;
 }
 
 /// Raises the indices of a 2-Tensor
-template <class data_t>
-ALWAYS_INLINE Tensor<2, data_t>
-raise_all(const Tensor<2, data_t> &tensor_LL,
-          const Tensor<2, data_t> &inverse_metric)
+template <class data_t, int size>
+ALWAYS_INLINE Tensor<2, data_t, size>
+raise_all(const Tensor<2, data_t, size> &tensor_LL,
+          const Tensor<2, data_t, size> &inverse_metric)
 {
-    Tensor<2, data_t> tensor_UU = 0.;
-    FOR4(i, j, k, l)
-    {
-        tensor_UU[i][j] +=
-            inverse_metric[i][k] * inverse_metric[j][l] * tensor_LL[k][l];
-    }
+    Tensor<2, data_t, size> tensor_UU = 0.;
+
+    for (int i = 0; i < size; ++i)
+        for (int j = 0; j < size; ++j)
+            for (int k = 0; k < size; ++k)
+                for (int l = 0; l < size; ++l)
+                    tensor_UU[i][j] += inverse_metric[i][k] *
+                                       inverse_metric[j][l] * tensor_LL[k][l];
     return tensor_UU;
 }
 
 /// Lowers the indices of a vector
 /// Note: same functionality as raise; included to improve readibility
-template <class data_t>
-ALWAYS_INLINE Tensor<1, data_t> lower_all(const Tensor<1, data_t> &tensor_U,
-                                          const Tensor<2, data_t> &metric)
+template <class data_t, int size>
+ALWAYS_INLINE Tensor<1, data_t, size>
+lower_all(const Tensor<1, data_t, size> &tensor_U,
+          const Tensor<2, data_t, size> &metric)
 { // The code for lowering is exactly the same as for raising
     return raise_all(tensor_U, metric);
 }
 
 /// Lowers the indices of a 2-Tensor
 /// Note: same functionality as raise; included to improve readibility
-template <class data_t>
-ALWAYS_INLINE Tensor<2, data_t> lower_all(const Tensor<2, data_t> &tensor_UU,
-                                          const Tensor<2, data_t> &metric)
+template <class data_t, int size>
+ALWAYS_INLINE Tensor<2, data_t, size>
+lower_all(const Tensor<2, data_t, size> &tensor_UU,
+          const Tensor<2, data_t, size> &metric)
 { // The code for lowering is exactly the same as for raising
     return raise_all(tensor_UU, metric);
 }
@@ -334,29 +260,454 @@ Tensor<3, data_t> compute_phys_chris(const Tensor<1, data_t> &d1_chi,
     return chris_phys;
 }
 
-// for rank==0, return its value
-template <class data_t, int N, int M>
-typename std::enable_if<(N == 0), data_t>::type
-compute_tensor_max(const Tensor<N, data_t, M> &t)
+/// Makes a 2-Tensor symmetric
+template <class data_t, int size>
+ALWAYS_INLINE void make_symmetric(Tensor<2, data_t, size> &tensor_LL)
 {
-    return t;
+    for (int i = 0; i < size; ++i)
+        for (int j = i + 1; j < size; ++j)
+        {
+            tensor_LL[i][j] = 0.5 * (tensor_LL[i][j] + tensor_LL[j][i]);
+            tensor_LL[j][i] = tensor_LL[i][j];
+        }
 }
 
-// for rank>=1
-template <class data_t, int N, int M>
-typename std::enable_if<(N > 0), data_t>::type
-compute_tensor_max(const Tensor<N, data_t, M> &t)
+// print to any output stream 'os' (std::cout or pout() or a file)
+template <class data_t, int size, int rank>
+ALWAYS_INLINE void print(const Tensor<rank, data_t, size> &t,
+                         std::ostream &os = std::cout)
 {
-    // looking for maximum in absolute value
-    data_t max = 0.;
-    for (int i = 0; i < M; ++i)
-    {
-        data_t elem = compute_tensor_max<data_t, N - 1, M>(t[i]);
-        max = simd_max(max, abs(elem));
-    }
-    return max;
+    aux::print<data_t, size, rank>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)t, os);
+}
+
+// set a tensor to 0
+template <class data_t, int size, int rank>
+void set_to_zero(Tensor<rank, data_t, size> &tensor)
+{
+    aux::set_to_zero<data_t, size, rank>(
+        (typename Tensor<rank, data_t, size>::arr_t &)tensor);
+}
+
+// copy any tensor 'src' to 'dest'
+template <class data_t, int size, int rank>
+void hard_copy(Tensor<rank, data_t, size> &dest,
+               const Tensor<rank, data_t, size> &src)
+{
+    aux::hard_copy<data_t, size, rank>(
+        (typename Tensor<rank, data_t, size>::arr_t &)dest,
+        (const typename Tensor<rank, data_t, size>::arr_t &)src);
+}
+
+// copy any tensor 'src'*factor to 'dest'
+template <bool reset, class data_t, int size, int rank>
+void copy(Tensor<rank, data_t, size> &dest,
+          const Tensor<rank, data_t, size> &src, data_t factor = 1.)
+{
+    aux::copy<data_t, size, rank, reset>(
+        (typename Tensor<rank, data_t, size>::arr_t &)dest,
+        (const typename Tensor<rank, data_t, size>::arr_t &)src, factor);
+}
+
+/*
+// add any two tensors of same size and rank
+template <class data_t, int size, int rank, long unsigned N>
+ALWAYS_INLINE Tensor<rank, data_t, size>
+add(const Tensor<rank, data_t, size> &tensor1,
+    const Tensor<rank, data_t, size> &tensor2)
+{
+    Tensor<rank, data_t, size> result;
+    aux::add<data_t, size, rank, false>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor1,
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor2);
+    return result;
+}
+
+// add an arbitrary number of tensors of same size and rank
+template <class data_t, int size, int rank, long unsigned N>
+ALWAYS_INLINE Tensor<rank, data_t, size>
+add(const std::array<const Tensor<rank, data_t, size> *, N> &tensors)
+{
+    Tensor<rank, data_t, size> result;
+    aux::add<data_t, size, rank, N, false>(
+        tensors, (typename Tensor<rank, data_t, size>::arr_t &)result);
+    return result;
+}
+*/
+
+// returns the same tensor with one rank less, by replacing index 'idx' for
+// 'dir' e.g.: reduce_tensor(t[a][b][c], 1, 2) would give the tensor
+// t2[a][b] = t[a][2][b]
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank - 1, data_t, size>
+reduce_tensor(const Tensor<rank, data_t, size> &tensor, int idx, int dir)
+{
+    Tensor<rank - 1, data_t, size> result;
+    aux::reduce_tensor<data_t, size, rank, false>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (typename Tensor<rank - 1, data_t, size>::arr_t &)result, idx, dir);
+    return result;
+}
+
+// transpose indices 'idx1' and 'idx2' of tensor
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank, data_t, size>
+transpose(const Tensor<rank, data_t, size> &tensor, int idx1, int idx2)
+{
+    Tensor<rank, data_t, size> result;
+    aux::transpose<data_t, size, rank>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (typename Tensor<rank, data_t, size>::arr_t &)result, idx1, idx2);
+    return result;
+}
+
+// compute external product between two arbitrary tensors
+// e.g. t1[a][b] and t2[a][b][c] would result in a tensor
+// t[a][b][c][d][e] = t1[a][b]*t2[c][d][e]
+template <class data_t, int size, int rank1, int rank2>
+ALWAYS_INLINE Tensor<rank1 + rank2, data_t, size>
+compute_external_product(const Tensor<rank1, data_t, size> &t1,
+                         const Tensor<rank2, data_t, size> &t2)
+{
+    Tensor<rank1 + rank2, data_t, size> result;
+    aux::compute_external_product<data_t, size, rank1, rank2>(
+        (const typename Tensor<rank1, data_t, size>::arr_t &)t1,
+        (const typename Tensor<rank2, data_t, size>::arr_t &)t2,
+        (typename Tensor<rank1 + rank2, data_t, size>::arr_t &)result);
+    return result;
+}
+
+// dot product between t1 and t2, contracting index 'idx1' of t1 and 'idx2' of
+// t2 (by default the last)
+template <class data_t, int size, int rank1, int rank2>
+ALWAYS_INLINE Tensor<rank1 + rank2 - 2, data_t, size>
+compute_dot_product(const Tensor<rank1, data_t, size> &t1,
+                    const Tensor<rank2, data_t, size> &t2, int idx1 = rank1 - 1,
+                    int idx2 = rank2 - 1)
+{
+    Tensor<rank1 + rank2 - 2, data_t, size> result;
+    aux::compute_dot_product<data_t, size, rank1, rank2>(
+        (const typename Tensor<rank1, data_t, size>::arr_t &)t1,
+        (const typename Tensor<rank2, data_t, size>::arr_t &)t2,
+        (typename Tensor<rank1 + rank2 - 2, data_t, size>::arr_t &)result, idx1,
+        idx2);
+    return result;
+}
+
+// dot product between t1 and t2, contracting index 'idx1' of t1 and 'idx2' of
+// t2 (by default the last)
+template <class data_t, int size, int rank1, int rank2, int der2>
+ALWAYS_INLINE Tensor<rank1 + rank2 + der2 - 2, data_t, size>
+compute_dot_product(const Tensor<rank1, data_t, size> &t1,
+                    const Tensor<rank2, Tensor<der2, data_t, size>, size> &t2,
+                    int idx1 = rank1 - 1, int idx2 = rank2 - 1)
+{
+    Tensor<rank1 + rank2 + der2 - 2, data_t, size> result;
+    aux::compute_dot_product<data_t, size, rank1, rank2 + der2>(
+        (const typename Tensor<rank1, data_t, size>::arr_t &)t1,
+        (const typename Tensor<rank2 + der2, data_t, size>::arr_t &)t2,
+        (typename Tensor<rank1 + rank2 + der2 - 2, data_t, size>::arr_t &)
+            result,
+        idx1, idx2);
+    return result;
+}
+
+// dot product between t1 and t2, contracting index 'idx1' of t1 and 'idx2' of
+// t2 (by default the last) USING a 'contractor'
+// this can be either the metric or the inverse metric, for UU or LL indices
+template <class data_t, int size, int rank1, int rank2>
+ALWAYS_INLINE Tensor<rank1 + rank2 - 2, data_t, size>
+compute_dot_product(const Tensor<rank1, data_t, size> &t1,
+                    const Tensor<rank2, data_t, size> &t2,
+                    const Tensor<2, data_t, size> &contractor,
+                    int idx1 = rank1 - 1, int idx2 = rank2 - 1)
+{
+    Tensor<rank1 + rank2 - 2, data_t, size> result;
+    aux::compute_dot_product<data_t, size, rank1, rank2>(
+        (const typename Tensor<rank1, data_t, size>::arr_t &)t1,
+        (const typename Tensor<rank2, data_t, size>::arr_t &)t2,
+        (typename Tensor<2, data_t, size>::arr_t &)contractor,
+        (typename Tensor<rank1 + rank2 - 2, data_t, size>::arr_t &)result, idx1,
+        idx2);
+    return result;
+}
+
+// computes the trace of 'tensor' over indeces 'idx1' and 'idx2' (by default the
+// last two)
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank - 2, data_t, size>
+compute_trace(const Tensor<rank, data_t, size> &tensor, int idx1 = rank - 2,
+              int idx2 = rank - 1)
+{
+    Tensor<rank - 2, data_t, size> result;
+    aux::compute_trace<data_t, size, rank>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (typename Tensor<rank - 2, data_t, size>::arr_t &)result, idx1, idx2);
+    return result;
+}
+
+// computes the trace of 'tensor' over indeces 'idx1' and 'idx2' (by default the
+// last two)
+// useful for derivative tensors 'Tensor<rank1, Tensor<rank2, data_t, size>'
+template <class data_t, int size, int rank1, int rank2>
+ALWAYS_INLINE Tensor<rank1 + rank2 - 2, data_t, size>
+compute_trace(const Tensor<rank1, Tensor<rank2, data_t, size>, size> &tensor,
+              int idx1 = rank1 + rank2 - 2, int idx2 = rank1 + rank2 - 1)
+{
+    Tensor<rank1 + rank2 - 2, data_t, size> result;
+    aux::compute_trace<data_t, size, rank1 + rank2>(
+        (const typename Tensor<rank1 + rank2, data_t, size>::arr_t &)tensor,
+        (typename Tensor<rank1 + rank2 - 2, data_t, size>::arr_t &)result, idx1,
+        idx2);
+    return result;
+}
+
+// computes the trace of 'tensor' over indeces 'idx1' and 'idx2' (by default the
+// last two)
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank - 2, data_t, size>
+compute_trace(const Tensor<rank, data_t, size> &tensor,
+              const Tensor<2, data_t, size> &contractor, int idx1 = rank - 2,
+              int idx2 = rank - 1)
+{
+    Tensor<rank - 2, data_t, size> result;
+    aux::compute_trace<data_t, size, rank>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (const typename Tensor<2, data_t, size>::arr_t &)contractor,
+        (typename Tensor<rank - 2, data_t, size>::arr_t &)result, idx1, idx2);
+    return result;
+}
+
+// computes the trace of 'tensor' over indeces 'idx1' and 'idx2' (by default the
+// last two)
+// useful for derivative tensors 'Tensor<rank1, Tensor<rank2, data_t, size>'
+template <class data_t, int size, int rank1, int rank2>
+ALWAYS_INLINE Tensor<rank1 + rank2 - 2, data_t, size>
+compute_trace(const Tensor<rank1, Tensor<rank2, data_t, size>, size> &tensor,
+              const Tensor<2, data_t, size> &contractor,
+              int idx1 = rank1 + rank2 - 2, int idx2 = rank1 + rank2 - 1)
+{
+    Tensor<rank1 + rank2 - 2, data_t, size> result;
+    aux::compute_trace<data_t, size, rank1 + rank2>(
+        (const typename Tensor<rank1 + rank2, data_t, size>::arr_t &)tensor,
+        (const typename Tensor<2, data_t, size>::arr_t &)contractor,
+        (typename Tensor<rank1 + rank2 - 2, data_t, size>::arr_t &)result, idx1,
+        idx2);
+    return result;
+}
+
+/// Removes the trace of a 2-Tensor with lower indices given a metric and an
+/// inverse metric.  Or a Tensor with upper indices given an inverse metric and
+/// a metric.
+template <class data_t, int size>
+ALWAYS_INLINE void
+    make_trace_free(Tensor<2, data_t, size> &tensor_LL,
+                    const Tensor<2, data_t, size> &metric,
+                    const Tensor<2, data_t, size> &inverse_metric)
+{
+    auto trace = compute_trace(tensor_LL, inverse_metric);
+    for (int i = 0; i < size; ++i)
+        for (int j = 0; j < size; ++j)
+            tensor_LL[i][j] -= metric[i][j] * trace / GR_SPACEDIM;
+}
+
+// moves index 'src' to position 'dest'
+// e.g. move_index(t[a][b][c], 2, 0) would produce a tensor t2[a][b][c] =
+// t[c][a][b]
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank, data_t, size>
+move_index(const Tensor<rank, data_t, size> &tensor, int src, int dest)
+{
+    Tensor<rank, data_t, size> result;
+    aux::move_index<data_t, size, rank, false>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (typename Tensor<rank, data_t, size>::arr_t &)result, src, dest);
+    return result;
+}
+
+// compute covariant derivative of any 'tensor', given it's derivative
+// 'd_tensor' and christoffel symbols 'chris_ULL' provide 'indices_up_or_down'
+// if tensor contains raised indices (e.g. {1,0,0} for a tensor ULL)
+// Derivative indices are last, tensor indices are first
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank + 1, data_t, size>
+covariant_derivative(const Tensor<rank + 1, data_t, size> &d_tensor,
+                     const Tensor<rank, data_t, size> &tensor,
+                     const Tensor<3, data_t, size> &chris_ULL,
+                     const std::array<bool, rank> &indices_up_or_down = {false})
+{
+    Tensor<rank + 1, data_t, size> result;
+    aux::covariant_derivative<data_t, size, rank>(
+        (const typename Tensor<rank + 1, data_t, size>::arr_t &)d_tensor,
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (const typename Tensor<3, data_t, size>::arr_t &)chris_ULL,
+        (typename Tensor<rank + 1, data_t, size>::arr_t &)result,
+        indices_up_or_down);
+    return result;
+}
+
+// compute covariant derivative of any 'tensor', given it's derivative
+// 'd_tensor' and christoffel symbols 'chris_ULL' provide 'indices_up_or_down'
+// if tensor contains raised indices (e.g. {1,0,0} for a tensor ULL)
+// useful for derivative tensors 'Tensor<rank1, Tensor<rank2, data_t, size>'
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank + 1, data_t, size> covariant_derivative(
+    const Tensor<rank, Tensor<1, data_t, size>, size> &d_tensor,
+    const Tensor<rank, data_t, size> &tensor,
+    const Tensor<3, data_t, size> &chris_ULL,
+    const std::array<bool, rank> &indices_up_or_down = {false})
+{
+    Tensor<rank + 1, data_t, size> result;
+    aux::covariant_derivative<data_t, size, rank>(
+        (const typename Tensor<rank + 1, data_t, size>::arr_t &)d_tensor,
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (const typename Tensor<3, data_t, size>::arr_t &)chris_ULL,
+        (typename Tensor<rank + 1, data_t, size>::arr_t &)result,
+        indices_up_or_down);
+    return result;
+}
+
+// compute the maximum value (in absolute value) of a tensor 't' of any
+// dimension or rank
+template <class data_t, int size, int rank>
+ALWAYS_INLINE data_t compute_tensor_max(const Tensor<rank, data_t, size> &t)
+{
+    return aux::compute_tensor_max<data_t, size, rank>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)t);
+}
+
+// assuming tensor has all indices down, creates a ST version
+// (further generatilized for any dimension)
+// assuming the tensor is spatial (such that time indices are simply 0)
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank, data_t, size + 1>
+make_spatial_tensor_up_ST(const Tensor<rank, data_t, size> &tensor)
+{
+    Tensor<rank, data_t, size + 1> tensor_ST;
+    aux::make_spatial_tensor_up_ST<data_t, size, rank>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (typename Tensor<rank, data_t, size + 1>::arr_t &)tensor_ST);
+    return tensor_ST;
+}
+
+// assuming tensor has all indices down, creates a ST version
+// (further generatilized for any dimension)
+// assuming the tensor is spatial (such that time indices are simply
+// contractions between the shift and the spatial ones)
+template <class data_t, int size, int rank>
+Tensor<rank, data_t, size + 1>
+make_spatial_tensor_ST(const Tensor<rank, data_t, size> &tensor,
+                       const Tensor<1, data_t, size + 1> &shift_ST)
+{
+    Tensor<rank, data_t, size + 1> tensor_ST;
+    aux::make_spatial_tensor_ST<data_t, size, rank>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (const typename Tensor<1, data_t, size + 1>::arr_t &)shift_ST,
+        (typename Tensor<rank, data_t, size + 1>::arr_t &)tensor_ST);
+    return tensor_ST;
+}
+
+template <class data_t, int size, int rank>
+Tensor<rank, data_t, size + 1>
+make_spatial_tensor_ST(const Tensor<rank, data_t, size> &tensor,
+                       const Tensor<1, data_t, size> &shift)
+{
+    Tensor<1, data_t, size + 1> shift_ST;
+    shift_ST[0] = 0.;
+    for (int i = 0; i < size; ++i)
+        shift_ST[i + 1] = shift[i];
+    return make_spatial_tensor_ST(tensor, shift_ST);
+}
+
+// Lie derivative for scalar densities
+template <class data_t>
+ALWAYS_INLINE data_t lie_derivative(const data_t &advection_term,
+                                    const data_t &tensor)
+{
+    return lie_derivative(advection_term, tensor, 0., 0.);
+}
+
+template <class data_t, int size>
+ALWAYS_INLINE data_t lie_derivative(
+    const data_t &advection_term, const data_t &tensor,
+    const Tensor<1, Tensor<1, data_t, size>, size> &d_vector, double density)
+{
+    data_t div_vector;
+    if (density == 0.)
+        div_vector = 0.;
+    else
+        div_vector = compute_trace(d_vector);
+
+    return lie_derivative(advection_term, tensor, div_vector, density);
+}
+
+template <class data_t>
+ALWAYS_INLINE data_t lie_derivative(const data_t &advection_term,
+                                    const data_t &tensor,
+                                    const data_t &div_vector, double density)
+{
+    return advection_term + density * tensor * div_vector;
+}
+
+// Lie derivative for tensor densities
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank, data_t, size>
+lie_derivative(const Tensor<rank, data_t, size> &advection_term,
+               const Tensor<rank, data_t, size> &tensor,
+               const Tensor<1, Tensor<1, data_t, size>, size> &d_vector,
+               const Tensor<1, data_t, size> &vector,
+               const std::array<bool, rank> &indices_up_or_down = {false})
+{
+    return lie_derivative(advection_term, tensor, d_vector, vector, 0., 0.,
+                          indices_up_or_down);
+}
+
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank, data_t, size>
+lie_derivative(const Tensor<rank, data_t, size> &advection_term,
+               const Tensor<rank, data_t, size> &tensor,
+               const Tensor<1, Tensor<1, data_t, size>, size> &d_vector,
+               const Tensor<1, data_t, size> &vector, double density,
+               const std::array<bool, rank> &indices_up_or_down = {false})
+{
+    data_t div_vector;
+    if (density == 0.)
+        div_vector = 0.;
+    else
+        div_vector = compute_trace(d_vector);
+
+    return lie_derivative(advection_term, tensor, d_vector, vector, div_vector,
+                          density, indices_up_or_down);
+}
+
+template <class data_t, int size, int rank>
+ALWAYS_INLINE Tensor<rank, data_t, size>
+lie_derivative(const Tensor<rank, data_t, size> &advection_term,
+               const Tensor<rank, data_t, size> &tensor,
+               const Tensor<1, Tensor<1, data_t, size>, size> &d_vector,
+               const Tensor<1, data_t, size> &vector, const data_t &div_vector,
+               double density,
+               const std::array<bool, rank> &indices_up_or_down = {false})
+{
+    Tensor<rank, data_t, size> result;
+    aux::lie_derivative<data_t, size, rank>(
+        (const typename Tensor<rank, data_t, size>::arr_t &)advection_term,
+        (const typename Tensor<rank, data_t, size>::arr_t &)tensor,
+        (const typename Tensor<2, data_t, size>::arr_t &)d_vector,
+        (const typename Tensor<1, data_t, size>::arr_t &)vector, div_vector,
+        (typename Tensor<rank, data_t, size>::arr_t &)result, density,
+        indices_up_or_down);
+    return result;
 }
 
 } // namespace TensorAlgebra
+
+// template <class data_t, int rank, int size>
+// ALWAYS_INLINE std::ostream &operator<<(std::ostream &os,
+//                                        const Tensor<rank, data_t, size> &t)
+// {
+//     TensorAlgebra::print(t, os);
+//     return os;
+// }
 
 #endif /* TENSORALGEBRA_HPP_ */

@@ -12,18 +12,18 @@
 
 //! A structure for the decomposed elements of the Energy Momentum Tensor in
 //! 3+1D
-template <class data_t> struct emtensor_t
+template <class data_t, int size = CH_SPACEDIM> struct emtensor_t
 {
-    Tensor<2, data_t> Sij; //!< S_ij = T_ij
-    Tensor<1, data_t> Si;  //!< S_i = T_ia_n^a
-    data_t S;              //!< S = S^i_i
-    data_t rho;            //!< rho = T_ab n^a n^b
+    Tensor<2, data_t, size> Sij; //!< S_ij = T_ij
+    Tensor<1, data_t, size> Si;  //!< S_i = T_ia_n^a
+    data_t S;                    //!< S = S^i_i
+    data_t rho;                  //!< rho = T_ab n^a n^b
 };
 
-template <class data_t> struct ricci_t
+template <class data_t, int size = CH_SPACEDIM> struct ricci_t
 {
-    Tensor<2, data_t> LL; // Ricci with two indices down
-    data_t scalar;        // Ricci scalar
+    Tensor<2, data_t, size> LL; // Ricci with two indices down
+    data_t scalar;              // Ricci scalar
 };
 
 class CCZ4Geometry
@@ -139,7 +139,6 @@ class CCZ4Geometry
         Tensor<1, data_t> Z0 = 0.;
         auto ricci = compute_ricci_Z(vars, d1, d2, h_UU, chris, Z0);
 
-        TensorAlgebra::compute_tensor_max(Z0);
         // need to add term to correct for d1.Gamma as this has contribution
         // from Z
         auto d1_chris_contracted =

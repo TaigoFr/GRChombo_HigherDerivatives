@@ -13,8 +13,11 @@
 /// dimension.  By default the dimension is equal to DEFAULT_TENSOR_DIM.
 template <int rank, class data_t, int size = DEFAULT_TENSOR_DIM> class Tensor
 {
+  public:
     template <int, class, int> friend class Tensor;
     typedef typename Tensor<rank - 1, data_t, size>::arr_t arr_t[size];
+
+  private:
     arr_t arr;
 
   public:
@@ -28,15 +31,22 @@ template <int rank, class data_t, int size = DEFAULT_TENSOR_DIM> class Tensor
 
     template <typename... T> ALWAYS_INLINE Tensor(T... data) : arr{data...} {}
 
+    // to convert to 'arr_t&' implicitly
     operator arr_t &() { return arr; }
-
     operator const arr_t &() const { return arr; }
+
+    // to convert to 'arr_t&' explicitly (e.g. t() gives t.arr)
+    arr_t &operator()() { return arr; }
+    const arr_t &operator()() const { return arr; }
 };
 
 template <class data_t, int size> class Tensor<0, data_t, size>
 {
+  public:
     template <int, class, int> friend class Tensor;
     typedef data_t arr_t;
+
+  private:
     arr_t arr;
 
   public:
@@ -46,9 +56,13 @@ template <class data_t, int size> class Tensor<0, data_t, size>
     ALWAYS_INLINE
     Tensor(data_t val) : arr(val) {}
 
+    // to convert to 'arr_t&' implicitly
     operator arr_t &() { return arr; }
-
     operator const arr_t &() const { return arr; }
+
+    // to convert to 'arr_t&' explicitly (e.g. t() gives t.arr)
+    arr_t &operator()() { return arr; }
+    const arr_t &operator()() const { return arr; }
 };
 
 #endif /* TENSOR_HPP_ */

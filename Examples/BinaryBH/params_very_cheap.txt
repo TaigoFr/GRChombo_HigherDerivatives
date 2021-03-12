@@ -104,3 +104,5 @@ modes = 2 0 # l m for spherical harmonics
         2 1
         2 2
 
+activate_extraction = 1
+max_steps = 1
