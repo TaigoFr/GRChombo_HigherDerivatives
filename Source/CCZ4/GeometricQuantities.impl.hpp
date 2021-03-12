@@ -246,21 +246,6 @@ template_GQ void GeometricQuantities_t::clean()
         delete m_covd_lapse;
         m_covd_lapse = nullptr;
     }
-    if (m_ricci != nullptr)
-    {
-        delete m_ricci;
-        m_ricci = nullptr;
-    }
-    if (m_ricci_1DZ != nullptr)
-    {
-        delete m_ricci_1DZ;
-        m_ricci_1DZ = nullptr;
-    }
-    if (m_ricci_2DZ != nullptr)
-    {
-        delete m_ricci_2DZ;
-        m_ricci_2DZ = nullptr;
-    }
     if (m_weyl_magnetic_part != nullptr)
     {
         delete m_weyl_magnetic_part;
@@ -368,11 +353,6 @@ template_GQ void GeometricQuantities_t::clean_em_tensor_dependent()
         delete m_momentum_constraints;
         m_momentum_constraints = nullptr;
     }
-    if (m_weyl_electric_part != nullptr)
-    {
-        delete m_weyl_electric_part;
-        m_weyl_electric_part = nullptr;
-    }
     if (m_lie_Z != nullptr)
     {
         delete m_lie_Z;
@@ -405,6 +385,26 @@ template_GQ void GeometricQuantities_t::clean_em_tensor_dependent()
 
 template_GQ void GeometricQuantities_t::clean_eom_dependent()
 {
+    if (m_ricci != nullptr) // depe
+    {
+        delete m_ricci;
+        m_ricci = nullptr;
+    }
+    if (m_ricci_1DZ != nullptr)
+    {
+        delete m_ricci_1DZ;
+        m_ricci_1DZ = nullptr;
+    }
+    if (m_ricci_2DZ != nullptr)
+    {
+        delete m_ricci_2DZ;
+        m_ricci_2DZ = nullptr;
+    }
+    if (m_weyl_electric_part != nullptr)
+    {
+        delete m_weyl_electric_part;
+        m_weyl_electric_part = nullptr;
+    }
     if (m_hamiltonian_constraint != nullptr)
     {
         delete m_hamiltonian_constraint;
@@ -558,7 +558,6 @@ GeometricQuantities_t::set_em_tensor(const emtensor_t<data_t> &a_em_tensor,
                                      double G_Newton)
 {
     m_em_tensor = &a_em_tensor;
-    CH_assert(G_Newton != 0.);
     m_16_pi_G_Newton = 16. * M_PI * G_Newton;
     clean_em_tensor_dependent();
 }
@@ -785,46 +784,6 @@ template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_covd_lapse()
         compute_covd_lapse();
     return *m_covd_lapse;
 }
-template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_qDZ(int q)
-{
-    // either q==0 to get the pure Ricci, set BSSN or CCZ4 (for
-    // example for q=2 one will get the Ricci with calculated Gammas
-    // replaced by evolved Gammas, and extra Z terms for CCZ4)
-    CH_assert(q == 0 || m_formulation >= 0);
-    switch (q)
-    {
-    case 0:
-        return get_ricci();
-    case 1:
-        return get_ricci_1DZ();
-    case 2:
-        return get_ricci_2DZ();
-    default:
-        MayDay::Error("Mmmm. Use 'compute_ricci_qDZ' for q != 0,1,2 .");
-    }
-}
-template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci()
-{
-    if (m_ricci == nullptr)
-        compute_ricci();
-    return *m_ricci;
-}
-template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_1DZ()
-{
-    CH_assert(m_formulation >= 0);
-    if (m_ricci_1DZ == nullptr)
-        compute_ricci_1DZ();
-    return *m_ricci_1DZ;
-}
-template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_2DZ()
-{
-    // will give the Ricci with calculated Gammas
-    // replaced by evolved Gammas, and extra Z terms for CCZ4
-    CH_assert(m_formulation >= 0);
-    if (m_ricci_2DZ == nullptr)
-        compute_ricci_2DZ();
-    return *m_ricci_2DZ;
-}
 template_GQ const Tensor<2, data_t> &
 GeometricQuantities_t::get_weyl_magnetic_part()
 {
@@ -884,6 +843,54 @@ GeometricQuantities_t::get_momentum_constraints()
         compute_momentum_constraints();
     return *m_momentum_constraints;
 }
+template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_lie_Z()
+{
+    CH_assert(m_formulation >= 0); // formulation is set
+    if (m_lie_Z == nullptr)
+        compute_lie_Z();
+    return *m_lie_Z;
+}
+//////////////////////////////////////////////////////////////////////////
+template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_qDZ(int q)
+{
+    // either q==0 to get the pure Ricci, set BSSN or CCZ4 (for
+    // example for q=2 one will get the Ricci with calculated Gammas
+    // replaced by evolved Gammas, and extra Z terms for CCZ4)
+    CH_assert(q == 0 || m_formulation >= 0);
+    switch (q)
+    {
+    case 0:
+        return get_ricci();
+    case 1:
+        return get_ricci_1DZ();
+    case 2:
+        return get_ricci_2DZ();
+    default:
+        MayDay::Error("Mmmm. Use 'compute_ricci_qDZ' for q != 0,1,2 .");
+    }
+}
+template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci()
+{
+    if (m_ricci == nullptr)
+        compute_ricci();
+    return *m_ricci;
+}
+template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_1DZ()
+{
+    CH_assert(m_formulation >= 0);
+    if (m_ricci_1DZ == nullptr)
+        compute_ricci_1DZ();
+    return *m_ricci_1DZ;
+}
+template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_2DZ()
+{
+    // will give the Ricci with calculated Gammas
+    // replaced by evolved Gammas, and extra Z terms for CCZ4
+    CH_assert(m_formulation >= 0);
+    if (m_ricci_2DZ == nullptr)
+        compute_ricci_2DZ();
+    return *m_ricci_2DZ;
+}
 template_GQ const Tensor<2, data_t> &
 GeometricQuantities_t::get_weyl_electric_part()
 {
@@ -893,14 +900,6 @@ GeometricQuantities_t::get_weyl_electric_part()
         compute_weyl_electric_part();
     return *m_weyl_electric_part;
 }
-template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_lie_Z()
-{
-    CH_assert(m_formulation >= 0); // formulation is set
-    if (m_lie_Z == nullptr)
-        compute_lie_Z();
-    return *m_lie_Z;
-}
-//////////////////////////////////////////////////////////////////////////
 template_GQ const data_t &GeometricQuantities_t::get_hamiltonian_constraint()
 {
     // uses cosmological constant
@@ -1512,144 +1511,6 @@ template_GQ void GeometricQuantities_t::compute_covd_lapse()
     m_covd_lapse = new Tensor<2, data_t>(
         TensorAlgebra::covariant_derivative(d2.lapse, d1.lapse, chris_spatial));
 }
-template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
-{
-    CH_TIME("GeometricQuantities_t::compute_ricci_qDZ");
-
-    CH_assert(q == 0 || m_formulation >= 0);
-    // either q==0 to get the pure Ricci, set BSSN or CCZ4 (for
-    // example for q=2 one will get the Ricci with calculated Gammas
-    // replaced by evolved Gammas, and extra Z terms for CCZ4)
-
-    const auto &vars = get_vars();
-    const auto &d1 = get_d1_vars();
-    const auto &d2 = get_d2_vars();
-    const auto &h_UU = get_h_UU();
-    const auto &chris = get_chris();
-
-    ricci_t<data_t> ricci_qDZ;
-
-    const Tensor<2, data_t> covDtilde2chi = get_covd_chi_conformal();
-
-    Tensor<1, data_t> chris_q;
-    Tensor<1, Tensor<1, data_t>> d1_chris_q;
-    if (q != 2)
-    {
-        const auto &d1_chris_contracted = get_d1_chris_contracted();
-        double q_over_2 = q / 2.;
-        double one_m_q_over_2 = 1. - q_over_2;
-        FOR(i)
-        {
-            chris_q[i] =
-                q_over_2 * vars.Gamma[i] + one_m_q_over_2 * chris.contracted[i];
-            FOR(j)
-            {
-                d1_chris_q[i][j] = q_over_2 * d1.Gamma[i][j] +
-                                   one_m_q_over_2 * d1_chris_contracted[i][j];
-            }
-        }
-    }
-    else
-    {
-        chris_q = vars.Gamma;
-        d1_chris_q = d1.Gamma;
-    }
-
-    Tensor<1, data_t> Z_U_q = {0.};
-    if (q != 0 && m_formulation == CCZ4::USE_CCZ4) // only if in CCZ4
-        TensorAlgebra::hard_copy(Z_U_q, get_Z_U_conformal());
-
-    /*
-    const data_t boxtildechi =
-        TensorAlgebra::compute_trace(covDtilde2chi, h_UU);
-    const data_t dchi_dot_dchi =
-        TensorAlgebra::compute_dot_product(d1.chi, d1.chi, h_UU);
-    */
-
-    Tensor<3, data_t> chris_LLU = {0.};
-    data_t boxtildechi = 0.;
-    data_t dchi_dot_dchi = 0.;
-    FOR(i, j)
-    {
-        boxtildechi += covDtilde2chi[i][j] * h_UU[i][j];
-        dchi_dot_dchi += d1.chi[i] * d1.chi[j] * h_UU[i][j];
-        FOR(k, l) { chris_LLU[i][j][k] += h_UU[k][l] * chris.LLL[i][j][l]; }
-    }
-
-    FOR(i, j)
-    {
-        data_t ricci_tilde = 0;
-        data_t z_terms = 0.;
-        FOR(k)
-        {
-            ricci_tilde += 0.5 * (vars.h[k][i] * d1_chris_q[k][j] +
-                                  vars.h[k][j] * d1_chris_q[k][i]);
-            ricci_tilde +=
-                0.5 * chris_q[k] * (chris.LLL[i][j][k] + chris.LLL[j][i][k]);
-            // 0.5 * chris_q[k] * d1.h[i][j][k];
-            FOR(l)
-            {
-                ricci_tilde += -0.5 * h_UU[k][l] * d2.h[i][j][k][l] +
-                               (chris.ULL[k][l][i] * chris_LLU[j][k][l] +
-                                chris.ULL[k][l][j] * chris_LLU[i][k][l] +
-                                chris.ULL[k][i][l] * chris_LLU[k][j][l]);
-                // ricci_tilde -= 0.5 * h_UU[k][l] * d2.h[i][j][k][l];
-                // FOR(m)
-                // {
-                //     ricci_tilde +=
-                //         h_UU[l][m] * (chris.ULL[k][l][i] * chris.LLL[j][k][m]
-                //         +
-                //                       chris.ULL[k][l][j] * chris.LLL[i][k][m]
-                //                       + chris.ULL[k][i][m] *
-                //                       chris.LLL[k][l][j]);
-                // }
-            }
-
-            if (q != 0 && m_formulation == CCZ4::USE_CCZ4)
-            {
-                z_terms += Z_U_q[k] * (vars.h[i][k] * d1.chi[j] +
-                                       vars.h[j][k] * d1.chi[i] -
-                                       vars.h[i][j] * d1.chi[k]);
-            }
-        }
-
-        const data_t ricci_chi =
-            0.5 * ((GR_SPACEDIM - 2) * covDtilde2chi[i][j] +
-                   vars.h[i][j] * boxtildechi -
-                   ((GR_SPACEDIM - 2) * d1.chi[i] * d1.chi[j] +
-                    GR_SPACEDIM * vars.h[i][j] * dchi_dot_dchi) /
-                       (2 * vars.chi));
-
-        ricci_qDZ.LL[i][j] =
-            ricci_tilde + (ricci_chi + q / 2. * z_terms) / vars.chi;
-    }
-
-    ricci_qDZ.scalar =
-        vars.chi * TensorAlgebra::compute_trace(ricci_qDZ.LL, h_UU);
-
-    return ricci_qDZ;
-}
-template_GQ void GeometricQuantities_t::compute_ricci()
-{
-    if (m_ricci != nullptr)
-        delete m_ricci;
-
-    m_ricci = new ricci_t<data_t>(compute_ricci_qDZ(0));
-}
-template_GQ void GeometricQuantities_t::compute_ricci_1DZ()
-{
-    if (m_ricci_1DZ != nullptr)
-        delete m_ricci_1DZ;
-
-    m_ricci_1DZ = new ricci_t<data_t>(compute_ricci_qDZ(1));
-}
-template_GQ void GeometricQuantities_t::compute_ricci_2DZ()
-{
-    if (m_ricci_2DZ != nullptr)
-        delete m_ricci_2DZ;
-
-    m_ricci_2DZ = new ricci_t<data_t>(compute_ricci_qDZ(2));
-}
 template_GQ void GeometricQuantities_t::compute_weyl_magnetic_part()
 {
     if (m_weyl_magnetic_part != nullptr)
@@ -1800,6 +1661,168 @@ template_GQ void GeometricQuantities_t::compute_momentum_constraints()
                  : m_16_pi_G_Newton / 2. * m_em_tensor->Si[i]);
     }
 }
+template_GQ void GeometricQuantities_t::compute_lie_Z()
+{
+    if (m_lie_Z != nullptr)
+        delete m_lie_Z;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &M = get_momentum_constraints();
+    const auto &Z = get_Z();
+    const auto &Kij_dot_Z = TensorAlgebra::compute_dot_product(
+        get_extrinsic_curvature(), get_Z_U());
+
+    data_t kappa1 = m_ccz4_params->kappa1;
+    if (m_ccz4_params->covariantZ4)
+        kappa1 /= vars.lapse;
+
+    m_lie_Z = new Tensor<1, data_t>;
+    FOR(i)
+    {
+        (*m_lie_Z)[i] = M[i] - vars.Theta * d1.lapse[i] / vars.lapse +
+                        d1.Theta[i] - kappa1 * Z[i] - 2. * Kij_dot_Z[i];
+    }
+}
+//////////////////////////////////////////////////////////////////////////
+template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
+{
+    CH_TIME("GeometricQuantities_t::compute_ricci_qDZ");
+
+    CH_assert(q == 0 || m_formulation >= 0);
+    // either q==0 to get the pure Ricci, set BSSN or CCZ4 (for
+    // example for q=2 one will get the Ricci with calculated Gammas
+    // replaced by evolved Gammas, and extra Z terms for CCZ4)
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();
+    const auto &h_UU = get_h_UU();
+    const auto &chris = get_chris();
+
+    ricci_t<data_t> ricci_qDZ;
+
+    const Tensor<2, data_t> covDtilde2chi = get_covd_chi_conformal();
+
+    Tensor<1, data_t> chris_q;
+    Tensor<1, Tensor<1, data_t>> d1_chris_q;
+    if (q != 2)
+    {
+        const auto &d1_chris_contracted = get_d1_chris_contracted();
+        double q_over_2 = q / 2.;
+        double one_m_q_over_2 = 1. - q_over_2;
+        FOR(i)
+        {
+            chris_q[i] =
+                q_over_2 * vars.Gamma[i] + one_m_q_over_2 * chris.contracted[i];
+            FOR(j)
+            {
+                d1_chris_q[i][j] = q_over_2 * d1.Gamma[i][j] +
+                                   one_m_q_over_2 * d1_chris_contracted[i][j];
+            }
+        }
+    }
+    else
+    {
+        chris_q = vars.Gamma;
+        d1_chris_q = d1.Gamma;
+    }
+
+    Tensor<1, data_t> Z_U_q = {0.};
+    if (q != 0 && m_formulation == CCZ4::USE_CCZ4) // only if in CCZ4
+        TensorAlgebra::hard_copy(Z_U_q, get_Z_U_conformal());
+
+    /*
+    const data_t boxtildechi =
+        TensorAlgebra::compute_trace(covDtilde2chi, h_UU);
+    const data_t dchi_dot_dchi =
+        TensorAlgebra::compute_dot_product(d1.chi, d1.chi, h_UU);
+    */
+
+    Tensor<3, data_t> chris_LLU = {0.};
+    data_t boxtildechi = 0.;
+    data_t dchi_dot_dchi = 0.;
+    FOR(i, j)
+    {
+        boxtildechi += covDtilde2chi[i][j] * h_UU[i][j];
+        dchi_dot_dchi += d1.chi[i] * d1.chi[j] * h_UU[i][j];
+        FOR(k, l) { chris_LLU[i][j][k] += h_UU[k][l] * chris.LLL[i][j][l]; }
+    }
+
+    FOR(i, j)
+    {
+        data_t ricci_tilde = 0;
+        data_t z_terms = 0.;
+        FOR(k)
+        {
+            ricci_tilde += 0.5 * (vars.h[k][i] * d1_chris_q[k][j] +
+                                  vars.h[k][j] * d1_chris_q[k][i]);
+            ricci_tilde +=
+                0.5 * chris_q[k] * (chris.LLL[i][j][k] + chris.LLL[j][i][k]);
+            // 0.5 * chris_q[k] * d1.h[i][j][k];
+            FOR(l)
+            {
+                ricci_tilde += -0.5 * h_UU[k][l] * d2.h[i][j][k][l] +
+                               (chris.ULL[k][l][i] * chris_LLU[j][k][l] +
+                                chris.ULL[k][l][j] * chris_LLU[i][k][l] +
+                                chris.ULL[k][i][l] * chris_LLU[k][j][l]);
+                // ricci_tilde -= 0.5 * h_UU[k][l] * d2.h[i][j][k][l];
+                // FOR(m)
+                // {
+                //     ricci_tilde +=
+                //         h_UU[l][m] * (chris.ULL[k][l][i] * chris.LLL[j][k][m]
+                //         +
+                //                       chris.ULL[k][l][j] * chris.LLL[i][k][m]
+                //                       + chris.ULL[k][i][m] *
+                //                       chris.LLL[k][l][j]);
+                // }
+            }
+
+            if (q != 0 && m_formulation == CCZ4::USE_CCZ4)
+            {
+                z_terms += Z_U_q[k] * (vars.h[i][k] * d1.chi[j] +
+                                       vars.h[j][k] * d1.chi[i] -
+                                       vars.h[i][j] * d1.chi[k]);
+            }
+        }
+
+        const data_t ricci_chi =
+            0.5 * ((GR_SPACEDIM - 2) * covDtilde2chi[i][j] +
+                   vars.h[i][j] * boxtildechi -
+                   ((GR_SPACEDIM - 2) * d1.chi[i] * d1.chi[j] +
+                    GR_SPACEDIM * vars.h[i][j] * dchi_dot_dchi) /
+                       (2 * vars.chi));
+
+        ricci_qDZ.LL[i][j] =
+            ricci_tilde + (ricci_chi + q / 2. * z_terms) / vars.chi;
+    }
+
+    ricci_qDZ.scalar =
+        vars.chi * TensorAlgebra::compute_trace(ricci_qDZ.LL, h_UU);
+
+    return ricci_qDZ;
+}
+template_GQ void GeometricQuantities_t::compute_ricci()
+{
+    if (m_ricci != nullptr)
+        delete m_ricci;
+
+    m_ricci = new ricci_t<data_t>(compute_ricci_qDZ(0));
+}
+template_GQ void GeometricQuantities_t::compute_ricci_1DZ()
+{
+    if (m_ricci_1DZ != nullptr)
+        delete m_ricci_1DZ;
+
+    m_ricci_1DZ = new ricci_t<data_t>(compute_ricci_qDZ(1));
+}
+template_GQ void GeometricQuantities_t::compute_ricci_2DZ()
+{
+    if (m_ricci_2DZ != nullptr)
+        delete m_ricci_2DZ;
+
+    m_ricci_2DZ = new ricci_t<data_t>(compute_ricci_qDZ(2));
+}
 template_GQ void GeometricQuantities_t::compute_weyl_electric_part()
 {
     if (m_weyl_electric_part != nullptr)
@@ -1830,30 +1853,6 @@ template_GQ void GeometricQuantities_t::compute_weyl_electric_part()
 
     TensorAlgebra::make_trace_free(*m_weyl_electric_part, vars.h, get_h_UU());
 }
-template_GQ void GeometricQuantities_t::compute_lie_Z()
-{
-    if (m_lie_Z != nullptr)
-        delete m_lie_Z;
-
-    const auto &vars = get_vars();
-    const auto &d1 = get_d1_vars();
-    const auto &M = get_momentum_constraints();
-    const auto &Z = get_Z();
-    const auto &Kij_dot_Z = TensorAlgebra::compute_dot_product(
-        get_extrinsic_curvature(), get_Z_U());
-
-    data_t kappa1 = m_ccz4_params->kappa1;
-    if (m_ccz4_params->covariantZ4)
-        kappa1 /= vars.lapse;
-
-    m_lie_Z = new Tensor<1, data_t>;
-    FOR(i)
-    {
-        (*m_lie_Z)[i] = M[i] - vars.Theta * d1.lapse[i] / vars.lapse +
-                        d1.Theta[i] - kappa1 * Z[i] - 2. * Kij_dot_Z[i];
-    }
-}
-//////////////////////////////////////////////////////////////////////////
 template_GQ void GeometricQuantities_t::compute_hamiltonian_constraint()
 {
     if (m_hamiltonian_constraint != nullptr)
@@ -1894,11 +1893,8 @@ template_GQ void GeometricQuantities_t::compute_lie_derivatives()
     const Tensor<2, data_t> covd2lapse =
         get_covd_lapse(); // calculates chris_spatial -> not very efficient
 
-    // {
-    // CH_TIME("GeometricQuantities::compute_lie_derivatives::main_part");
-
     bool ccz4 = (m_formulation == CCZ4::USE_CCZ4);
-    bool k3 = (ccz4 && m_ccz4_params->kappa1 != 1.);
+    bool k3 = (ccz4 && m_ccz4_params->kappa3 != 1.);
     bool vacuum = (m_em_tensor == nullptr);
 
     data_t kappa1 =
@@ -2029,7 +2025,6 @@ template_GQ void GeometricQuantities_t::compute_lie_derivatives()
     m_lie_derivatives->lapse = 0.;
     m_lie_derivatives->shift = 0.;
     m_lie_derivatives->B = 0.;
-    // }
 }
 template_GQ void GeometricQuantities_t::compute_lie_extrinsic_curvature()
 {
@@ -2110,19 +2105,9 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
 
         FOR(i)
         {
-            rhs.shift[i] = m_ccz4_params->shift_advec_coeff * advec.shift[i] +
-                           m_ccz4_params->shift_Gamma_coeff * vars.B[i];
-            rhs.B[i] = rhs.Gamma[i] +
-                       m_ccz4_params->shift_advec_coeff *
-                           (advec.B[i] - advec.Gamma[i]) -
-                       m_ccz4_params->eta * vars.B[i];
-
             // Use the calculated christoffels in the lie derivative terms, not
             // the evolved ones, for BSSN (as according to the old code for BSSN
-            // and according with Alcubierre page 87) rhs.Gamma =
-            // TensorAlgebra::lie_derivative(advec.Gamma, vars.Gamma, d1.shift,
-            // vars.shift, div_shift,
-            // 2. / GR_SPACEDIM, {true});
+            // and according with Alcubierre page 87)
             rhs.Gamma[i] =
                 advec.Gamma[i] + LIE.Gamma[i] * vars.lapse +
                 2. / GR_SPACEDIM *
@@ -2132,7 +2117,13 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
 
             FOR1(j)
             {
-                rhs.Gamma[i] -= vars.Gamma[j] * d1.shift[i][j];
+                // Use the calculated christoffels in the lie derivative terms,
+                // not the evolved ones, for BSSN (as according to the old code
+                // for BSSN and according with Alcubierre page 87)
+                rhs.Gamma[i] -=
+                    (m_formulation == CCZ4::USE_CCZ4 ? vars.Gamma[j]
+                                                     : chris.contracted[j]) *
+                    d1.shift[i][j];
 
                 rhs.h[i][j] = advec.h[i][j] + LIE.h[i][j] * vars.lapse -
                               2. / GR_SPACEDIM * vars.h[i][j] * div_shift;
@@ -2147,6 +2138,13 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
                                    vars.A[j][k] * d1.shift[k][i];
                 }
             }
+
+            rhs.shift[i] = m_ccz4_params->shift_advec_coeff * advec.shift[i] +
+                           m_ccz4_params->shift_Gamma_coeff * vars.B[i];
+            rhs.B[i] = rhs.Gamma[i] +
+                       m_ccz4_params->shift_advec_coeff *
+                           (advec.B[i] - advec.Gamma[i]) -
+                       m_ccz4_params->eta * vars.B[i];
         }
 
         /*

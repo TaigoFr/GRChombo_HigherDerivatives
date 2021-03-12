@@ -39,7 +39,7 @@ int main()
     std::cout << "#threads = " << omp_get_max_threads() << std::endl;
 #endif
 
-    const int N_GRID = 128;
+    const int N_GRID = 32;
     Box box(IntVect(0, 0, 0), IntVect(N_GRID - 1, N_GRID - 1, N_GRID - 1));
     Box ghosted_box(IntVect(-3, -3, -3),
                     IntVect(N_GRID + 2, N_GRID + 2, N_GRID + 2));
@@ -47,7 +47,7 @@ int main()
     FArrayBox out_fab(box, NUM_VARS);
     FArrayBox out_fab_chf(box, NUM_VARS);
 
-    const double dx = 1.0 / (N_GRID - 1);
+    const double dx = 0.25 / (N_GRID - 1);
 
     for (int zz = -3; zz < N_GRID + 3; ++zz)
     {
@@ -203,15 +203,16 @@ int main()
     }
 
     CCZ4::params_t params;
-    params.kappa1 = 00.0;
-    params.kappa2 = 00.0;
-    params.kappa3 = 00.0;
+    params.kappa1 = 0.;
+    params.kappa2 = 0.;
+    params.kappa3 = 0.;
+    params.covariantZ4 = false;
     params.shift_Gamma_coeff = 0.75;
-    params.lapse_advec_coeff = 1.0;
+    params.lapse_advec_coeff = 1.;
+    params.shift_advec_coeff = 0.;
+    params.eta = 1.0;
     params.lapse_power = 1.0;
     params.lapse_coeff = 2.0;
-    params.shift_advec_coeff = 0.0;
-    params.eta = 1.0;
 
     Real null = 0;
 
@@ -287,7 +288,9 @@ int main()
                       << std::endl
                       << std::endl;
             std::cout << " --  " << UserVariables::variable_names[i]
-                      << " Value = " << max_chf << std::endl;
+                      << " Value Diff = " << max_err << std::endl;
+            std::cout << " --  " << UserVariables::variable_names[i]
+                      << " Value ChF = " << max_chf << std::endl;
             std::cout << " --  " << UserVariables::variable_names[i]
                       << " relative error = " << max_err / max_chf * 100 << " %"
                       << std::endl;

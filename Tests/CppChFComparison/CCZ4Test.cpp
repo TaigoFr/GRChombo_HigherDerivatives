@@ -207,6 +207,9 @@ int main()
     params.lapse_advec_coeff = 0;
     params.shift_advec_coeff = 0;
     params.eta = 1.82;
+    params.lapse_power = 1.;
+    params.lapse_coeff = 2.;
+    params.covariantZ4 = true;
 
     double sigma = 0.3;
 
@@ -264,11 +267,15 @@ int main()
         double max_chf = out_fab_chf.norm(0, i, 1);
         if (max_err > 1e-9)
         {
-            std::cout << "COMPONENT " << i << " DOES NOT AGREE: MAX ERROR = "
-                      << out_fab.norm(0, i, 1) << std::endl;
-            std::cout << "COMPONENT " << i
+            std::cout << "COMPONENT " << UserVariables::variable_names[i]
+                      << " DOES NOT AGREE: MAX ERROR = " << max_err
+                      << std::endl;
+            std::cout << "COMPONENT " << UserVariables::variable_names[i]
                       << " DOES NOT AGREE: MAX CHF Value = " << max_chf
                       << std::endl;
+            std::cout << "COMPONENT " << UserVariables::variable_names[i]
+                      << " DOES NOT AGREE: Relative Value = "
+                      << max_err / max_chf << std::endl;
             failed = -1;
         }
     }

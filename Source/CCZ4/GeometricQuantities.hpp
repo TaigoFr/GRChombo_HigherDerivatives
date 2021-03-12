@@ -3,6 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
+#include "CCZ4.hpp" // need 'formulations'; should be included before GeometricQuantities (before the #ifndef)
+
 #ifndef GEOMETRICQUANTITIES_HPP_
 #define GEOMETRICQUANTITIES_HPP_
 
@@ -21,8 +23,6 @@ template <class data_t, int size = CH_SPACEDIM> struct ricci_t
     Tensor<2, data_t, size> LL; // Ricci with two indices down
     data_t scalar;              // Ricci scalar
 };
-
-#include "CCZ4.hpp" // need 'formulations'
 
 //!  Calculates the several spatial and spacetime geometric quantities
 /*!
@@ -122,11 +122,6 @@ class GeometricQuantities
     const Tensor<3, data_t> &get_levi_civita_spatial();     // LLL
     const Tensor<3, data_t> &get_levi_civita_spatial_LUU(); // LUU
     const Tensor<2, data_t> &get_covd_lapse();
-    const ricci_t<data_t> &get_ricci_qDZ(int q);
-    const ricci_t<data_t> &get_ricci(); // original formula
-    const ricci_t<data_t> &get_ricci_1DZ();
-    // uses evolved variables, not calculated Gammas
-    const ricci_t<data_t> &get_ricci_2DZ();
     const Tensor<2, data_t> &get_weyl_magnetic_part();
     const Tensor<4, data_t> &get_riemann_spatial_LLLL();
     const Tensor<4, data_t> &get_gauss_codazzi();
@@ -137,10 +132,15 @@ class GeometricQuantities
 
     // EM-tensor dependent
     const Tensor<1, data_t> &get_momentum_constraints();
-    const Tensor<2, data_t> &get_weyl_electric_part();
     const Tensor<1, data_t> &get_lie_Z();
 
-    // EOM dependent
+    // EOM / Formulation dependent
+    const ricci_t<data_t> &get_ricci_qDZ(int q);
+    const ricci_t<data_t> &get_ricci(); // original formula
+    const ricci_t<data_t> &get_ricci_1DZ();
+    // uses evolved variables, not calculated Gammas
+    const ricci_t<data_t> &get_ricci_2DZ();
+    const Tensor<2, data_t> &get_weyl_electric_part();
     const data_t &get_hamiltonian_constraint();
     const Vars &get_lie_derivatives(); // Lie derivatives of non-gauge variables
     const Tensor<2, data_t> &get_lie_extrinsic_curvature();
@@ -175,7 +175,7 @@ class GeometricQuantities
     const Tensor<4, data_t, CH_SPACEDIM + 1> &get_weyl_tensor_LLLL();
     const data_t &get_weyl_squared();
 
-    // EOM dependent
+    // EOM / Formulation dependent
     const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLL_ST();
     const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLL_ST_v2();
     const Tensor<2, data_t, CH_SPACEDIM + 1> &get_ricci_ST();
@@ -270,9 +270,6 @@ class GeometricQuantities
     Tensor<1, data_t> *m_Z_U;
     Tensor<1, data_t> *m_Z;
     Tensor<2, data_t> *m_covd_Z;
-    ricci_t<data_t> *m_ricci;
-    ricci_t<data_t> *m_ricci_1DZ;
-    ricci_t<data_t> *m_ricci_2DZ;
     Tensor<3, data_t> *m_d1_extrinsic_curvature;
     Tensor<3, data_t> *m_covd_extrinsic_curvature;
     Tensor<3, data_t> *m_levi_civita_spatial;
@@ -292,6 +289,9 @@ class GeometricQuantities
     Tensor<1, data_t> *m_lie_Z;
 
     // EOM dependent
+    ricci_t<data_t> *m_ricci;
+    ricci_t<data_t> *m_ricci_1DZ;
+    ricci_t<data_t> *m_ricci_2DZ;
     data_t *m_hamiltonian_constraint;
     Vars *m_lie_derivatives;
     Tensor<2, data_t> *m_lie_extrinsic_curvature;
@@ -364,9 +364,6 @@ class GeometricQuantities
     void compute_Z_U();
     void compute_Z();
     void compute_covd_Z();
-    void compute_ricci();
-    void compute_ricci_1DZ();
-    void compute_ricci_2DZ();
     void compute_d1_extrinsic_curvature();
     void compute_covd_extrinsic_curvature();
     void compute_levi_civita_spatial();
@@ -386,6 +383,9 @@ class GeometricQuantities
     void compute_lie_Z();
 
     // EOM dependent
+    void compute_ricci();
+    void compute_ricci_1DZ();
+    void compute_ricci_2DZ();
     void compute_hamiltonian_constraint();
     void compute_lie_derivatives();
     void compute_lie_extrinsic_curvature();

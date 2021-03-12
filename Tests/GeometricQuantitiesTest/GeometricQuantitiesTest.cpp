@@ -19,6 +19,8 @@
 #include "MatterCCZ4.hpp"
 #include "ScalarField.hpp"
 
+#include "OldCCZ4.hpp"
+
 template <class data_t>
 using MatterVars = MatterCCZ4<ScalarField<>>::Vars<data_t>;
 template <class data_t> struct Vars : public MatterVars<data_t>
@@ -431,6 +433,37 @@ int runTest(int argc, char *argv[])
         gq.compute_dt_weyl_magnetic_part(d1.WeylE, d1.WeylB, vars.WeylE,
                                          vars.WeylB, advec.WeylE, advec.WeylB),
         dt_weyl_magnetic_part, "dt_weyl_magnetic_part");
+
+    // COMPARE WITH OLD CCZ4 FOR BSSN AS AN EXTRA TEST
+    // Also good to test the rest of variables in GeometricQuantities
+    gq.set_em_tensor(em_tensor_def, 0.); // set matter to 0 here
+    formulation = CCZ4::USE_BSSN;
+    ccz4_params.kappa1 = 0.;
+    ccz4_params.kappa2 = 0.;
+    ccz4_params.kappa3 = 0.;
+    gq.set_formulation(formulation, ccz4_params);
+    vars.Theta = 0.;
+    advec.Theta = 0.;
+    FOR(i) { d1.Theta[i] = 0.; }
+
+    OldCCZ4 ccz4(ccz4_params, 0., 0., formulation, cosmological_constant);
+    Vars<double> old_rhs;
+    ccz4.rhs_equation(old_rhs, vars, d1, d2, advec);
+
+    failed |=
+        relative_error(gq.get_rhs_equations().chi, old_rhs.chi, "old_rhs.chi");
+    failed |= relative_error(gq.get_rhs_equations().h, old_rhs.h, "old_rhs.h");
+    failed |= relative_error(gq.get_rhs_equations().K, old_rhs.K, "old_rhs.K");
+    failed |= relative_error(gq.get_rhs_equations().A, old_rhs.A, "old_rhs.A");
+    failed |= relative_error(gq.get_rhs_equations().Gamma, old_rhs.Gamma,
+                             "old_rhs.Gamma");
+    failed |= relative_error(gq.get_rhs_equations().Theta, old_rhs.Theta,
+                             "old_rhs.Theta");
+    failed |= relative_error(gq.get_rhs_equations().lapse, old_rhs.lapse,
+                             "old_rhs.lapse");
+    failed |= relative_error(gq.get_rhs_equations().shift, old_rhs.shift,
+                             "old_rhs.shift");
+    failed |= relative_error(gq.get_rhs_equations().B, old_rhs.B, "old_rhs.B");
 
     return failed;
 }

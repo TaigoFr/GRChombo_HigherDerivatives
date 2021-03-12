@@ -315,11 +315,14 @@ int main()
         if (max_err / max_chf > 1e-6)
         {
             std::cout << "COMPONENT " << UserVariables::variable_names[i]
-                      << " DOES NOT AGREE: MAX ERROR = "
-                      << out_fab.norm(0, i, 1) << std::endl;
+                      << " DOES NOT AGREE: MAX ERROR = " << max_err
+                      << std::endl;
             std::cout << "COMPONENT " << UserVariables::variable_names[i]
                       << " DOES NOT AGREE: MAX CHF Value = " << max_chf
                       << std::endl;
+            std::cout << "COMPONENT " << UserVariables::variable_names[i]
+                      << " DOES NOT AGREE: Relative Value = "
+                      << max_err / max_chf << std::endl;
             failed = -1;
         }
     }

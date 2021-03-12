@@ -3,8 +3,9 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#include "CCZ4Geometry.hpp"
+// #include "CCZ4Geometry.hpp"
 #include "DimensionDefinitions.hpp"
+#include "GeometricQuantities.hpp"
 #include "Tensor.hpp"
 #include <iostream>
 
@@ -26,21 +27,31 @@ int main()
 
 #include "values1.hpp" //Including the auto generated file with values
 
-    auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
+    // auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
 
-    auto chris = TensorAlgebra::compute_christoffel(d1.h, h_UU);
+    // auto chris = TensorAlgebra::compute_christoffel(d1.h, h_UU);
 
-    auto ricciZ =
-        CCZ4Geometry::compute_ricci_Z(vars, d1, d2, h_UU, chris, Z_over_chi);
+    // auto ricciZ =
+    // CCZ4Geometry::compute_ricci_Z(vars, d1, d2, h_UU, chris, Z_over_chi);
+
+    GeometricQuantities<double, vars_t, vars_t> gq(vars, d1, d2);
+    gq.set_formulation(CCZ4::USE_CCZ4, CCZ4::params_t());
+
+    auto h_UU = gq.get_h_UU();
+    auto chris = gq.get_chris();
+    auto ricciZ = gq.get_ricci_2DZ();
 
     // Compare
     FOR2(i, j)
     {
         double diff = h_UU[i][j] - h_UU_known[i][j];
-        if (diff > 1e-14)
+        if (diff > 2e-14)
         {
             std::cout << "h_UU wrong in component [" << i << "][" << j << "]"
                       << std::endl;
+            std::cout << "value: " << h_UU[i][j] << std::endl;
+            std::cout << "correct value: " << h_UU_known[i][j] << std::endl;
+            std::cout << "error: " << diff << std::endl;
             failed = -1;
         }
     }
@@ -48,12 +59,13 @@ int main()
     FOR3(i, j, k)
     {
         double diff = chris.ULL[i][j][k] - chris_known[i][j][k];
-        if (diff > 1e-14)
+        if (diff > 2e-14)
         {
             std::cout << "chris wrong in component [" << i << "][" << j << "]["
                       << k << "]" << std::endl;
             std::cout << "value: " << chris.ULL[i][j][k] << std::endl;
             std::cout << "correct value: " << chris_known[i][j][k] << std::endl;
+            std::cout << "error: " << diff << std::endl;
             failed = -1;
         }
     }

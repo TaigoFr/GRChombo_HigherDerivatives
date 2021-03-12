@@ -10,8 +10,8 @@ GRCHOMBO_SOURCE = $(shell pwd)/../../Source
 
 ebase := CCZ4GeometryUnitTest
 
-LibNames := BoxTools
+LibNames := AMRTimeDependent AMRTools BoxTools
 
-src_dirs := $(GRCHOMBO_SOURCE)/utils $(GRCHOMBO_SOURCE)/CCZ4
+src_dirs := $(GRCHOMBO_SOURCE)/utils $(GRCHOMBO_SOURCE)/CCZ4 $(GRCHOMBO_SOURCE)/GRChomboCore $(GRCHOMBO_SOURCE)/BoxUtils $(GRCHOMBO_SOURCE)/simd $(GRCHOMBO_SOURCE)/AMRInterpolator
 
 include $(CHOMBO_HOME)/mk/Make.test
