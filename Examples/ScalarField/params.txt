@@ -85,11 +85,11 @@ eta = 1.0 # This is gamma driver, usually of order 1/M_ADM of spacetime
 
 # CCZ4 parameters
 # if using BSSN the kappa values should be zero
-formulation = 1  # 1 for BSSN, 0 for CCZ4
-kappa1 = 0
+formulation = 0  # 1 for BSSN, 0 for CCZ4
+kappa1 = 0.1
 kappa2 = 0
-kappa3 = 0
-covariantZ4 = 0 # 0: default. 1: dampk1 -> dampk1/lapse
+kappa3 = 1.
+covariantZ4 = 1 # 0: default. 1: dampk1 -> dampk1/lapse
 
 # coefficient for KO numerical dissipation
 sigma = 0.3

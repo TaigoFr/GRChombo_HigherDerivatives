@@ -106,6 +106,7 @@ class GeometricQuantities
     const Tensor<2, data_t> &get_A_UU();
     const data_t &get_tr_A2();
     const data_t &get_div_shift();
+    const Tensor<1, data_t> &get_Gamma_L();
 
     // spatial non-conformal
     const Tensor<1, data_t> &get_shift_L();
@@ -130,6 +131,8 @@ class GeometricQuantities
     const Tensor<4, data_t> &get_riemann_spatial_LLLL();
     const Tensor<4, data_t> &get_gauss_codazzi();
     const Tensor<3, data_t> &get_codazzi_mainardi();
+    const Tensor<1, data_t> &get_Gamma_spatial();
+    const Tensor<1, data_t> &get_Gamma_L_spatial();
 
     // EM-tensor dependent
     const Tensor<1, data_t> &get_momentum_constraints();
@@ -178,9 +181,15 @@ class GeometricQuantities
     const data_t &get_ricci_squared();
     const data_t &get_kretschmann();
     const data_t &get_riemann_squared(); // alternative to Kretschmann
+    const Tensor<4, data_t, CH_SPACEDIM + 1> &
+    get_riemann_LLLU_ST(); // not checked in Test
+    const Tensor<4, data_t, CH_SPACEDIM + 1> &
+    get_riemann_LULU_ST(); // not checked in Test
 
     // Advection dependent
     const Tensor<3, data_t, CH_SPACEDIM + 1> &get_chris_ST();
+    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_Gamma_ST();
+    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_Gamma_L_ST();
     // const Tensor<2, data_t, CH_SPACEDIM + 1> &get_d1_Z_L_ST();
     // // commented, but working!
 
@@ -221,6 +230,7 @@ class GeometricQuantities
     Tensor<2, data_t> *m_A_UU;
     data_t *m_tr_A2;
     data_t *m_div_shift;
+    Tensor<1, data_t> *m_Gamma_L;
 
     // spatial non-conformal
     Tensor<2, data_t> *m_metric_spatial;
@@ -243,6 +253,8 @@ class GeometricQuantities
     Tensor<4, data_t> *m_gauss_codazzi;
     Tensor<3, data_t> *m_codazzi_mainardi;
     Tensor<2, data_t> *m_covd_lapse;
+    Tensor<1, data_t> *m_Gamma_spatial;
+    Tensor<1, data_t> *m_Gamma_L_spatial;
 
     // EM-tensor dependent
     Tensor<1, data_t> *m_momentum_constraints;
@@ -288,9 +300,13 @@ class GeometricQuantities
     data_t *m_ricci_squared;
     data_t *m_kretschmann;
     data_t *m_riemann_squared;
+    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLU_ST;
+    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LULU_ST;
 
     // Advection dependent
     Tensor<3, data_t, CH_SPACEDIM + 1> *m_chris_ST;
+    Tensor<1, data_t, CH_SPACEDIM + 1> *m_Gamma_ST;
+    Tensor<1, data_t, CH_SPACEDIM + 1> *m_Gamma_L_ST;
     // Tensor<2, data_t, CH_SPACEDIM + 1> *m_d1_Z_L_ST;
 
     //////// spatial ////////
@@ -305,6 +321,7 @@ class GeometricQuantities
     void compute_A_UU();
     void compute_tr_A2();
     void compute_div_shift();
+    void compute_Gamma_L();
 
     // spatial non-conformal
     void compute_metric_spatial();
@@ -328,6 +345,8 @@ class GeometricQuantities
     void compute_gauss_codazzi();
     void compute_codazzi_mainardi();
     void compute_covd_lapse();
+    void compute_Gamma_spatial();
+    void compute_Gamma_L_spatial();
 
     // EM-tensor dependent
     void compute_momentum_constraints();
@@ -373,9 +392,13 @@ class GeometricQuantities
     void compute_ricci_squared();
     void compute_kretschmann();
     void compute_riemann_squared();
+    void compute_riemann_LLLU_ST();
+    void compute_riemann_LULU_ST();
 
     // Advection dependent
     void compute_chris_ST();
+    void compute_Gamma_ST();
+    void compute_Gamma_L_ST();
     // void compute_d1_Z_L_ST();
 };
 

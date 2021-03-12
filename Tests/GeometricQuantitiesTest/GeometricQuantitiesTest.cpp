@@ -149,6 +149,11 @@ int runTest(int argc, char *argv[])
     Tensor<1, double> Z_U_conformal;
     Tensor<2, double> d1_chris_contracted;
     Tensor<2, double> covd_chi_conformal;
+    Tensor<2, double> A_LU;
+    Tensor<2, double> A_UU;
+    double tr_A2;
+    double div_shift;
+    Tensor<1, double> Gamma_L;
 
     // spatial
     Tensor<1, double> shift_L;
@@ -163,6 +168,8 @@ int runTest(int argc, char *argv[])
     Tensor<3, double> covd_Kij;
     Tensor<3, double> levi_civita_spatial;
     Tensor<2, double> covd_lapse;
+    Tensor<1, double> Gamma_spatial;
+    Tensor<1, double> Gamma_L_spatial;
 
     // xTensor 3D
     ricci_t<double> ricci;
@@ -202,9 +209,9 @@ int runTest(int argc, char *argv[])
     double dtshift3 = gq.get_rhs_equations().shift[2];
 
     // xTensor 4D
-    Tensor<3, double, 4> chris4D; // code commented, but working!
-    Tensor<1, double> dtGammaC;   // code commented, but working!
-    Tensor<1, double> dtGamma;    // code commented, but working!
+    Tensor<3, double, 4> chris4D;
+    Tensor<1, double> dtGammaC; // code commented, but working!
+    Tensor<1, double> dtGamma;  // code commented, but working!
     double LieTheta;
     double dtTheta;
     Tensor<1, double> LieZi;
@@ -217,6 +224,10 @@ int runTest(int argc, char *argv[])
     double kretschmann;
     Tensor<4, double, 4> weyl_tensor_LLLL;
     double weyl_squared;
+    Tensor<1, double, 4> Gamma_ST;
+    Tensor<1, double, 4> Gamma_L_ST;
+    Tensor<4, double, 4> riemann_LLLU_ST;
+    Tensor<4, double, 4> riemann_LULU_ST;
 
 #include "randomGeometricQuantities.hpp" //Including the auto generated file with calculations
 
@@ -242,6 +253,11 @@ int runTest(int argc, char *argv[])
                              "d1_chris_contracted");
     failed |= relative_error(gq.get_covd_chi_conformal(), covd_chi_conformal,
                              "covd_chi_conformal");
+    failed |= relative_error(gq.get_A_LU(), A_LU, "A_LU");
+    failed |= relative_error(gq.get_A_UU(), A_UU, "A_UU");
+    failed |= relative_error(gq.get_tr_A2(), tr_A2, "tr_A2");
+    failed |= relative_error(gq.get_div_shift(), div_shift, "div_shift");
+    failed |= relative_error(gq.get_Gamma_L(), Gamma_L, "Gamma_L");
 
     // spatial
     failed |= relative_error(gq.get_shift_L(), shift_L, "shift_L");
@@ -261,6 +277,10 @@ int runTest(int argc, char *argv[])
     failed |= relative_error(gq.get_levi_civita_spatial(), levi_civita_spatial,
                              "levi_civita_spatial");
     failed |= relative_error(gq.get_covd_lapse(), covd_lapse, "covd_lapse");
+    failed |=
+        relative_error(gq.get_Gamma_spatial(), Gamma_spatial, "Gamma_spatial");
+    failed |= relative_error(gq.get_Gamma_L_spatial(), Gamma_L_spatial,
+                             "Gamma_L_spatial");
 
     // xTensor 3D
     failed |= relative_error(gq.get_ricci().LL, ricci.LL, "ricci.LL");
@@ -328,7 +348,7 @@ int runTest(int argc, char *argv[])
     failed |= relative_error(gq.get_em_tensor_trace_ST(), TrTmn, "TrTmn");
 
     // xTensor 4D
-    // failed |= relative_error(gq.get_chris_ST(), chris4D, "chris4D");
+    failed |= relative_error(gq.get_chris_ST(), chris4D, "chris4D");
     // failed |=
     // relative_error(gq.get_dt_chris_contracted(), dtGammaC, "dtGammaC");
     // failed |= relative_error(gq.get_dt_chris_spatial_contracted(),
@@ -340,9 +360,9 @@ int runTest(int argc, char *argv[])
     failed |= relative_error(gq.get_covd_Z_L_ST(), covd_Z_L_ST, "covd_Z_L_ST");
     failed |= relative_error(gq.get_lie_Z(), LieZi, "LieZi");
     failed |= relative_error(gq.get_riemann_LLLL_ST(), riemann_LLLL_ST,
-                             "riemann_LLLL_ST");
+                             "riemann_LLLL_ST", 2.e-11);
     failed |= relative_error(gq.get_riemann_LLLL_ST_v2(), riemann_LLLL_ST,
-                             "riemann_LLLL_ST_v2");
+                             "riemann_LLLL_ST_v2", 2.e-11);
     failed |= relative_error(gq.get_ricci_ST(), ricci_ST, "ricci_ST");
     failed |= relative_error(gq.get_ricci_scalar_ST(), ricci_scalar_ST,
                              "ricci_scalar_ST");
@@ -352,9 +372,15 @@ int runTest(int argc, char *argv[])
     failed |= relative_error(gq.get_kretschmann(), gq.get_riemann_squared(),
                              "riemann_squared");
     failed |= relative_error(gq.get_weyl_tensor_LLLL(), weyl_tensor_LLLL,
-                             "weyl_tensor_LLLL");
+                             "weyl_tensor_LLLL", 2.e-11);
     failed |=
         relative_error(gq.get_weyl_squared(), weyl_squared, "weyl_squared");
+    failed |= relative_error(gq.get_Gamma_ST(), Gamma_ST, "Gamma_ST");
+    failed |= relative_error(gq.get_Gamma_L_ST(), Gamma_L_ST, "Gamma_L_ST");
+    failed |= relative_error(gq.get_riemann_LLLU_ST(), riemann_LLLU_ST,
+                             "riemann_LLLU_ST", 2.e-11);
+    failed |= relative_error(gq.get_riemann_LULU_ST(), riemann_LULU_ST,
+                             "riemann_LULU_ST", 2.e-11);
 
     return failed;
 }

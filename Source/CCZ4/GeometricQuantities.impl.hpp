@@ -50,6 +50,7 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_A_UU = nullptr;
     m_tr_A2 = nullptr;
     m_div_shift = nullptr;
+    m_Gamma_L = nullptr;
 
     m_metric_spatial = nullptr;
     m_metric_UU_spatial = nullptr;
@@ -71,6 +72,8 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_riemann_spatial_LLLL = nullptr;
     m_gauss_codazzi = nullptr;
     m_codazzi_mainardi = nullptr;
+    m_Gamma_spatial = nullptr;
+    m_Gamma_L_spatial = nullptr;
 
     m_momentum_constraints = nullptr;
     m_weyl_electric_part = nullptr;
@@ -109,8 +112,12 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_ricci_squared = nullptr;
     m_kretschmann = nullptr;
     m_riemann_squared = nullptr;
+    m_riemann_LLLU_ST = nullptr;
+    m_riemann_LULU_ST = nullptr;
 
     m_chris_ST = nullptr;
+    m_Gamma_ST = nullptr;
+    m_Gamma_L_ST = nullptr;
     // m_d1_Z_L_ST = nullptr;
 }
 
@@ -165,6 +172,11 @@ template_GQ void GeometricQuantities_t::clean()
     {
         delete m_div_shift;
         m_div_shift = nullptr;
+    }
+    if (m_Gamma_L != nullptr)
+    {
+        delete m_Gamma_L;
+        m_Gamma_L = nullptr;
     }
 
     if (m_metric_spatial != nullptr)
@@ -266,6 +278,16 @@ template_GQ void GeometricQuantities_t::clean()
     {
         delete m_codazzi_mainardi;
         m_codazzi_mainardi = nullptr;
+    }
+    if (m_Gamma_spatial != nullptr)
+    {
+        delete m_Gamma_spatial;
+        m_Gamma_spatial = nullptr;
+    }
+    if (m_Gamma_L_spatial != nullptr)
+    {
+        delete m_Gamma_L_spatial;
+        m_Gamma_L_spatial = nullptr;
     }
 
     if (m_metric_ST != nullptr)
@@ -427,6 +449,16 @@ template_GQ void GeometricQuantities_t::clean_eom_dependent()
         delete m_riemann_squared;
         m_riemann_squared = nullptr;
     }
+    if (m_riemann_LLLU_ST != nullptr)
+    {
+        delete m_riemann_LLLU_ST;
+        m_riemann_LLLU_ST = nullptr;
+    }
+    if (m_riemann_LULU_ST != nullptr)
+    {
+        delete m_riemann_LULU_ST;
+        m_riemann_LULU_ST = nullptr;
+    }
 
     clean_advection_dependent();
 }
@@ -455,6 +487,16 @@ template_GQ void GeometricQuantities_t::clean_advection_dependent()
     {
         delete m_chris_ST;
         m_chris_ST = nullptr;
+    }
+    if (m_Gamma_ST != nullptr)
+    {
+        delete m_Gamma_ST;
+        m_Gamma_ST = nullptr;
+    }
+    if (m_Gamma_L_ST != nullptr)
+    {
+        delete m_Gamma_L_ST;
+        m_Gamma_L_ST = nullptr;
     }
     /*
     if (m_d1_Z_L_ST != nullptr)
@@ -634,6 +676,12 @@ template_GQ const data_t &GeometricQuantities_t::get_div_shift()
         compute_div_shift();
     return *m_div_shift;
 }
+template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Gamma_L()
+{
+    if (m_Gamma_L == nullptr)
+        compute_Gamma_L();
+    return *m_Gamma_L;
+}
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_metric_spatial()
 {
@@ -795,6 +843,19 @@ GeometricQuantities_t::get_codazzi_mainardi()
     if (m_codazzi_mainardi == nullptr)
         compute_codazzi_mainardi();
     return *m_codazzi_mainardi;
+}
+template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Gamma_spatial()
+{
+    if (m_Gamma_spatial == nullptr)
+        compute_Gamma_spatial();
+    return *m_Gamma_spatial;
+}
+template_GQ const Tensor<1, data_t> &
+GeometricQuantities_t::get_Gamma_L_spatial()
+{
+    if (m_Gamma_L_spatial == nullptr)
+        compute_Gamma_L_spatial();
+    return *m_Gamma_L_spatial;
 }
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<1, data_t> &
@@ -1043,6 +1104,24 @@ template_GQ const data_t &GeometricQuantities_t::get_riemann_squared()
         compute_riemann_squared();
     return *m_riemann_squared;
 }
+template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
+GeometricQuantities_t::get_riemann_LLLU_ST()
+{
+    CH_assert(m_formulation >= 0); // formulation is set
+    CH_assert(GR_SPACEDIM == 3);
+    if (m_riemann_LLLU_ST == nullptr)
+        compute_riemann_LLLU_ST();
+    return *m_riemann_LLLU_ST;
+}
+template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
+GeometricQuantities_t::get_riemann_LULU_ST()
+{
+    CH_assert(m_formulation >= 0); // formulation is set
+    CH_assert(GR_SPACEDIM == 3);
+    if (m_riemann_LULU_ST == nullptr)
+        compute_riemann_LULU_ST();
+    return *m_riemann_LULU_ST;
+}
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<3, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_chris_ST()
@@ -1050,6 +1129,20 @@ GeometricQuantities_t::get_chris_ST()
     if (m_chris_ST == nullptr)
         compute_chris_ST();
     return *m_chris_ST;
+}
+template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+GeometricQuantities_t::get_Gamma_ST()
+{
+    if (m_Gamma_ST == nullptr)
+        compute_Gamma_ST();
+    return *m_Gamma_ST;
+}
+template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+GeometricQuantities_t::get_Gamma_L_ST()
+{
+    if (m_Gamma_L_ST == nullptr)
+        compute_Gamma_L_ST();
+    return *m_Gamma_L_ST;
 }
 /*
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
@@ -1187,6 +1280,13 @@ template_GQ void GeometricQuantities_t::compute_div_shift()
         delete m_div_shift;
 
     m_div_shift = new data_t(TensorAlgebra::compute_trace(get_d1_vars().shift));
+}
+template_GQ void GeometricQuantities_t::compute_Gamma_L()
+{
+    if (m_Gamma_L != nullptr)
+        delete m_Gamma_L;
+    m_Gamma_L = new Tensor<1, data_t>(TensorAlgebra::compute_dot_product(
+        get_chris().contracted, get_vars().h));
 }
 //////////////////////////////////////////////////////////////////////////
 template_GQ void GeometricQuantities_t::compute_metric_spatial()
@@ -1405,21 +1505,6 @@ template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
 
     const Tensor<2, data_t> covDtilde2chi = get_covd_chi_conformal();
 
-    /*
-    const data_t boxtildechi =
-        TensorAlgebra::compute_trace(covDtilde2chi, h_UU);
-    const data_t dchi_dot_dchi =
-        TensorAlgebra::compute_dot_product(d1.chi, d1.chi, h_UU);
-    */
-
-    data_t boxtildechi = 0.;
-    data_t dchi_dot_dchi = 0.;
-    FOR2(i, j)
-    {
-        boxtildechi += covDtilde2chi[i][j] * h_UU[i][j];
-        dchi_dot_dchi += d1.chi[i] * d1.chi[j] * h_UU[i][j];
-    }
-
     Tensor<1, data_t> chris_q;
     Tensor<1, Tensor<1, data_t>> d1_chris_q;
     if (q != 2)
@@ -1448,8 +1533,22 @@ template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
     if (q != 0 && m_formulation == CCZ4::USE_CCZ4) // only if in CCZ4
         TensorAlgebra::hard_copy(Z_U_q, get_Z_U_conformal());
 
+    /*
+    const data_t boxtildechi =
+        TensorAlgebra::compute_trace(covDtilde2chi, h_UU);
+    const data_t dchi_dot_dchi =
+        TensorAlgebra::compute_dot_product(d1.chi, d1.chi, h_UU);
+    */
+
     Tensor<3, data_t> chris_LLU = {0.};
-    FOR(i, j, k, l) { chris_LLU[i][j][k] += h_UU[k][l] * chris.LLL[i][j][l]; }
+    data_t boxtildechi = 0.;
+    data_t dchi_dot_dchi = 0.;
+    FOR(i, j)
+    {
+        boxtildechi += covDtilde2chi[i][j] * h_UU[i][j];
+        dchi_dot_dchi += d1.chi[i] * d1.chi[j] * h_UU[i][j];
+        FOR(k, l) { chris_LLU[i][j][k] += h_UU[k][l] * chris.LLL[i][j][l]; }
+    }
 
     FOR(i, j)
     {
@@ -1604,6 +1703,43 @@ template_GQ void GeometricQuantities_t::compute_codazzi_mainardi()
         (*m_codazzi_mainardi)[i][j][k] = covd_Kij[i][k][j] - covd_Kij[j][k][i];
     }
 }
+template_GQ void GeometricQuantities_t::compute_Gamma_spatial()
+{
+    if (m_Gamma_spatial != nullptr)
+        delete m_Gamma_spatial;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &h_UU = get_h_UU();
+    const auto &chris = get_chris();
+
+    m_Gamma_spatial = new Tensor<1, data_t>;
+    FOR(i)
+    {
+        (*m_Gamma_spatial)[i] = chris.contracted[i] * vars.chi;
+        FOR(j)
+        {
+            (*m_Gamma_spatial)[i] +=
+                (GR_SPACEDIM - 2.) / 2. * h_UU[i][j] * d1.chi[j];
+        }
+    }
+}
+template_GQ void GeometricQuantities_t::compute_Gamma_L_spatial()
+{
+    if (m_Gamma_L_spatial != nullptr)
+        delete m_Gamma_L_spatial;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &Gamma_L = get_Gamma_L();
+
+    m_Gamma_L_spatial = new Tensor<1, data_t>;
+    FOR(i)
+    {
+        (*m_Gamma_L_spatial)[i] =
+            Gamma_L[i] + (GR_SPACEDIM - 2.) / 2. * d1.chi[i] / vars.chi;
+    }
+}
 //////////////////////////////////////////////////////////////////////////
 template_GQ void GeometricQuantities_t::compute_momentum_constraints()
 {
@@ -1709,223 +1845,154 @@ template_GQ void GeometricQuantities_t::compute_lie_derivatives()
     m_lie_derivatives = new Vars;
 
     const auto &vars = get_vars();
-
-    ///////////////////////////
-    // RHS chi
-    m_lie_derivatives->chi = (2.0 / GR_SPACEDIM) * vars.chi * vars.K;
-
-    ///////////////////////////
-    // RHS hij
-    FOR(i, j) { m_lie_derivatives->h[i][j] = -2.0 * vars.A[i][j]; }
-
-    ///////////////////////////
-    // RHS Aij
     const auto &d1 = get_d1_vars();
     const auto &d2 = get_d2_vars();
     const auto &h_UU = get_h_UU();
-    const auto &chris_spatial = get_chris_spatial();
     const auto &A_LU = get_A_LU();
+    const auto &chris = get_chris();
+    const Tensor<2, data_t> &A_UU = get_A_UU();
+    const data_t div_shift = get_div_shift();
 
     const ricci_t<data_t> ricci = get_ricci_qDZ(2);
-    const Tensor<2, data_t> covd2lapse = get_covd_lapse();
+    const Tensor<2, data_t> covd2lapse =
+        get_covd_lapse(); // calculates chris_spatial -> not very efficient
 
-    const Tensor<2, data_t> Aik_Ajk =
-        TensorAlgebra::compute_dot_product(vars.A, A_LU);
-    data_t K_minus_2Theta = vars.K;
-    if (m_formulation == CCZ4::USE_CCZ4)
-        K_minus_2Theta -= 2. * vars.Theta;
+    // {
+    // CH_TIME("GeometricQuantities::compute_lie_derivatives::main_part");
 
+    bool ccz4 = (m_formulation == CCZ4::USE_CCZ4);
+    bool k3 = (ccz4 && m_ccz4_params->kappa1 != 1.);
+    bool vacuum = (m_em_tensor == nullptr);
+
+    data_t kappa1 =
+        m_ccz4_params->kappa1 / (m_ccz4_params->covariantZ4 ? vars.lapse : 1.);
+
+    data_t K_minus_2Theta = vars.K - (ccz4 ? 2. * vars.Theta : 0.);
+
+    Tensor<2, data_t> Aik_Ajk = 0.;
+    data_t tr_covd2lapse = 0.;
     Tensor<2, data_t> LIE_A_TF_part;
+
+    // LIE chi
+    m_lie_derivatives->chi = (2.0 / GR_SPACEDIM) * vars.chi * vars.K;
+
     FOR(i, j)
     {
+        // LIE hij
+        m_lie_derivatives->h[i][j] = -2.0 * vars.A[i][j];
+
+        FOR(k) { Aik_Ajk[i][j] += vars.A[i][k] * A_LU[j][k]; }
+
+        tr_covd2lapse += covd2lapse[i][j] * h_UU[i][j] * vars.chi;
+
         LIE_A_TF_part[i][j] =
-            vars.chi * (-covd2lapse[i][j] / vars.lapse + ricci.LL[i][j]);
+            vars.chi * (-covd2lapse[i][j] / vars.lapse + ricci.LL[i][j]) -
+            (vacuum
+                 ? 0.
+                 : vars.chi * m_16_pi_G_Newton / 2. * m_em_tensor->Sij[i][j]);
     }
-    // Matter terms
-    if (m_em_tensor != nullptr) // if EM-tensor is set (cosmological constant
-                                // does not matter for Aij RHS)
-    {
-        FOR(i, j)
-        {
-            LIE_A_TF_part[i][j] +=
-                -vars.chi * m_16_pi_G_Newton / 2. * m_em_tensor->Sij[i][j];
-        }
-    }
+
     TensorAlgebra::make_trace_free(LIE_A_TF_part, vars.h, h_UU);
 
-    FOR(i, j)
+    Tensor<1, data_t> Z_U_conformal = 0.;
+    if (ccz4)
+        Z_U_conformal = get_Z_U_conformal();
+
+    data_t tr_A2 = 0.;
+    FOR(i)
     {
-        m_lie_derivatives->A[i][j] = LIE_A_TF_part[i][j] +
-                                     vars.A[i][j] * K_minus_2Theta -
-                                     2. * Aik_Ajk[i][j];
+        // LIE Gamma
+        m_lie_derivatives->Gamma[i] =
+            (-4. / GR_SPACEDIM * vars.K - 2. * kappa1 +
+             (k3 ? 4. / GR_SPACEDIM * (m_ccz4_params->kappa3 - 1.) /
+                       vars.lapse * div_shift
+                 : 0.)) *
+            Z_U_conformal[i];
+
+        FOR(j)
+        {
+            // LIE Gamma
+            m_lie_derivatives->Gamma[i] +=
+                -(2. / vars.lapse * d1.lapse[j] +
+                  GR_SPACEDIM * d1.chi[j] / vars.chi) *
+                    A_UU[i][j] +
+                2. *
+                    (-(GR_SPACEDIM - 1.) / (double)GR_SPACEDIM * d1.K[j] +
+                     d1.Theta[j] - vars.Theta * d1.lapse[j] / vars.lapse -
+                     (vacuum ? 0.
+                             : 0.5 * m_16_pi_G_Newton * m_em_tensor->Si[j])) *
+                    h_UU[i][j] -
+                (k3 ? 2. * (m_ccz4_params->kappa3 - 1.) / vars.lapse *
+                          Z_U_conformal[j] * d1.shift[i][j]
+                    : 0.);
+
+            FOR(k)
+            {
+                // LIE Gamma
+                m_lie_derivatives->Gamma[i] +=
+                    2. * chris.ULL[i][j][k] * A_UU[j][k] +
+                    ((GR_SPACEDIM - 2.) / (double)GR_SPACEDIM *
+                         d2.shift[k][j][k] * h_UU[j][i] +
+                     d2.shift[i][j][k] * h_UU[j][k]) /
+                        vars.lapse;
+            }
+
+            // LIE Aij
+            m_lie_derivatives->A[i][j] = LIE_A_TF_part[i][j] +
+                                         vars.A[i][j] * K_minus_2Theta -
+                                         2. * Aik_Ajk[i][j];
+
+            tr_A2 += Aik_Ajk[i][j] * h_UU[i][j];
+        }
     }
 
-    ///////////////////////////
-    ///////////////////////////
-    const auto &metric_UU_spatial = get_metric_UU_spatial();
-    const auto &chris = get_chris();
-
-    const data_t tr_covd2lapse =
-        TensorAlgebra::compute_trace(covd2lapse, metric_UU_spatial);
-    const data_t tr_A2 = TensorAlgebra::compute_trace(Aik_Ajk, h_UU);
-
-    data_t kappa1 = m_ccz4_params->kappa1;
-    if (m_ccz4_params->covariantZ4)
-        kappa1 /= vars.lapse;
-
-    if (m_formulation == CCZ4::USE_BSSN)
+    if (ccz4)
     {
-        ///////////////////////////
-        // RHS K
-
-        // Use hamiltonian constraint to remove ricci.scalar for BSSN update
-        m_lie_derivatives->K =
-            -tr_covd2lapse / vars.lapse +
-            (tr_A2 + vars.K * vars.K / GR_SPACEDIM) -
-            2. / (GR_SPACEDIM - 1.) * m_cosmological_constant +
-            (m_em_tensor == nullptr
-                 ? 0.
-                 : m_16_pi_G_Newton / (2. * (GR_SPACEDIM - 1.)) *
-                       (m_em_tensor->S +
-                        (GR_SPACEDIM - 2.) * m_em_tensor->rho));
-
-        ///////////////////////////
-        // RHS Theta
-        m_lie_derivatives->Theta = 0.;
-    }
-    else
-    {
-        ///////////////////////////
-        // RHS K
+        // LIE K
         m_lie_derivatives->K =
             -tr_covd2lapse / vars.lapse + ricci.scalar +
             vars.K * K_minus_2Theta -
             2. * GR_SPACEDIM / (GR_SPACEDIM - 1.) * kappa1 *
                 (1. + m_ccz4_params->kappa2) * vars.Theta -
             2. * GR_SPACEDIM / (GR_SPACEDIM - 1.) * m_cosmological_constant +
-            (m_em_tensor == nullptr
-                 ? 0.
-                 : m_16_pi_G_Newton / (2. * (GR_SPACEDIM - 1.)) *
-                       (m_em_tensor->S - GR_SPACEDIM * m_em_tensor->rho));
+            (vacuum ? 0.
+                    : m_16_pi_G_Newton / (2. * (GR_SPACEDIM - 1.)) *
+                          (m_em_tensor->S - GR_SPACEDIM * m_em_tensor->rho));
 
-        ///////////////////////////
-        // RHS Theta
         const auto &Z_U = get_Z_U();
         const data_t Z_U_dot_dlapse =
             TensorAlgebra::compute_dot_product(Z_U, d1.lapse);
 
+        // LIE Theta
         m_lie_derivatives->Theta =
             0.5 * (ricci.scalar - 2. * vars.K * vars.Theta +
                    (GR_SPACEDIM - 1.) / (double)GR_SPACEDIM * vars.K * vars.K -
                    tr_A2 - 2. / vars.lapse * Z_U_dot_dlapse -
                    2. * kappa1 * (2. + m_ccz4_params->kappa2) * vars.Theta) -
             m_cosmological_constant -
-            (m_em_tensor == nullptr
-                 ? 0.
-                 : 0.5 * m_16_pi_G_Newton * m_em_tensor->rho);
+            (vacuum ? 0. : 0.5 * m_16_pi_G_Newton * m_em_tensor->rho);
     }
-
-    ///////////////////////////
-    // RHS Gamma
-
-    const Tensor<2, data_t> &A_UU = get_A_UU();
-    const data_t div_shift = get_div_shift();
-
-    /*
-        const Tensor<1, data_t> A_dot_dlapse =
-            TensorAlgebra::compute_dot_product(A_UU, d1.lapse);
-        // \Gamma^i_^{jk} A^{jk}. - Note the abuse of the compute trace
-       function. const Tensor<1, data_t> chris_dot_A =
-            TensorAlgebra::compute_trace(chris.ULL, A_UU);
-        const Tensor<1, data_t> A_dot_dchi =
-            TensorAlgebra::compute_dot_product(A_UU, d1.chi);
-        const Tensor<1, data_t> d1K_U =
-            TensorAlgebra::compute_dot_product(d1.K, h_UU);
-        const Tensor<1, data_t> d2shift_trace_U =
-            TensorAlgebra::compute_dot_product(
-                TensorAlgebra::compute_trace(d2.shift, 0, 2), h_UU);
-        const Tensor<1, data_t> d2shift_laplacian =
-            TensorAlgebra::compute_trace(d2.shift, h_UU);
-        const Tensor<1, data_t> d1Theta_U =
-            TensorAlgebra::compute_dot_product(d1.Theta, h_UU);
-        const Tensor<1, data_t> d1lapse_U =
-            TensorAlgebra::compute_dot_product(d1.lapse, h_UU);
-    */
-
-    Tensor<1, data_t> d2shift_trace = 0.;
-    FOR(i, j) { d2shift_trace[i] += d2.shift[j][i][j]; }
-
-    Tensor<1, data_t> A_dot_dlapse = 0.;
-    Tensor<1, data_t> chris_dot_A = 0.;
-    Tensor<1, data_t> A_dot_dchi = 0.;
-    Tensor<1, data_t> d1K_U = 0.;
-    Tensor<1, data_t> d2shift_trace_U = 0.;
-    Tensor<1, data_t> d2shift_laplacian = 0.;
-    Tensor<1, data_t> d1Theta_U = 0.;
-    Tensor<1, data_t> d1lapse_U = 0.;
-
-    FOR(i)
+    else
     {
-        FOR(j)
-        {
-            A_dot_dlapse[i] += A_UU[i][j] * d1.lapse[j];
+        // LIE K
+        // Use hamiltonian constraint to remove ricci.scalar for BSSN update
+        m_lie_derivatives->K =
+            -tr_covd2lapse / vars.lapse +
+            (tr_A2 + vars.K * vars.K / GR_SPACEDIM) -
+            2. / (GR_SPACEDIM - 1.) * m_cosmological_constant +
+            (vacuum ? 0.
+                    : m_16_pi_G_Newton / (2. * (GR_SPACEDIM - 1.)) *
+                          (m_em_tensor->S +
+                           (GR_SPACEDIM - 2.) * m_em_tensor->rho));
 
-            A_dot_dchi[i] += A_UU[i][j] * d1.chi[j];
-
-            d1K_U[i] += d1.K[j] * h_UU[i][j];
-
-            d2shift_trace_U[i] += d2shift_trace[j] * h_UU[j][i];
-
-            d1Theta_U[i] += d1.Theta[j] * h_UU[j][i];
-
-            d1lapse_U[i] += d1.lapse[j] * h_UU[j][i];
-
-            FOR(k)
-            {
-                chris_dot_A[i] += chris.ULL[i][j][k] * A_UU[j][k];
-                d2shift_laplacian[i] = d2.shift[i][j][k] * h_UU[j][k];
-            }
-        }
-    }
-
-    FOR(i)
-    {
-        Tensor<1, data_t> Si_U = 0.;
-        if (m_em_tensor != nullptr)
-            Si_U = TensorAlgebra::compute_dot_product(m_em_tensor->Si, h_UU);
-
-        m_lie_derivatives->Gamma[i] =
-            -2. / vars.lapse * A_dot_dlapse[i] + 2. * chris_dot_A[i] -
-            GR_SPACEDIM * A_dot_dchi[i] / vars.chi -
-            2. * (GR_SPACEDIM - 1.) / (double)GR_SPACEDIM * d1K_U[i] +
-            ((GR_SPACEDIM - 2.) / (double)GR_SPACEDIM * d2shift_trace_U[i] +
-             d2shift_laplacian[i]) /
-                vars.lapse -
-            (m_em_tensor == nullptr ? 0. : m_16_pi_G_Newton * Si_U[i]);
-
-        if (m_formulation == CCZ4::USE_CCZ4)
-        {
-            const auto &Z_U_conformal = get_Z_U_conformal();
-            const Tensor<1, data_t> Z_U_conformal_dot_dshift =
-                TensorAlgebra::compute_dot_product(Z_U_conformal, d1.shift, 0,
-                                                   1);
-
-            m_lie_derivatives->Gamma[i] +=
-                2. * (d1Theta_U[i] - vars.Theta * d1lapse_U[i] / vars.lapse -
-                      2. / GR_SPACEDIM * vars.K * Z_U_conformal[i]) -
-                2. * kappa1 * Z_U_conformal[i];
-
-            if (m_ccz4_params->kappa3 != 1.)
-                m_lie_derivatives->Gamma[i] +=
-                    2. * (m_ccz4_params->kappa3 - 1.) / vars.lapse *
-                    (2. / GR_SPACEDIM * Z_U_conformal[i] * div_shift -
-                     Z_U_conformal_dot_dshift[i]);
-        }
+        // LIE Theta
+        m_lie_derivatives->Theta = 0.;
     }
 
     m_lie_derivatives->lapse = 0.;
     m_lie_derivatives->shift = 0.;
     m_lie_derivatives->B = 0.;
+    // }
 }
 template_GQ void GeometricQuantities_t::compute_lie_extrinsic_curvature()
 {
@@ -1980,10 +2047,10 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations()
     const auto &vars = get_vars();
     const auto &d1 = get_d1_vars();
     const auto &advec = get_advection();
-    const auto &chris = get_chris();
     const auto &LIE = get_lie_derivatives();
+    const auto &chris = get_chris();
 
-    const data_t div_shift = get_div_shift();
+    const data_t &div_shift = get_div_shift();
 
     {
         CH_TIME("GeometricQuantities::compute_rhs_equations::RHS");
@@ -2585,8 +2652,13 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST()
     const auto &n_U = get_normal_U_ST();
     const auto &n_L = get_normal_L_ST();
     const auto &g = get_metric_ST();
-    const auto &Tmn = get_em_tensor_ST();
-    const auto &T = get_em_tensor_trace_ST();
+
+    if (m_em_tensor != nullptr)
+    {
+        // compute these tensors! To use below directly
+        get_em_tensor_ST();
+        get_em_tensor_trace_ST();
+    }
 
     data_t kappa1 = m_ccz4_params->kappa1;
     if (m_ccz4_params->covariantZ4)
@@ -2601,7 +2673,11 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST()
     {
         (*m_ricci_ST)[m][n] =
             m_16_pi_G_Newton / 2. *
-                (Tmn[m][n] - g[m][n] * T / (GR_SPACEDIM - 1.)) +
+                (m_em_tensor == nullptr
+                     ? 0.
+                     : (*m_em_tensor_ST)[m][n] - g[m][n] *
+                                                     (*m_em_tensor_trace_ST) /
+                                                     (GR_SPACEDIM - 1.)) +
             m_cosmological_constant * g[m][n] * 2. / (GR_SPACEDIM - 1.);
 
         if (m_formulation == CCZ4::USE_CCZ4)
@@ -2657,18 +2733,43 @@ template_GQ void GeometricQuantities_t::compute_riemann_squared()
     if (m_riemann_squared != nullptr)
         delete m_riemann_squared;
 
-    const auto &riemann = get_riemann_LLLL_ST();
-    const auto &g_UU = get_metric_UU_ST();
+    const auto &riemann_LULU = get_riemann_LULU_ST();
 
     m_riemann_squared = new data_t(0.);
     FOR_ST(a, b, c, d)
     {
-        FOR_ST(m, n, r, s)
-        {
-            (*m_riemann_squared) += riemann[a][b][c][d] * riemann[m][n][r][s] *
-                                    g_UU[a][m] * g_UU[b][n] * g_UU[c][r] *
-                                    g_UU[d][s];
-        }
+        (*m_riemann_squared) +=
+            riemann_LULU[a][b][c][d] * riemann_LULU[b][a][d][c];
+    }
+}
+template_GQ void GeometricQuantities_t::compute_riemann_LLLU_ST()
+{
+    if (m_riemann_LLLU_ST != nullptr)
+        delete m_riemann_LLLU_ST;
+
+    const auto &g_UU = get_metric_UU_ST();
+    const auto &riemann_LLLL = get_riemann_LLLL_ST();
+
+    m_riemann_LLLU_ST = new Tensor<4, data_t, CH_SPACEDIM + 1>({0.});
+    FOR_ST(a, b, c, d, e)
+    {
+        (*m_riemann_LLLU_ST)[a][b][c][d] +=
+            riemann_LLLL[a][b][c][e] * g_UU[e][d];
+    }
+}
+template_GQ void GeometricQuantities_t::compute_riemann_LULU_ST()
+{
+    if (m_riemann_LULU_ST != nullptr)
+        delete m_riemann_LULU_ST;
+
+    const auto &g_UU = get_metric_UU_ST();
+    const auto &riemann_LLLU = get_riemann_LLLU_ST();
+
+    m_riemann_LULU_ST = new Tensor<4, data_t, CH_SPACEDIM + 1>({0.});
+    FOR_ST(a, b, c, d, e)
+    {
+        (*m_riemann_LULU_ST)[a][b][c][d] +=
+            riemann_LLLU[a][e][c][d] * g_UU[e][b];
     }
 }
 //////////////////////////////////////////////////////////////////////////
@@ -2766,6 +2867,20 @@ template_GQ void GeometricQuantities_t::compute_chris_ST()
             }
         }
     }
+}
+template_GQ void GeometricQuantities_t::compute_Gamma_ST()
+{
+    if (m_Gamma_ST != nullptr)
+        delete m_Gamma_ST;
+    m_Gamma_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>(
+        TensorAlgebra::compute_trace(get_chris_ST(), get_metric_UU_ST()));
+}
+template_GQ void GeometricQuantities_t::compute_Gamma_L_ST()
+{
+    if (m_Gamma_L_ST != nullptr)
+        delete m_Gamma_L_ST;
+    m_Gamma_L_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>(
+        TensorAlgebra::compute_dot_product(get_Gamma_ST(), get_metric_ST()));
 }
 /*
 template_GQ void GeometricQuantities_t::compute_d1_Z_L_ST()
