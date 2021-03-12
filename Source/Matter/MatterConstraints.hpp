@@ -6,7 +6,6 @@
 #ifndef MATTERCONSTRAINTS_HPP_
 #define MATTERCONSTRAINTS_HPP_
 
-#include "CCZ4Geometry.hpp"
 #include "Cell.hpp"
 #include "Constraints.hpp"
 #include "FourthOrderDerivatives.hpp"
