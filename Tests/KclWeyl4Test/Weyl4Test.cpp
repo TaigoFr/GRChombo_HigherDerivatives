@@ -202,18 +202,6 @@ int main()
         }
     }
 
-    CCZ4::params_t params;
-    params.kappa1 = 0.;
-    params.kappa2 = 0.;
-    params.kappa3 = 0.;
-    params.covariantZ4 = false;
-    params.shift_Gamma_coeff = 0.75;
-    params.lapse_advec_coeff = 1.;
-    params.shift_advec_coeff = 0.;
-    params.eta = 1.0;
-    params.lapse_power = 1.0;
-    params.lapse_coeff = 2.0;
-
     Real null = 0;
 
     std::array<double, CH_SPACEDIM> centerGW = {0, 0, 0};

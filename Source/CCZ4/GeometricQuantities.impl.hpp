@@ -582,7 +582,7 @@ template_GQ void GeometricQuantities_t::set_all_vars(const Vars &a_vars,
 ///////////////////////////////    GETS    ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-template_GQ const int GeometricQuantities_t::get_formulation() const
+template_GQ int GeometricQuantities_t::get_formulation() const
 {
     return m_formulation;
 }
@@ -591,8 +591,7 @@ GeometricQuantities_t::get_formulation_params() const
 {
     return *m_ccz4_params;
 }
-template_GQ const double
-GeometricQuantities_t::get_cosmological_constant() const
+template_GQ double GeometricQuantities_t::get_cosmological_constant() const
 {
     return m_cosmological_constant;
 }
@@ -1864,10 +1863,7 @@ template_GQ void GeometricQuantities_t::compute_hamiltonian_constraint()
         delete m_hamiltonian_constraint;
 
     const auto &vars = get_vars();
-    const auto &h_UU = get_h_UU();
     const auto &ricci = get_ricci();
-
-    const auto &A_UU = get_A_UU();
     const data_t &tr_A2 = get_tr_A2();
 
     m_hamiltonian_constraint = new data_t;
@@ -2056,7 +2052,6 @@ template_GQ void GeometricQuantities_t::compute_eom_double_normal_projection()
         delete m_eom_double_normal_projection;
 
     const auto &vars = get_vars();
-    const auto &LIE = get_lie_derivatives();
     const auto &Kij = get_extrinsic_curvature();
     const auto &h_UU_spatial = get_metric_UU_spatial();
     const auto &covd_lapse = get_covd_lapse();
@@ -3022,7 +3017,6 @@ GeometricQuantities_t::compute_LieD_weyl_electric_part(
     const Tensor<2, data_t> &Bij)
 {
     const auto &vars = get_vars();
-    const auto &d1 = get_d1_vars();
 
     const auto &metric_spatial = get_metric_spatial();
     const auto &metric_UU_spatial = get_metric_UU_spatial();
@@ -3065,7 +3059,6 @@ GeometricQuantities_t::compute_LieD_weyl_magnetic_part(
     const Tensor<2, data_t> &Bij)
 {
     const auto &vars = get_vars();
-    const auto &d1 = get_d1_vars();
 
     const auto &metric_spatial = get_metric_spatial();
     const auto &metric_UU_spatial = get_metric_UU_spatial();
@@ -3110,7 +3103,6 @@ GeometricQuantities_t::compute_dt_weyl_electric_part(
 {
     const auto &vars = get_vars();
     const auto &d1 = get_d1_vars();
-    const auto &advec = get_advection();
 
     const Tensor<2, data_t> LieD_E =
         compute_LieD_weyl_electric_part(d1Eij, d1Bij, Eij, Bij);
@@ -3136,7 +3128,6 @@ GeometricQuantities_t::compute_dt_weyl_magnetic_part(
 {
     const auto &vars = get_vars();
     const auto &d1 = get_d1_vars();
-    const auto &advec = get_advection();
 
     const Tensor<2, data_t> LieD_B =
         compute_LieD_weyl_magnetic_part(d1Eij, d1Bij, Eij, Bij);

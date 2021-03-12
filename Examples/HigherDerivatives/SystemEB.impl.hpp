@@ -268,7 +268,6 @@ void SystemEB::add_matter_rhs(
     GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
 {
     const auto &vars = gq.get_vars();
-    const auto &d1 = gq.get_d1_vars();
 
     FOR(i, j)
     {

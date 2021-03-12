@@ -54,8 +54,11 @@ class WeakFieldConditionDiagnostic
         data_t weak_field_condition =
             my_matter.weak_field_condition(weak_field, gq);
 
+        data_t weak_field_after_WFC = weak_field * (1. - weak_field_condition);
+
         current_cell.store_vars(weak_field, c_WeakFieldVar);
         current_cell.store_vars(weak_field_condition, c_WeakFieldCondition);
+        current_cell.store_vars(weak_field_after_WFC, c_WeakFieldVar_after_WFC);
     }
 
   protected:

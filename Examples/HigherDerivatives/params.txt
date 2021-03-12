@@ -56,7 +56,7 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 4 6 0 5 0      #Bphys
 vars_parity_diagnostic = 0 0              #Ham and Mom
                          0 0              #Eij and Bij diffs
-                         0 0              #WeakFieldVar and Weak field condition
+                         0 0 0            #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC
 
 # if sommerfeld boundaries selected, must select
 # non zero asymptotic values
@@ -75,8 +75,8 @@ extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33
 # HDF5files are written every dt = L/N*dt_multiplier*checkpoint_interval
 checkpoint_interval = 0
 plot_interval = 1
-num_plot_vars = 9
-plot_vars = chi lapse shift1 Ham Mom E_diff B_diff WeakFieldVar WeakFieldCondition
+num_plot_vars = 10
+plot_vars = chi lapse shift1 Ham Mom E_diff B_diff WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC
 dt_multiplier = 0.25
 stop_time = 20.0
 #max_steps = 1
@@ -110,8 +110,8 @@ spin = 0.0 # for Kerr BH only
 # amplitude = 0.05
 # r0 = 1.
 
-epsilon = 0.00
-tau = 0.1
+epsilon = 0.00  # energy scale
+tau     = 0.1   # damping time scale for evolved Eij/Bij
 
 chi_threshold = 0.06
 chi_width     = 0.2

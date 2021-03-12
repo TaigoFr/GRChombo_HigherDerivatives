@@ -17,6 +17,7 @@ enum
 
     c_WeakFieldVar,
     c_WeakFieldCondition,
+    c_WeakFieldVar_after_WFC,
 
     NUM_DIAGNOSTIC_VARS
 };
@@ -24,7 +25,13 @@ enum
 namespace DiagnosticVariables
 {
 static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
-    "Ham", "Mom", "E_diff", "B_diff", "WeakFieldVar", "WeakFieldCondition"};
+    "Ham",
+    "Mom",
+    "E_diff",
+    "B_diff",
+    "WeakFieldVar",
+    "WeakFieldCondition",
+    "WeakFieldVar_after_WFC"};
 }
 
 #endif /* DIAGNOSTICVARIABLES_HPP */
