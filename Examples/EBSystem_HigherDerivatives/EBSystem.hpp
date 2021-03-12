@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef SYSTEMEB_HPP_
-#define SYSTEMEB_HPP_
+#ifndef EBSYSTEM_HPP_
+#define EBSYSTEM_HPP_
 
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS, total num of components
@@ -12,7 +12,7 @@
 
 #include "GeometricQuantities.hpp"
 
-class SystemEB
+class EBSystem
 {
   public:
     struct params_t
@@ -20,8 +20,8 @@ class SystemEB
         double tau; // for the evolution equation of Eij and Bij
     };
 
-    //!  Constructor of class SystemEB, inputs are the matter parameters.
-    SystemEB(params_t a_params) : m_params(a_params) {}
+    //!  Constructor of class EBSystem, inputs are the matter parameters.
+    EBSystem(params_t a_params) : m_params(a_params) {}
 
     //! Structure containing the rhs variables for the matter fields
     template <class data_t> struct Vars
@@ -98,6 +98,6 @@ class SystemEB
     params_t m_params;
 };
 
-#include "SystemEB.impl.hpp"
+#include "EBSystem.impl.hpp"
 
-#endif /* SYSTEMEB_HPP_ */
+#endif /* EBSYSTEM_HPP_ */

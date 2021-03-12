@@ -13,7 +13,7 @@
 // Problem specific includes:
 #include "C2EFT.hpp"
 #include "CCZ4.hpp"
-#include "SystemEB.hpp"
+#include "CSystem.hpp"
 
 // #include "MinkowskiPerturbed.hpp"
 // #include "SchwarzschildIsotropic.hpp"
@@ -56,7 +56,8 @@ class SimulationParameters : public SimulationParametersBase
         G_Newton = 1.;
         hd_params.epsilon /= (G_Newton * 8. * M_PI);
 
-        pp.load("tau", eb_params.tau);
+        pp.load("tau", c_params.tau);
+        pp.load("sigma", c_params.sigma);
 
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * id_params.mass);
@@ -68,8 +69,8 @@ class SimulationParameters : public SimulationParametersBase
     // Schwarzschild bh initial data
     InitialData::params_t id_params;
 
-    C2EFT<SystemEB>::params_t hd_params;
-    SystemEB::params_t eb_params;
+    C2EFT<CSystem>::params_t hd_params;
+    CSystem::params_t c_params;
 
 #ifdef USE_AHFINDER
     double AH_initial_guess;

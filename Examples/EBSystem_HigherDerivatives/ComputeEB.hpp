@@ -8,9 +8,9 @@
 
 #include "C2EFT.hpp"
 #include "Cell.hpp"
+#include "EBSystem.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "MatterCCZ4.hpp"
-#include "SystemEB.hpp"
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
@@ -19,11 +19,11 @@ class ComputeEB
 
     // Use the variable definitions in MatterCCZ4
     template <class data_t>
-    using Vars = typename MatterCCZ4<C2EFT<SystemEB>>::template Vars<data_t>;
+    using Vars = typename MatterCCZ4<C2EFT<EBSystem>>::template Vars<data_t>;
 
     template <class data_t>
     using Diff2Vars =
-        typename MatterCCZ4<C2EFT<SystemEB>>::template Diff2Vars<data_t>;
+        typename MatterCCZ4<C2EFT<EBSystem>>::template Diff2Vars<data_t>;
 
   public:
     ComputeEB(double m_dx, int a_formulation,

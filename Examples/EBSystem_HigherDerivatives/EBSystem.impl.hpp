@@ -3,18 +3,18 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#if !defined(SYSTEMEB_HPP_)
-#error "This file should only be included through SystemEB.hpp"
+#if !defined(EBSYSTEM_HPP_)
+#error "This file should only be included through EBSystem.hpp"
 #endif
 
-#ifndef SYSTEMEB_IMPL_HPP_
-#define SYSTEMEB_IMPL_HPP_
+#ifndef EBSYSTEM_IMPL_HPP_
+#define EBSYSTEM_IMPL_HPP_
 #include "DimensionDefinitions.hpp"
 
 // Calculate the stress energy tensor elements
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t>
-void SystemEB::compute_C(
+void EBSystem::compute_C(
     data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
     Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
     GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
@@ -236,7 +236,7 @@ void SystemEB::compute_C(
 
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t>
-void SystemEB::compute_Riemann(
+void EBSystem::compute_Riemann(
     Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LLLU,
     Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LULU,
     GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
@@ -263,7 +263,7 @@ void SystemEB::compute_Riemann(
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t,
           template <typename> class rhs_vars_t>
-void SystemEB::add_matter_rhs(
+void EBSystem::add_matter_rhs(
     rhs_vars_t<data_t> &total_rhs,
     GeometricQuantities<data_t, vars_t, diff2_vars_t> &gq) const
 {
@@ -280,4 +280,4 @@ void SystemEB::add_matter_rhs(
     }
 }
 
-#endif /* SYSTEMEB_IMPL_HPP_ */
+#endif /* EBSYSTEM_IMPL_HPP_ */

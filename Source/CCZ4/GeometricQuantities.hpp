@@ -184,10 +184,8 @@ class GeometricQuantities
     const data_t &get_ricci_squared();
     const data_t &get_kretschmann();
     const data_t &get_riemann_squared(); // alternative to Kretschmann
-    const Tensor<4, data_t, CH_SPACEDIM + 1> &
-    get_riemann_LLLU_ST(); // not checked in Test
-    const Tensor<4, data_t, CH_SPACEDIM + 1> &
-    get_riemann_LULU_ST(); // not checked in Test
+    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLU_ST();
+    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LULU_ST();
 
     // Advection dependent
     const Tensor<3, data_t, CH_SPACEDIM + 1> &get_chris_ST();

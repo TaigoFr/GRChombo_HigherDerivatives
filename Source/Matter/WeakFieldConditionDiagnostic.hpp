@@ -10,26 +10,21 @@
 #include "Cell.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "MatterCCZ4.hpp"
-#include "SystemEB.hpp"
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// ASSUMES ComputeEB WAS CALLED
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-class WeakFieldConditionDiagnostic
+template <class System> class WeakFieldConditionDiagnostic
 {
     // Use the variable definitions in MatterCCZ4
     template <class data_t>
-    using Vars = typename MatterCCZ4<C2EFT<SystemEB>>::template Vars<data_t>;
+    using Vars = typename MatterCCZ4<C2EFT<System>>::template Vars<data_t>;
 
     template <class data_t>
     using Diff2Vars =
-        typename MatterCCZ4<C2EFT<SystemEB>>::template Diff2Vars<data_t>;
+        typename MatterCCZ4<C2EFT<System>>::template Diff2Vars<data_t>;
 
   public:
-    WeakFieldConditionDiagnostic(const C2EFT<SystemEB> &a_matter, double m_dx,
+    WeakFieldConditionDiagnostic(const C2EFT<System> &a_matter, double m_dx,
                                  int a_formulation,
                                  const CCZ4::params_t &a_ccz4_params)
         : my_matter(a_matter), m_formulation(a_formulation),
@@ -62,8 +57,7 @@ class WeakFieldConditionDiagnostic
     }
 
   protected:
-    const C2EFT<SystemEB>
-        &my_matter; //!< The matter object, e.g. a scalar field.
+    const C2EFT<System> &my_matter; //!< The matter object, e.g. a scalar field.
     int m_formulation;
     const CCZ4::params_t &m_ccz4_params;
     FourthOrderDerivatives m_deriv;

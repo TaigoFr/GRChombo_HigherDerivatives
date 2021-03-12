@@ -26,8 +26,8 @@
 // Problem specific includes
 #include "C2EFT.hpp"
 #include "ComputeEB.hpp"
+#include "EBSystem.hpp"
 #include "EBdiffDiagnostic.hpp"
-#include "SystemEB.hpp"
 #include "WeakFieldConditionDiagnostic.hpp"
 
 // BH ID defined here:
@@ -76,15 +76,15 @@ void HigherDerivativesLevel::initialData()
 void HigherDerivativesLevel::prePlotLevel()
 {
     fillAllGhosts();
-    SystemEB systemEB(m_p.eb_params);
-    C2EFT<SystemEB> c2eft(systemEB, m_p.hd_params);
+    EBSystem EBsystem(m_p.eb_params);
+    C2EFT<EBSystem> c2eft(EBsystem, m_p.hd_params);
 
-    MatterConstraints<C2EFT<SystemEB>> constraints(
+    MatterConstraints<C2EFT<EBSystem>> constraints(
         c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
         Interval(c_Mom, c_Mom));
     EBdiffDiagnostic EBdiff(m_dx, m_p.formulation, m_p.ccz4_params);
-    WeakFieldConditionDiagnostic weakField(c2eft, m_dx, m_p.formulation,
-                                           m_p.ccz4_params);
+    WeakFieldConditionDiagnostic<EBSystem> weakField(
+        c2eft, m_dx, m_p.formulation, m_p.ccz4_params);
 
     BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
                              Interval(c_Ephys11, c_Ephys33),
@@ -115,9 +115,9 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
                    m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     fillAllGhosts();
 
-    SystemEB systemEB(m_p.eb_params);
-    C2EFT<SystemEB> c2eft(systemEB, m_p.hd_params);
-    MatterCCZ4<C2EFT<SystemEB>> my_ccz4_matter(
+    EBSystem EBsystem(m_p.eb_params);
+    C2EFT<EBSystem> c2eft(EBsystem, m_p.hd_params);
+    MatterCCZ4<C2EFT<EBSystem>> my_ccz4_matter(
         c2eft, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation, m_p.G_Newton);
     BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
