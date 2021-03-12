@@ -105,8 +105,10 @@ class SimulationParameters : public SimulationParametersBase
         hd_params.epsilon /= (G_Newton * 8. * M_PI);
 
         pp.load("tau", system_params.tau);
+        pout() << "Using tau = " << system_params.tau << std::endl;
 #ifdef USE_CSYSTEM
         pp.load("c_sigma", system_params.sigma);
+        pout() << "Using sigma = " << system_params.sigma << std::endl;
 #endif
 
         /////////////
