@@ -35,8 +35,9 @@ min_box_size = 16
 isPeriodic = 0 0 0
 # if not periodic, then specify the boundary type
 # 0 = static, 1 = sommerfeld, 2 = reflective
+# 3 = extrapolating, 4 = mixed
 # (see BoundaryConditions.hpp for details)
-hi_boundary = 1 1 1
+hi_boundary = 4 4 4
 lo_boundary = 2 2 2
 
 # if reflective boundaries selected, must set
@@ -51,19 +52,23 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 1 2 3 1 2 3    #lapse shift and B
                          0 4 6 0 5 0      #Eij
                          0 4 6 0 5 0      #Bij
+                         0 4 6 0 5 0      #Ephys
+                         0 4 6 0 5 0      #Bphys
 vars_parity_diagnostic = 0 0	            #Ham and Mom
 					0 0 			  #Eij and Bij diffs
                          0 0              #rho and Weak field condition
 
 # if sommerfeld boundaries selected, must select
-# asymptotic values (in order given by UserVariables.hpp)
-vars_asymptotic_values = 1.0 1.0 0.0 0.0 1.0 0.0 1.0 #chi and hij
-                         0.0 0.0 0.0 0.0 0.0 0.0 0.0 #K and Aij
-                         0.0 0.0 0.0 0.0             #Theta and Gamma
-                         1.0 0.0 0.0 0.0 0.0 0.0 0.0 #lapse shift and B
-                         0.0 0.0                     #phi and Pi
-                         0.0 0.0 0.0 0.0 0.0 0.0	 #Eij
-                         0.0 0.0 0.0 0.0 0.0 0.0 	 #Bij
+# non zero asymptotic values
+num_nonzero_asymptotic_vars = 5
+nonzero_asymptotic_vars = chi h11 h22 h33 lapse
+nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0
+
+# for extrapolating vars
+extrapolation_order = 1
+num_extrapolating_vars = 12
+extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33 
+                     Bphys11 Bphys12 Bphys13 Bphys22 Bphys23 Bphys33
 
 # Set up time steps
 # dt will be dx*dt_multiplier on each grid level

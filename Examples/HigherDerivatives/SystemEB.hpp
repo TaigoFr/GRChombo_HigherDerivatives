@@ -29,6 +29,9 @@ class SystemEB
         // adding 'ij' because B already exists from Gamma-driver
         Tensor<2, data_t> Eij;
         Tensor<2, data_t> Bij;
+        // need to store physical ones to get their spatial derivatives
+        Tensor<2, data_t> Ephys;
+        Tensor<2, data_t> Bphys;
 
         /// Defines the mapping between members of Vars and Chombo grid
         /// variables (enum in User_Variables)
@@ -40,6 +43,11 @@ class SystemEB
                 mapping_function, GRInterval<c_E11, c_E33>(), Eij);
             VarsTools::define_symmetric_enum_mapping(
                 mapping_function, GRInterval<c_B11, c_B33>(), Bij);
+
+            VarsTools::define_symmetric_enum_mapping(
+                mapping_function, GRInterval<c_Ephys11, c_Ephys33>(), Ephys);
+            VarsTools::define_symmetric_enum_mapping(
+                mapping_function, GRInterval<c_Bphys11, c_Bphys33>(), Bphys);
         }
     };
 

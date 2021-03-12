@@ -582,9 +582,14 @@ template_GQ void GeometricQuantities_t::set_all_vars(const Vars &a_vars,
 ///////////////////////////////    GETS    ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-template_GQ const double GeometricQuantities_t::get_formulation() const
+template_GQ const int GeometricQuantities_t::get_formulation() const
 {
     return m_formulation;
+}
+template_GQ const CCZ4::params_t &
+GeometricQuantities_t::get_formulation_params() const
+{
+    return *m_ccz4_params;
 }
 template_GQ const double
 GeometricQuantities_t::get_cosmological_constant() const

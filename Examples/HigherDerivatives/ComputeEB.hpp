@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef COMPUTEINITIALEB
-#define COMPUTEINITIALEB
+#ifndef COMPUTEEB
+#define COMPUTEEB
 
 #include "C2EFT.hpp"
 #include "Cell.hpp"
@@ -14,7 +14,7 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-class ComputeInitialEB
+class ComputeEB
 {
 
     // Use the variable definitions in MatterCCZ4
@@ -26,11 +26,14 @@ class ComputeInitialEB
         typename MatterCCZ4<C2EFT<SystemEB>>::template Diff2Vars<data_t>;
 
   public:
-    ComputeInitialEB(double m_dx, int a_formulation,
-                     const CCZ4::params_t &a_ccz4_params)
+    ComputeEB(double m_dx, int a_formulation,
+              const CCZ4::params_t &a_ccz4_params, const Interval &E_comps,
+              const Interval &B_comps)
         : m_formulation(a_formulation), m_ccz4_params(a_ccz4_params),
-          m_deriv(m_dx)
+          m_deriv(m_dx), m_E_comps(E_comps), m_B_comps(B_comps)
     {
+        CH_assert(m_E_comps.size() == (GR_SPACEDIM * (GR_SPACEDIM + 1) / 2));
+        CH_assert(m_B_comps.size() == (GR_SPACEDIM * (GR_SPACEDIM + 1) / 2));
     }
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
@@ -45,25 +48,26 @@ class ComputeInitialEB
         const auto &Eij = gq.get_weyl_electric_part();
         const auto &Bij = gq.get_weyl_magnetic_part();
 
-        current_cell.store_vars(Eij[0][0], c_E11);
-        current_cell.store_vars(Eij[0][1], c_E12);
-        current_cell.store_vars(Eij[0][2], c_E13);
-        current_cell.store_vars(Eij[1][1], c_E22);
-        current_cell.store_vars(Eij[1][2], c_E23);
-        current_cell.store_vars(Eij[2][2], c_E33);
+        current_cell.store_vars(Eij[0][0], m_E_comps.begin() + 0);
+        current_cell.store_vars(Eij[0][1], m_E_comps.begin() + 1);
+        current_cell.store_vars(Eij[0][2], m_E_comps.begin() + 2);
+        current_cell.store_vars(Eij[1][1], m_E_comps.begin() + 3);
+        current_cell.store_vars(Eij[1][2], m_E_comps.begin() + 4);
+        current_cell.store_vars(Eij[2][2], m_E_comps.begin() + 5);
 
-        current_cell.store_vars(Bij[0][0], c_B11);
-        current_cell.store_vars(Bij[0][1], c_B12);
-        current_cell.store_vars(Bij[0][2], c_B13);
-        current_cell.store_vars(Bij[1][1], c_B22);
-        current_cell.store_vars(Bij[1][2], c_B23);
-        current_cell.store_vars(Bij[2][2], c_B33);
+        current_cell.store_vars(Bij[0][0], m_B_comps.begin() + 0);
+        current_cell.store_vars(Bij[0][1], m_B_comps.begin() + 1);
+        current_cell.store_vars(Bij[0][2], m_B_comps.begin() + 2);
+        current_cell.store_vars(Bij[1][1], m_B_comps.begin() + 3);
+        current_cell.store_vars(Bij[1][2], m_B_comps.begin() + 4);
+        current_cell.store_vars(Bij[2][2], m_B_comps.begin() + 5);
     }
 
   protected:
     int m_formulation;
     const CCZ4::params_t &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
+    const Interval m_E_comps, m_B_comps;
 };
 
-#endif /* COMPUTEINITIALEB */
+#endif /* COMPUTEEB */

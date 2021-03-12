@@ -25,7 +25,7 @@
 
 // Problem specific includes
 #include "C2EFT.hpp"
-#include "ComputeInitialEB.hpp"
+#include "ComputeEB.hpp"
 #include "EBdiffDiagnostic.hpp"
 #include "SystemEB.hpp"
 #include "WeakFieldConditionDiagnostic.hpp"
@@ -63,10 +63,12 @@ void HigherDerivativesLevel::initialData()
                    m_state_new, INCLUDE_GHOST_CELLS);
 
     fillAllGhosts();
-    BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx),
-                                     ComputeInitialEB(m_dx, m_p.formulation,
-                                                      m_p.ccz4_params)),
-                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(
+        make_compute_pack(GammaCalculator(m_dx),
+                          ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
+                                    Interval(c_E11, c_E33),
+                                    Interval(c_B11, c_B33))),
+        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do before outputting a plot file
@@ -83,6 +85,11 @@ void HigherDerivativesLevel::prePlotLevel()
     WeakFieldConditionDiagnostic weakField(c2eft, m_dx, m_p.formulation,
                                            m_p.ccz4_params);
 
+    BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
+                             Interval(c_Ephys11, c_Ephys33),
+                             Interval(c_Bphys11, c_Bphys33)),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+
     BoxLoops::loop(make_compute_pack(constraints, EBdiff, weakField),
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
@@ -98,7 +105,15 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
                           PositiveChiAndAlpha(m_p.min_chi, m_p.min_lapse)),
         a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
-    // Calculate MatterCCZ4 right hand side with matter_t = ScalarField
+    // don't include the above BoxLoops in this one because this one excludes
+    // ghost cells and the fillAllGhosts will not fill the outer boundaries for
+    // sommerfeld BC
+    BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
+                             Interval(c_Ephys11, c_Ephys33),
+                             Interval(c_Bphys11, c_Bphys33)),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    fillAllGhosts();
+
     SystemEB systemEB(m_p.eb_params);
     C2EFT<SystemEB> c2eft(systemEB, m_p.hd_params);
     MatterCCZ4<C2EFT<SystemEB>> my_ccz4_matter(

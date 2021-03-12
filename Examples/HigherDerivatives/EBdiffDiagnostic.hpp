@@ -14,6 +14,10 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// ASSUMES ComputeEB WAS CALLED
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 class EBdiffDiagnostic
 {
 
@@ -39,20 +43,14 @@ class EBdiffDiagnostic
         const auto d1 = m_deriv.template diff1<Vars>(current_cell);
         const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
-        gq.set_formulation(m_formulation, m_ccz4_params);
-
-        const auto &Eij = gq.get_weyl_electric_part();
-        const auto &Bij = gq.get_weyl_magnetic_part();
-
         data_t E_diff_squared = 0.;
         data_t B_diff_squared = 0.;
         FOR(i, j)
         {
-            E_diff_squared +=
-                (vars.Eij[i][j] - Eij[i][j]) * (vars.Eij[i][j] - Eij[i][j]);
-            B_diff_squared +=
-                (vars.Bij[i][j] - Bij[i][j]) * (vars.Bij[i][j] - Bij[i][j]);
+            E_diff_squared += (vars.Eij[i][j] - vars.Ephys[i][j]) *
+                              (vars.Eij[i][j] - vars.Ephys[i][j]);
+            B_diff_squared += (vars.Bij[i][j] - vars.Bphys[i][j]) *
+                              (vars.Bij[i][j] - vars.Bphys[i][j]);
         }
 
         current_cell.store_vars(sqrt(E_diff_squared), c_E_diff);

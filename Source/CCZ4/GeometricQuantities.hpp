@@ -86,7 +86,8 @@ class GeometricQuantities
 
     //////// SET BY USER ////////
     // vars, d1, d2 and emtensor are assumed to stay in scope
-    const double get_formulation() const;
+    const int get_formulation() const;
+    const CCZ4::params_t &get_formulation_params() const;
     const double get_cosmological_constant() const;
     const Vars &get_vars() const;
     const Diff1Vars &get_d1_vars() const;

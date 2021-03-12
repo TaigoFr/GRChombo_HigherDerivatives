@@ -14,6 +14,10 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// ASSUMES ComputeEB WAS CALLED
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 class WeakFieldConditionDiagnostic
 {
     // Use the variable definitions in MatterCCZ4
