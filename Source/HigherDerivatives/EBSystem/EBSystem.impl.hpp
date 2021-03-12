@@ -280,11 +280,12 @@ void EBSystem::add_matter_rhs(
     }
 }
 
-template <class data_t, template <typename> class vars_t,
+template <class data_t, template <typename> class rhs_vars_t,
+          template <typename> class vars_t,
           template <typename> class diff2_vars_t, class gauge_t>
 void EBSystem::add_diffusion_terms(
-    vars_t<data_t> &rhs, //!< Reference to the variables into which the
-                         //! output right hand side is written
+    rhs_vars_t<data_t> &rhs, //!< Reference to the variables into which the
+                             //! output right hand side is written
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
     data_t diffCoeffSafe) const
 {

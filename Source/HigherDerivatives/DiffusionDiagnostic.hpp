@@ -70,9 +70,7 @@ class DiffusionDiagnostic
         gq.compute_rhs_equations(rhs);
 
         Vars<data_t> diffusion;
-        data_t diffCoeffSafe =
-            this->template add_diffusion_terms<data_t, Vars, Diff2Vars>(
-                diffusion, gq);
+        this->template add_diffusion_terms(diffusion, gq);
 
         // for the moment only saving for vars.chi, just to see how it looks
         current_cell.store_vars(diffusion.chi, m_diffusion_var);

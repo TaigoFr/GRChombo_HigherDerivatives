@@ -52,11 +52,12 @@ class MatterCCZ4RHSWithDiffusion
     diffusion_params_t m_diffusion_params;
     double m_dt;
 
-    template <class data_t, template <typename> class vars_t,
+    template <class data_t, template <typename> class rhs_vars_t,
+              template <typename> class vars_t,
               template <typename> class diff2_vars_t>
     data_t add_diffusion_terms(
-        vars_t<data_t> &rhs, //!< Reference to the variables into which the
-                             //! output right hand side is written
+        rhs_vars_t<data_t> &rhs, //!< Reference to the variables into which the
+                                 //! output right hand side is written
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
     // output is <10^{-k} for x>t(1+k+w) and >1-10^{-k} for x<t(1-k*w)

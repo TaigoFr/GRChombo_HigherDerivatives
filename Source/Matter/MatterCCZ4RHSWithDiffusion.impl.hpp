@@ -54,11 +54,8 @@ void MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::compute(
 
     gq.compute_rhs_equations(matter_rhs);
 
-    data_t diffCoeffSafe =
-        add_diffusion_terms<data_t, Vars, Diff2Vars>(matter_rhs, gq);
-    this->my_matter
-        .template add_diffusion_terms<data_t, Vars, Diff2Vars, gauge_t>(
-            matter_rhs, gq, diffCoeffSafe);
+    data_t diffCoeffSafe = add_diffusion_terms(matter_rhs, gq);
+    this->my_matter.add_diffusion_terms(matter_rhs, gq, diffCoeffSafe);
 
     // Add dissipation to all terms
     this->m_deriv.add_dissipation(matter_rhs, current_cell, this->m_sigma);
@@ -68,11 +65,12 @@ void MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::compute(
 }
 
 template <class matter_t, class gauge_t, class deriv_t>
-template <class data_t, template <typename> class vars_t,
+template <class data_t, template <typename> class rhs_vars_t,
+          template <typename> class vars_t,
           template <typename> class diff2_vars_t>
 data_t
 MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::add_diffusion_terms(
-    vars_t<data_t> &rhs,
+    rhs_vars_t<data_t> &rhs,
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     // based on arxiv:1512.04532v2 (in Supplemental Material)
