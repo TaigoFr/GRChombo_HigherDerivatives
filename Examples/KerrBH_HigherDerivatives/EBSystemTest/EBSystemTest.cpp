@@ -19,6 +19,8 @@
 #include "EBSystem.hpp"
 #include "MatterCCZ4.hpp"
 
+#include "SetupFunctions.hpp" // just to avoid some undefined references of static Derivative::LOCAL and other vars
+
 template <class data_t> using Vars = MatterCCZ4<C2EFT<EBSystem>>::Vars<data_t>;
 template <class data_t>
 using Diff2Vars = MatterCCZ4<C2EFT<EBSystem>>::Diff2Vars<data_t>;

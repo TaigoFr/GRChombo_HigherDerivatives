@@ -23,16 +23,21 @@
 // For tag cells
 #include "ChiTaggingCriterion.hpp"
 
+// BH ID and System defined here:
+#include "SimulationParameters.hpp"
+
 // Problem specific includes
 #include "C2EFT.hpp"
-#include "CSystem.hpp"
-#include "CdiffDiagnostic.hpp"
-#include "ComputeC.hpp"
 #include "NCCDiagnostic.hpp"
 #include "WeakFieldConditionDiagnostic.hpp"
 
-// BH ID defined here:
-#include "SimulationParameters.hpp"
+#ifdef USE_EBSYSTEM
+#include "ComputeEB.hpp"
+#include "EBdiffDiagnostic.hpp"
+#elif USE_CSYSTEM
+#include "CdiffDiagnostic.hpp"
+#include "ComputeC.hpp"
+#endif
 
 // Things to do at each advance step, after the RK4 is calculated
 void HigherDerivativesLevel::specificAdvance()
@@ -61,14 +66,20 @@ void HigherDerivativesLevel::initialData()
     InitialData id(m_p.id_params, m_dx);
 
     // First set everything to zero then desired initial data
-    BoxLoops::loop(make_compute_pack(SetValue(0.0), id), m_state_new,
+    BoxLoops::loop(make_compute_pack(SetValue(0.), id), m_state_new,
                    m_state_new, INCLUDE_GHOST_CELLS);
 
     fillAllGhosts();
-    BoxLoops::loop(
-        make_compute_pack(GammaCalculator(m_dx),
-                          ComputeC(m_dx, m_p.formulation, m_p.ccz4_params)),
-        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+
+#ifdef USE_EBSYSTEM
+    ComputeEB compute(m_dx, m_p.formulation, m_p.ccz4_params,
+                      Interval(c_E11, c_E33), Interval(c_B11, c_B33));
+#elif USE_CSYSTEM
+    ComputeC compute(m_dx, m_p.formulation, m_p.ccz4_params);
+#endif
+
+    BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do before outputting a plot file
@@ -76,23 +87,33 @@ void HigherDerivativesLevel::prePlotLevel()
 {
     fillAllGhosts();
     bool apply_weak_field = false;
-    CSystem Csystem(m_p.c_params);
-    C2EFT<CSystem> c2eft(Csystem, m_p.hd_params, apply_weak_field);
+    System EBsystem(m_p.system_params);
+    C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
 
-    MatterConstraints<C2EFT<CSystem>> constraints(
+    MatterConstraints<C2EFT<System>> constraints(
         c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
         Interval(c_Mom, c_Mom));
-    CdiffDiagnostic Cdiff(m_dx, m_p.formulation, m_p.ccz4_params);
-    WeakFieldConditionDiagnostic<CSystem> weakField(
-        c2eft, m_dx, m_p.formulation, m_p.ccz4_params);
-    NCCDiagnostic<CSystem> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
-                               m_p.center, m_p.G_Newton, c_NCC_plus,
-                               c_NCC_minus, c_NCC_Z4_plus, c_NCC_Z4_minus);
 
-    // these are a lot of diagnostics and it would be more efficient to compute
-    // them all in a single class, but it's nicer for now to have them separate.
-    // Niceness over performance for now, as these are just Plotfiles
-    BoxLoops::loop(make_compute_pack(constraints, Cdiff, weakField, ncc),
+#ifdef USE_EBSYSTEM
+    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params);
+#elif USE_CSYSTEM
+    CdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params);
+#endif
+
+    WeakFieldConditionDiagnostic<System> weakField(c2eft, m_dx, m_p.formulation,
+                                                   m_p.ccz4_params);
+    NCCDiagnostic<System> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
+                              m_p.center, m_p.G_Newton, c_NCC_plus, c_NCC_minus,
+                              c_NCC_Z4_plus, c_NCC_Z4_minus);
+
+#ifdef USE_EBSYSTEM
+    BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
+                             Interval(c_Ephys11, c_Ephys33),
+                             Interval(c_Bphys11, c_Bphys33)),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+#endif
+
+    BoxLoops::loop(make_compute_pack(constraints, diff, weakField, ncc),
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
 
@@ -107,12 +128,23 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
                           PositiveChiAndAlpha(m_p.min_chi, m_p.min_lapse)),
         a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
+#ifdef USE_EBSYSTEM
+    // don't include the above BoxLoops in this one because this one excludes
+    // ghost cells and the fillAllGhosts will not fill the outer boundaries for
+    // sommerfeld BC
+    BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
+                             Interval(c_Ephys11, c_Ephys33),
+                             Interval(c_Bphys11, c_Bphys33)),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    fillAllGhosts();
+#endif
+
     m_p.hd_params.update_min_chi(a_time, m_p.id_params.spin);
 
     bool apply_weak_field = true;
-    CSystem Csystem(m_p.c_params);
-    C2EFT<CSystem> c2eft(Csystem, m_p.hd_params, apply_weak_field);
-    MatterCCZ4<C2EFT<CSystem>> my_ccz4_matter(
+    System EBsystem(m_p.system_params);
+    C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
+    MatterCCZ4<C2EFT<System>> my_ccz4_matter(
         c2eft, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation, m_p.G_Newton);
     BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }

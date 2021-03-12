@@ -12,8 +12,12 @@ enum
     c_Ham,
     c_Mom,
 
+#ifdef USE_EBSYSTEM
     c_E_diff,
     c_B_diff,
+#elif USE_CSYSTEM
+    c_C_diff,
+#endif
 
     c_WeakFieldVar,
     c_WeakFieldCondition,
@@ -33,8 +37,12 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "Ham",
     "Mom",
 
+#ifdef USE_EBSYSTEM
     "E_diff",
     "B_diff",
+#elif USE_CSYSTEM
+    "C_diff",
+#endif
 
     "WeakFieldVar",
     "WeakFieldCondition",
@@ -44,6 +52,6 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "NCC_minus",
     "NCC_Z4_plus",
     "NCC_Z4_minus"};
-}
+} // namespace DiagnosticVariables
 
 #endif /* DIAGNOSTICVARIABLES_HPP */

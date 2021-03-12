@@ -13,8 +13,9 @@
 // assign an enum to each variable
 enum
 {
-    // Note that it is important that the first enum value is set to 1 more than
-    // the last CCZ4 var enum
+// Note that it is important that the first enum value is set to 1 more than
+// the last CCZ4 var enum
+#ifdef USE_EBSYSTEM
     c_E11 = NUM_CCZ4_VARS,
     c_E12,
     c_E13,
@@ -43,11 +44,19 @@ enum
     c_Bphys23,
     c_Bphys33,
 
+#elif USE_CSYSTEM
+    c_C = NUM_CCZ4_VARS,
+    c_dCdt,
+#else
+#error "Please define either USE_CSYSTEM or USE_EBSYSTEM"
+#endif
+
     NUM_VARS
 };
 
 namespace UserVariables
 {
+#ifdef USE_EBSYSTEM
 static const std::array<std::string, NUM_VARS - NUM_CCZ4_VARS>
     user_variable_names = {
         "E11",     "E12",     "E13",     "E22",     "E23",     "E33",
@@ -57,6 +66,11 @@ static const std::array<std::string, NUM_VARS - NUM_CCZ4_VARS>
         "Ephys11", "Ephys12", "Ephys13", "Ephys22", "Ephys23", "Ephys33",
 
         "Bphys11", "Bphys12", "Bphys13", "Bphys22", "Bphys23", "Bphys33"};
+
+#elif USE_CSYSTEM
+static const std::array<std::string, NUM_VARS - NUM_CCZ4_VARS>
+    user_variable_names = {"C", "dCdt"};
+#endif
 
 static const std::array<std::string, NUM_VARS> variable_names =
     ArrayTools::concatenate(ccz4_variable_names, user_variable_names);
