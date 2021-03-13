@@ -18,5 +18,6 @@ USE_MT         = FALSE
 cxxoptflags    = -xHost -O3
 foptflags      = -xHost -O3
 syslibflags    = -mkl=sequential
+XTRACXXFLAGS   = -std=c++17
 
 #end  -- dont change this line

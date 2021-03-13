@@ -27,5 +27,6 @@ USE_MT         = FALSE
 cxxoptflags    = -march=native -O3
 foptflags      = -march=native -O3
 syslibflags    = -lblas -llapack
+XTRACXXFLAGS   = -std=c++17
 
 #end  -- dont change this line
