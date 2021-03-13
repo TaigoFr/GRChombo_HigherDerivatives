@@ -83,9 +83,9 @@ void HigherDerivativesLevel::initialData()
                    m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 
 #ifdef USE_AHFINDER
-    // Diagnostics needed for AHFinder
-    if (m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
-        computeDiagnostics();
+    // Diagnostics needed for AHFinder (calculate anyway as AHFinder not yet
+    // setup)
+    computeDiagnostics();
 #endif
 }
 

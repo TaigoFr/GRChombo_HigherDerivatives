@@ -17,6 +17,7 @@ enum
     c_B_diff,
 #elif USE_CSYSTEM
     c_C_diff,
+    c_Cphys,
 #endif
 
     c_WeakFieldVar,
@@ -46,6 +47,7 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "B_diff",
 #elif USE_CSYSTEM
     "C_diff",
+    "Cphys",
 #endif
 
     "WeakFieldVar",

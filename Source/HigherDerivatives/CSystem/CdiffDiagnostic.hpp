@@ -46,6 +46,7 @@ class CdiffDiagnostic
         data_t C = gq.get_kretschmann();
 
         current_cell.store_vars(abs(C - vars.C), c_C_diff);
+        current_cell.store_vars(C, c_Cphys);
     }
 
   protected:
