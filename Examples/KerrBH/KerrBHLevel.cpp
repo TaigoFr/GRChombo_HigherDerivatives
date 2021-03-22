@@ -6,7 +6,7 @@
 #include "KerrBHLevel.hpp"
 #include "BoxLoops.hpp"
 #include "CCZ4RHS.hpp"
-#include "ChiTaggingCriterion.hpp"
+#include "ChiExtractionTaggingCriterion.hpp"
 #include "ComputePack.hpp"
 #include "KerrBHLevel.hpp"
 #include "NanCheck.hpp"
@@ -19,6 +19,9 @@
 // Initial data
 #include "GammaCalculator.hpp"
 #include "KerrBH.hpp"
+
+#include "ADMQuantities.hpp"
+#include "ADMQuantitiesExtraction.hpp"
 
 void KerrBHLevel::specificAdvance()
 {
@@ -39,9 +42,9 @@ void KerrBHLevel::initialData()
     if (m_verbosity)
         pout() << "KerrBHLevel::initialData " << m_level << endl;
 
-    // First set everything to zero then calculate initial data  Get the Kerr
-    // solution in the variables, then calculate the \tilde\Gamma^i numerically
-    // as these are non zero and not calculated in the Kerr ICs
+    // First set everything to zero then calculate initial data
+    // Get the Kerr solution in the variables, then calculate the \tilde\Gamma^i
+    // numerically as these are non zero and not calculated in the Kerr ICs
     BoxLoops::loop(
         make_compute_pack(SetValue(0.), KerrBH(m_p.kerr_params, m_dx)),
         m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
@@ -110,12 +113,42 @@ void KerrBHLevel::preTagCells()
 void KerrBHLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                                           const FArrayBox &current_state)
 {
-    BoxLoops::loop(ChiTaggingCriterion(m_dx), current_state, tagging_criterion);
+    BoxLoops::loop(ChiExtractionTaggingCriterion(m_dx, m_level, m_p.max_level,
+                                                 m_p.extraction_params,
+                                                 m_p.activate_extraction),
+                   current_state, tagging_criterion);
 }
 
 void KerrBHLevel::specificPostTimeStep()
 {
     CH_TIME("KerrBHLevel::specificPostTimeStep");
+    // Do the extraction on the min extraction level
+    if (m_p.activate_extraction == 1)
+    {
+        int min_level = m_p.extraction_params.min_extraction_level();
+        bool calculate_adm = at_level_timestep_multiple(min_level);
+        if (calculate_adm)
+        {
+            // Populate the ADM Mass and Spin values on the grid
+            fillAllGhosts();
+            BoxLoops::loop(ADMQuantities(m_p.extraction_params.center, m_dx,
+                                         c_Madm, c_Jadm),
+                           m_state_new, m_state_diagnostics,
+                           EXCLUDE_GHOST_CELLS);
+
+            if (m_level == min_level)
+            {
+                CH_TIME("ADMExtraction");
+                // Now refresh the interpolator and do the interpolation
+                m_gr_amr.m_interpolator->refresh();
+                ADMQuantitiesExtraction my_extraction(
+                    m_p.extraction_params, m_dt, m_time, m_restart_time, c_Madm,
+                    c_Jadm);
+                my_extraction.execute_query(m_gr_amr.m_interpolator);
+            }
+        }
+    }
+
 #ifdef USE_AHFINDER
     // if print is on and there are Diagnostics to write, calculate them!
     if (m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))

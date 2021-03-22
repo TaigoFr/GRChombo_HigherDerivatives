@@ -134,6 +134,16 @@ class SimulationParametersBase : public ChomboParameters
                     false);
             pp.load<std::string>("extraction_prefix",
                                  extraction_params.extraction_prefix, "");
+
+            if (pp.contains("extraction_extrapolation_order"))
+            {
+                int extrapolation_order;
+                pp.load("extraction_extrapolation_order", extrapolation_order);
+                pp.load("extraction_extrapolation_radii",
+                        extraction_params.radii_idxs_for_extrapolation,
+                        extrapolation_order);
+                extraction_params.validate_extrapolation_radii();
+            }
         }
 
 #ifdef USE_AHFINDER
@@ -271,6 +281,15 @@ class SimulationParametersBase : public ChomboParameters
                     mode_name, value_str, (l >= 2) && (abs(m) <= l),
                     "l must be >= 2 and m must satisfy -l <= m <= l");
             }
+
+            int extrapolation_order =
+                extraction_params.radii_idxs_for_extrapolation.size();
+            if (extrapolation_order > 1)
+                pout() << "Extraction with extrapolation order "
+                       << extrapolation_order << std::endl;
+            else if (extrapolation_order ==
+                     1) // 1 radius only because other were invalid
+                pout() << "Extraction radii not valid." << std::endl;
         }
     }
 
