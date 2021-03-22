@@ -33,6 +33,9 @@ enum
     c_diffusion_chi,
     c_det_h,
 
+    c_Madm,
+    c_Jadm,
+
     NUM_DIAGNOSTIC_VARS
 };
 
@@ -61,7 +64,10 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "rhs_chi",
     "diffusion_chi",
-    "det_h"};
+    "det_h",
+
+    "M_adm",
+    "J_adm"};
 } // namespace DiagnosticVariables
 
 #endif /* DIAGNOSTICVARIABLES_HPP */

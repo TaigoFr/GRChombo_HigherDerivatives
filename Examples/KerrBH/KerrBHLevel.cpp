@@ -122,6 +122,12 @@ void KerrBHLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
 void KerrBHLevel::specificPostTimeStep()
 {
     CH_TIME("KerrBHLevel::specificPostTimeStep");
+
+    bool first_step =
+        (m_time == 0.); // this form is used when 'specificPostTimeStep' was
+                        // called during setup at t=0 from Main
+    // bool first_step = (m_time == m_dt); // if not called in Main
+
     // Do the extraction on the min extraction level
     if (m_p.activate_extraction == 1)
     {
@@ -142,8 +148,8 @@ void KerrBHLevel::specificPostTimeStep()
                 // Now refresh the interpolator and do the interpolation
                 m_gr_amr.m_interpolator->refresh();
                 ADMQuantitiesExtraction my_extraction(
-                    m_p.extraction_params, m_dt, m_time, m_restart_time, c_Madm,
-                    c_Jadm);
+                    m_p.extraction_params, m_dt, m_time, first_step,
+                    m_restart_time, c_Madm, c_Jadm);
                 my_extraction.execute_query(m_gr_amr.m_interpolator);
             }
         }

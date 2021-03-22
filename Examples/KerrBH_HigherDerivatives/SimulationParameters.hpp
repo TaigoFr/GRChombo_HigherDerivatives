@@ -104,6 +104,8 @@ class SimulationParameters : public SimulationParametersBase
         diffusion_params.chiCutoff_width = hd_params.chi_width;
         /////////////
 
+        pp.load("activate_extraction", activate_extraction, false);
+
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * id_params.mass);
 #endif
@@ -123,6 +125,7 @@ class SimulationParameters : public SimulationParametersBase
     }
 
     double G_Newton;
+    bool activate_extraction;
 
     // Schwarzschild bh initial data
     InitialData::params_t id_params;

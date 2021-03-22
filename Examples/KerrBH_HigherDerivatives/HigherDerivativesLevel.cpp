@@ -39,6 +39,9 @@
 #include "CDiagnostics.hpp"
 #endif
 
+#include "ADMQuantities.hpp"
+#include "ADMQuantitiesExtraction.hpp"
+
 // Things to do at each advance step, after the RK4 is calculated
 void HigherDerivativesLevel::specificAdvance()
 {
@@ -193,6 +196,39 @@ void HigherDerivativesLevel::computeTaggingCriterion(
 void HigherDerivativesLevel::specificPostTimeStep()
 {
     CH_TIME("HigherDerivativesLevel::specificPostTimeStep");
+
+    bool first_step =
+        (m_time == 0.); // this form is used when 'specificPostTimeStep' was
+                        // called during setup at t=0 from Main
+    // bool first_step = (m_time == m_dt); // if not called in Main
+
+    // Do the extraction on the min extraction level
+    if (m_p.activate_extraction == 1)
+    {
+        int min_level = m_p.extraction_params.min_extraction_level();
+        bool calculate_adm = at_level_timestep_multiple(min_level);
+        if (calculate_adm)
+        {
+            // Populate the ADM Mass and Spin values on the grid
+            fillAllGhosts();
+            BoxLoops::loop(ADMQuantities(m_p.extraction_params.center, m_dx,
+                                         c_Madm, c_Jadm),
+                           m_state_new, m_state_diagnostics,
+                           EXCLUDE_GHOST_CELLS);
+
+            if (m_level == min_level)
+            {
+                CH_TIME("ADMExtraction");
+                // Now refresh the interpolator and do the interpolation
+                m_gr_amr.m_interpolator->refresh();
+                ADMQuantitiesExtraction my_extraction(
+                    m_p.extraction_params, m_dt, m_time, first_step,
+                    m_restart_time, c_Madm, c_Jadm);
+                my_extraction.execute_query(m_gr_amr.m_interpolator);
+            }
+        }
+    }
+
 #ifdef USE_AHFINDER
     // if print is on and there are Diagnostics to write, calculate them!
     if (m_bh_amr.m_ah_finder.need_diagnostics(m_dt, m_time))
