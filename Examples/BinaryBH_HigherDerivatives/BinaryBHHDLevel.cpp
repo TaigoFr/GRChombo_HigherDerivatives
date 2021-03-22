@@ -42,8 +42,7 @@
 #include "ComputeEB.hpp"
 #include "EBdiffDiagnostic.hpp"
 #elif USE_CSYSTEM
-#include "CdiffDiagnostic.hpp"
-#include "ComputeC.hpp"
+#include "CDiagnostics.hpp"
 #endif
 
 // Things to do at each advance step, after the RK4 is calculated
@@ -82,7 +81,7 @@ void BinaryBHHDLevel::initialData()
     ComputeEB compute(m_dx, m_p.formulation, m_p.ccz4_params,
                       Interval(c_E11, c_E33), Interval(c_B11, c_B33));
 #elif USE_CSYSTEM
-    ComputeC compute(m_dx, m_p.formulation, m_p.ccz4_params);
+    CDiagnostics compute(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
 #endif
 
     // not needed for binaries (conformally flag initial metric)
@@ -125,7 +124,8 @@ void BinaryBHHDLevel::computeDiagnostics()
 #ifdef USE_EBSYSTEM
     EBdiffDiagnostic diff(m_dx);
 #elif USE_CSYSTEM
-    CdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params);
+    CDiagnostics diff(m_dx, m_p.formulation, m_p.ccz4_params, c_Cphys,
+                      c_C_diff);
 #endif
 
     WeakFieldConditionDiagnostic<System> weakField(c2eft, m_dx, m_p.formulation,

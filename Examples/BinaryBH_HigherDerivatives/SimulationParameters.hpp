@@ -76,6 +76,8 @@ class SimulationParameters : public SimulationParametersBase
 #endif
 
         pp.load("epsilon", hd_params.epsilon);
+        pout() << "Using epsilon = " << hd_params.epsilon << std::endl;
+
         // pp.load("chi_threshold", hd_params.chi_threshold); // automatic now
         pp.load("weak_field_threshold", hd_params.weak_field_threshold);
         pp.load("weak_field_width", hd_params.weak_field_width);

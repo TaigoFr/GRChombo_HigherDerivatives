@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef CDIFFDIAGNOSTIC
-#define CDIFFDIAGNOSTIC
+#ifndef CDIAGNOSTICS
+#define CDIAGNOSTICS
 
 #include "C2EFT.hpp"
 #include "CSystem.hpp"
@@ -15,7 +15,7 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-class CdiffDiagnostic
+class CDiagnostics
 {
 
     // Use the variable definitions in MatterCCZ4RHS
@@ -27,10 +27,11 @@ class CdiffDiagnostic
         typename MatterCCZ4RHS<C2EFT<CSystem>>::template Diff2Vars<data_t>;
 
   public:
-    CdiffDiagnostic(double m_dx, int a_formulation,
-                    const CCZ4_params_t<> &a_ccz4_params)
+    CDiagnostics(double m_dx, int a_formulation,
+                 const CCZ4_params_t<> &a_ccz4_params, int a_C_comp = -1,
+                 int a_C_diff_comp = -1)
         : m_formulation(a_formulation), m_ccz4_params(a_ccz4_params),
-          m_deriv(m_dx)
+          m_deriv(m_dx), m_C_comp(a_C_comp), m_C_diff_comp(a_C_diff_comp)
     {
     }
 
@@ -45,14 +46,18 @@ class CdiffDiagnostic
 
         data_t C = gq.get_kretschmann();
 
-        current_cell.store_vars(abs(C - vars.C), c_C_diff);
-        current_cell.store_vars(C, c_Cphys);
+        if (m_C_diff_comp >= 0)
+            current_cell.store_vars(abs(C - vars.C), m_C_diff_comp);
+        if (m_C_comp >= 0)
+            current_cell.store_vars(C, m_C_comp);
     }
 
   protected:
     int m_formulation;
     const CCZ4_params_t<> &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
+
+    int m_C_comp, m_C_diff_comp;
 };
 
-#endif /* CDIFFDIAGNOSTIC */
+#endif /* CDIAGNOSTICS */
