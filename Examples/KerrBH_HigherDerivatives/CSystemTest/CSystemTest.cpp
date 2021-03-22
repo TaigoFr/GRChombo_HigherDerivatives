@@ -109,6 +109,8 @@ int runTest(int argc, char *argv[])
     CSystem::params_t c_params;
     c_params.tau = 0.1;
     c_params.sigma = 1.;
+    c_params.use_only_time_derivatives = false;
+    // c_params.rescale_tau_sigma_by_lapse = true;
 
     int failed = 0;
 

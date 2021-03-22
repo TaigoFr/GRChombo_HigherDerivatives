@@ -61,18 +61,31 @@ void CSystem::add_matter_rhs(
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     const auto &vars = gq.get_vars();
-    const auto &advec = gq.get_advection();
     const auto &kretschmann = gq.get_kretschmann();
 
     CH_assert(m_params.sigma != 0.);
-    // if (m_params.sigma != 0.)
+
+    total_rhs.C = vars.dCdt;
+
+    if (m_params.use_only_time_derivatives)
+    {
+        data_t tau = m_params.tau;
+        data_t sigma = m_params.sigma;
+        if (m_params.rescale_tau_sigma_by_lapse)
+        {
+            tau /= vars.lapse;
+            sigma /= (vars.lapse * vars.lapse);
+        }
+        total_rhs.dCdt = (-tau * vars.dCdt + kretschmann - vars.C) / sigma;
+    }
+    else
     {
         const auto &d1 = gq.get_d1_vars();
         const auto &d2 = gq.get_d2_vars();
+        const auto &advec = gq.get_advection();
         const auto &g_UU = gq.get_metric_UU_ST();
         const auto &Gamma_ST = gq.get_Gamma_ST();
 
-        total_rhs.C = vars.dCdt;
         total_rhs.dCdt = -m_params.tau / vars.lapse * (vars.dCdt - advec.C) +
                          kretschmann - vars.C -
                          m_params.sigma * Gamma_ST[0] * vars.dCdt;
@@ -88,15 +101,8 @@ void CSystem::add_matter_rhs(
                     m_params.sigma * g_UU[i + 1][j + 1] * d2.C[i][j];
             }
         }
-
         total_rhs.dCdt /= (-m_params.sigma * g_UU[0][0]);
     }
-    // else
-    // {
-    //     total_rhs.C =
-    //         (kretschmann - vars.C) * vars.lapse / m_params.tau + advec.C;
-    //     total_rhs.dCdt = 0.;
-    // }
 }
 
 template <class data_t, template <typename> class rhs_vars_t,

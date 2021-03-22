@@ -42,6 +42,7 @@ class SimulationParameters : public SimulationParametersBase
     {
         // read the problem specific params
         readParams(pp);
+        check_params();
     }
 
     void readParams(GRParmParse &pp)
@@ -65,8 +66,6 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("chi_damp_coeff", hd_params.chi_damp_coeff);
         pp.load("chi_damp_timescale", hd_params.chi_damp_timescale);
         pp.load("chi_threshold_percentage", hd_params.chi_threshold_percentage);
-        CH_assert(hd_params.chi_threshold_percentage <
-                  0.98); // just to make sure I don't do anything stupid
 
         if (pp.contains("chi_width"))
             pp.load("chi_width", hd_params.chi_width);
@@ -88,6 +87,12 @@ class SimulationParameters : public SimulationParametersBase
 #ifdef USE_CSYSTEM
         pp.load("c_sigma", system_params.sigma);
         pout() << "Using sigma = " << system_params.sigma << std::endl;
+
+        pp.load("use_only_time_derivatives",
+                system_params.use_only_time_derivatives);
+        if (system_params.use_only_time_derivatives)
+            pp.load("rescale_tau_sigma_by_lapse",
+                    system_params.rescale_tau_sigma_by_lapse);
 #endif
 
         /////////////
@@ -102,6 +107,19 @@ class SimulationParameters : public SimulationParametersBase
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * id_params.mass);
 #endif
+    }
+
+    void check_params()
+    {
+
+        check_parameter("spin", id_params.spin,
+                        abs(id_params.spin) <= id_params.mass,
+                        "must be between -mass and +mass");
+
+        check_parameter("chi_threshold_percentage",
+                        hd_params.chi_threshold_percentage,
+                        hd_params.chi_threshold_percentage < 0.98,
+                        "must be sufficiently below 1");
     }
 
     double G_Newton;
