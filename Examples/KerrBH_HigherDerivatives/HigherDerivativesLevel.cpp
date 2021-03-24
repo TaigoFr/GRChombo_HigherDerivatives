@@ -21,7 +21,7 @@
 #include "NewMatterConstraintsWithGauge.hpp"
 
 // For tag cells
-#include "ChiTaggingCriterion.hpp"
+#include "ChiExtractionTaggingCriterion.hpp"
 
 // BH ID and System defined here:
 #include "SimulationParameters.hpp"
@@ -190,7 +190,10 @@ void HigherDerivativesLevel::specificUpdateODE(GRLevelData &a_soln,
 void HigherDerivativesLevel::computeTaggingCriterion(
     FArrayBox &tagging_criterion, const FArrayBox &current_state)
 {
-    BoxLoops::loop(ChiTaggingCriterion(m_dx), current_state, tagging_criterion);
+    BoxLoops::loop(ChiExtractionTaggingCriterion(m_dx, m_level,
+                                                 m_p.extraction_params,
+                                                 m_p.activate_extraction),
+                   current_state, tagging_criterion);
 }
 
 void HigherDerivativesLevel::specificPostTimeStep()
