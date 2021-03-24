@@ -24,7 +24,7 @@ max_level = 6 # There are (max_level+1) grids, so min is zero
 # Generally you do not need to regrid frequently on every level
 # Level Regridding:   0   1   2   3   4   5
 regrid_interval   =   0   0   0   0   0   0
-regrid_threshold = 0.2
+regrid_threshold = 0.02
 
 # Max and min box size - for load balancing
 max_box_size = 16
