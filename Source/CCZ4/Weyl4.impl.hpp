@@ -103,7 +103,7 @@ Weyl4::compute_null_tetrad(const Vars<data_t> &vars,
 
     FOR4(i, j, k, m)
     {
-        out.w[i] += pow(chi, -0.5) * h_UU[i][j] * epsilon[j][k][m] * out.v[k] *
+        out.w[i] += 1. / sqrt(chi) * h_UU[i][j] * epsilon[j][k][m] * out.v[k] *
                     out.u[m];
     }
 

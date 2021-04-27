@@ -165,7 +165,8 @@ class GRAMRLevel : public AMRLevel, public InterpSource<>
     {
     }
 
-    double get_dx() const;
+    // direction irrelevant, but relevant for InterpSource
+    ALWAYS_INLINE double get_dx(int dir = 0) const { return m_dx; };
 
     /// Returns true if m_time is the same as the time at the end of the current
     /// timestep on level a_level and false otherwise
@@ -205,6 +206,8 @@ class GRAMRLevel : public AMRLevel, public InterpSource<>
     /// This function is used to define the exchange copiers required for
     /// copying ghost cells between boxes
     virtual void defineExchangeCopier(const DisjointBoxLayout &a_level_domain);
+
+    void printProgress(const std::string &from) const;
 
     BoundaryConditions m_boundaries; // the class for implementing BCs
 

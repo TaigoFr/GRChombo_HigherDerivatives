@@ -14,8 +14,8 @@
 //! using add_var or add_vars
 template <class SurfaceGeometry>
 SurfaceExtraction<SurfaceGeometry>::SurfaceExtraction(
-    const SurfaceGeometry &a_geom, const params_t &a_params, double a_dt,
-    double a_time, bool a_first_step, double a_restart_time)
+    const SurfaceGeometry &a_geom, const surface_extraction_params_t &a_params,
+    double a_dt, double a_time, bool a_first_step, double a_restart_time)
     : m_geom(a_geom), m_params(a_params), m_dt(a_dt), m_time(a_time),
       m_first_step(a_first_step), m_restart_time(a_restart_time),
       m_num_interp_points((procID() == 0)
@@ -27,6 +27,18 @@ SurfaceExtraction<SurfaceGeometry>::SurfaceExtraction(
       m_du(m_geom.du(m_params.num_points_u)),
       m_dv(m_geom.dv(m_params.num_points_v)), m_done_extraction(false)
 {
+    // check folders only in first two timesteps
+    // (or at m_first_step if this is not the first two timesteps)
+    if (m_time < m_restart_time + 1.5 * m_dt || m_first_step)
+    {
+        if (!FilesystemTools::directory_exists(m_params.data_path))
+            FilesystemTools::mkdir_recursive(m_params.data_path);
+
+        if (m_params.write_extraction &&
+            !FilesystemTools::directory_exists(m_params.extraction_path))
+            FilesystemTools::mkdir_recursive(m_params.extraction_path);
+    }
+
     // only interp points on rank 0
     if (procID() == 0)
     {
@@ -114,7 +126,7 @@ void SurfaceExtraction<SurfaceGeometry>::add_diagnostic_vars(
 //! derivatives
 template <class SurfaceGeometry>
 SurfaceExtraction<SurfaceGeometry>::SurfaceExtraction(
-    const SurfaceGeometry &a_geom, const params_t &a_params,
+    const SurfaceGeometry &a_geom, const surface_extraction_params_t &a_params,
     const std::vector<std::tuple<int, VariableType, Derivative>> &a_vars,
     double a_dt, double a_time, bool a_first_step, double a_restart_time)
     : SurfaceExtraction<SurfaceGeometry>(a_geom, a_params, a_dt, a_time,
@@ -127,7 +139,7 @@ SurfaceExtraction<SurfaceGeometry>::SurfaceExtraction(
 //! no derivatives
 template <class SurfaceGeometry>
 SurfaceExtraction<SurfaceGeometry>::SurfaceExtraction(
-    const SurfaceGeometry &a_geom, const params_t &a_params,
+    const SurfaceGeometry &a_geom, const surface_extraction_params_t &a_params,
     const std::vector<int> &a_vars, double a_dt, double a_time,
     bool a_first_step, double a_restart_time)
     : SurfaceExtraction<SurfaceExtraction>(a_geom, a_params, a_dt, a_time,
@@ -347,7 +359,7 @@ void SurfaceExtraction<SurfaceGeometry>::write_extraction(
     CH_assert(m_done_extraction);
     if (procID() == 0)
     {
-        SmallDataIO extraction_file(m_params.extraction_prefix + a_file_prefix,
+        SmallDataIO extraction_file(m_params.extraction_path + a_file_prefix,
                                     m_dt, m_time, m_restart_time,
                                     SmallDataIO::NEW, m_first_step);
 
@@ -449,8 +461,8 @@ void SurfaceExtraction<SurfaceGeometry>::write_integrals(
             CH_assert(vect.size() == m_params.num_surfaces);
         }
         // open file for writing
-        SmallDataIO integral_file(m_params.extraction_prefix + a_filename, m_dt,
-                                  m_time, m_restart_time, SmallDataIO::APPEND,
+        SmallDataIO integral_file(m_params.data_path + a_filename, m_dt, m_time,
+                                  m_restart_time, SmallDataIO::APPEND,
                                   m_first_step);
 
         // remove any duplicate data if this is a restart
