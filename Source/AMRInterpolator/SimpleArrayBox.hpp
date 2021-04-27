@@ -6,8 +6,12 @@
 #ifndef SIMPLEARRAYBOX
 #define SIMPLEARRAYBOX
 
+// Chombo includes
 #include "CH_assert.H"
 #include "MayDay.H"
+
+// Chombo namespace
+#include "UsingNamespace.H"
 
 // Global Array Box class to interpolate N_DIM dimensional data
 // where 'm_f' is a flat array over the dimensions
@@ -58,12 +62,22 @@ template <int N_DIMS> class SimpleArrayBox
         return m_f[global_idx];
     }
 
+    SimpleArrayBox() {}
+
     SimpleArrayBox(std::array<int, N_DIMS> a_points_per_dir,
                    std::vector<double> a_f,
                    std::array<bool, N_DIMS> a_is_periodic = {false})
-        : m_points_per_dir(a_points_per_dir), m_f(a_f),
-          m_is_periodic(a_is_periodic)
     {
+        set(a_points_per_dir, a_f, a_is_periodic);
+    }
+
+    void set(std::array<int, N_DIMS> a_points_per_dir, std::vector<double> a_f,
+             std::array<bool, N_DIMS> a_is_periodic = {false})
+    {
+        m_points_per_dir = a_points_per_dir;
+        m_f = a_f;
+        m_is_periodic = a_is_periodic;
+
         CH_assert(N_DIMS <= CH_SPACEDIM);
         int total = 1.;
         for (int i = 0; i < N_DIMS; ++i)

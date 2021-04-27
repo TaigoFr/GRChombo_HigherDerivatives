@@ -19,11 +19,21 @@ template <int N_DIMS> class SimpleInterpSource : public InterpSource<N_DIMS>
     LevelData<FArrayBox> m_fake;
 
   public:
+    SimpleInterpSource() {}
     SimpleInterpSource(std::array<int, N_DIMS> a_points_per_dir,
                        std::array<double, N_DIMS> a_dxs,
                        std::array<bool, N_DIMS> a_is_periodic = {false})
-        : m_points_per_dir(a_points_per_dir), m_is_periodic(a_is_periodic)
     {
+        set(a_points_per_dir, a_dxs, a_is_periodic);
+    }
+
+    void set(std::array<int, N_DIMS> a_points_per_dir,
+             std::array<double, N_DIMS> a_dxs,
+             std::array<bool, N_DIMS> a_is_periodic = {false})
+    {
+        m_points_per_dir = a_points_per_dir;
+        m_dxs = a_dxs;
+        m_is_periodic = a_is_periodic;
     }
 
     const LevelData<FArrayBox> &
