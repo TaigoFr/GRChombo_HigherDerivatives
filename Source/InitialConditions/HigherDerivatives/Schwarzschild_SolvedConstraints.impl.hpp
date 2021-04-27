@@ -40,7 +40,10 @@ void Schwarzschild_SolvedConstraints::fill_from_files(
     r = simd_max(r, minimum_r);
 
     double psi = file_psi.interpolate(r);
-    chi = pow(psi, -4);
+    if (psi >= 0.)
+        chi = pow(psi, -4);
+    else
+        chi = 1. / pow(1. + m_params.mass / (2. * r), 4.);
 
     // assuming K = 0, then Arr = Krr
 
