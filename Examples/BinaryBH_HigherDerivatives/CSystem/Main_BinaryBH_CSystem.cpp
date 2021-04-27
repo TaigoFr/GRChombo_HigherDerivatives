@@ -18,13 +18,13 @@
 
 int runGRChombo(int argc, char *argv[])
 {
-    pout() << "############# USING C SYSTEM #############" << std::endl;
-
     // Load the parameter file and construct the SimulationParameter class
     // To add more parameters edit the SimulationParameters file.
     char *in_file = argv[1];
     GRParmParse pp(argc - 2, argv + 2, NULL, in_file);
     SimulationParameters sim_params(pp);
+
+    pout() << "############# USING C SYSTEM #############" << std::endl;
 
     if (sim_params.just_check_params)
         return 0;
@@ -39,7 +39,7 @@ int runGRChombo(int argc, char *argv[])
         int puncture_tracker_min_level = sim_params.max_level - 1;
         bh_amr.m_puncture_tracker.initial_setup(
             {sim_params.bh1_params.center, sim_params.bh2_params.center},
-            sim_params.checkpoint_prefix, puncture_tracker_min_level);
+            "punctures", sim_params.data_path, puncture_tracker_min_level);
     }
 
     // The line below selects the problem that is simulated

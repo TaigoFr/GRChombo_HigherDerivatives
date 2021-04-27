@@ -51,7 +51,6 @@ struct surface_extraction_params_t
     std::vector<int>
         radii_idxs_for_extrapolation; // 2 for 2nd order, 3 for 3rd order
 
-
     int min_extraction_level() const
     {
         return *(std::min_element(extraction_levels.begin(),
@@ -59,7 +58,33 @@ struct surface_extraction_params_t
     }
 
     //! deletes invalid or repeated
-    void validate_extrapolation_radii();
+    void validate_extrapolation_radii()
+    {
+        std::vector<int> valid_radii;
+        for (int i = 0; i < radii_idxs_for_extrapolation.size(); ++i)
+        {
+            // if valid
+            if (radii_idxs_for_extrapolation[i] < num_surfaces &&
+                radii_idxs_for_extrapolation[i] > -num_surfaces)
+            {
+                // allow negative indices, such that '-1' is 'last', '-2' is
+                // 'one before last'
+                if (radii_idxs_for_extrapolation[i] < 0)
+                    radii_idxs_for_extrapolation[i] += num_surfaces;
+
+                // if not repeated already
+                if (i == 0 ||
+                    std::find(radii_idxs_for_extrapolation.begin(),
+                              radii_idxs_for_extrapolation.begin() + i,
+                              radii_idxs_for_extrapolation[i]) ==
+                        radii_idxs_for_extrapolation.begin() + i)
+                {
+                    valid_radii.push_back(radii_idxs_for_extrapolation[i]);
+                }
+            }
+        }
+        radii_idxs_for_extrapolation = valid_radii;
+    }
 };
 
 //! This class extracts grid variables on 2 dimensional surfaces each
@@ -73,7 +98,7 @@ template <class SurfaceGeometry> class SurfaceExtraction
   protected:
     const SurfaceGeometry m_geom; //!< the geometry class which knows about
                                   //!< the particular surface
-    params_t m_params;
+    surface_extraction_params_t m_params;
     std::vector<std::tuple<int, VariableType, Derivative>>
         m_vars; //!< the vector of pairs of
     //!< variables and derivatives to extract

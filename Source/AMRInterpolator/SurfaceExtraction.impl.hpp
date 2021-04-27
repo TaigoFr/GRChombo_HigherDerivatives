@@ -540,35 +540,6 @@ void SurfaceExtraction<SurfaceGeometry>::write_integral(
     write_integrals(a_filename, {a_integrals}, {a_label});
 }
 
-template <class SurfaceGeometry>
-void SurfaceExtraction<
-    SurfaceGeometry>::params_t::validate_extrapolation_radii()
-{
-    std::vector<int> valid_radii;
-    for (int i = 0; i < radii_idxs_for_extrapolation.size(); ++i)
-    {
-        // if valid
-        if (radii_idxs_for_extrapolation[i] < num_surfaces &&
-            radii_idxs_for_extrapolation[i] > -num_surfaces)
-        {
-            // allow negative indices, such that '-1' is 'last', '-2' is 'one
-            // before last'
-            if (radii_idxs_for_extrapolation[i] < 0)
-                radii_idxs_for_extrapolation[i] += num_surfaces;
-
-            // if not repeated already
-            if (i == 0 || std::find(radii_idxs_for_extrapolation.begin(),
-                                    radii_idxs_for_extrapolation.begin() + i,
-                                    radii_idxs_for_extrapolation[i]) ==
-                              radii_idxs_for_extrapolation.begin() + i)
-            {
-                valid_radii.push_back(radii_idxs_for_extrapolation[i]);
-            }
-        }
-    }
-    radii_idxs_for_extrapolation = valid_radii;
-}
-
 // function to apply richardson extrapolation of 2nd or 3rd order to calculated
 // integrals
 template <class SurfaceGeometry>

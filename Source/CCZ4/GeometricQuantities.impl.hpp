@@ -2430,7 +2430,7 @@ template_GQ void GeometricQuantities_t::compute_levi_civita_ST()
     const auto &vars = get_vars();
 
     const auto epsilon4_symbol = TensorAlgebra::epsilon4D();
-    const data_t sqrt_g_det = vars.lapse * pow(vars.chi, -1.5);
+    const data_t sqrt_g_det = vars.lapse / (vars.chi * sqrt(vars.chi));
 
     m_levi_civita_ST = new Tensor<4, data_t, CH_SPACEDIM + 1>;
     FOR_ST(i, j, k, l)

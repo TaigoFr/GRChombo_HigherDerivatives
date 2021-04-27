@@ -159,13 +159,13 @@ int runTest(int argc, char *argv[])
     //////////////////////////////////////////////////////////////////
     // CHECK
     failed |= relative_error(em_tensor_def.rho, em_tensor.rho, "emtensor.rho",
-                             1.e-11);
+                             3.e-11);
     failed |=
-        relative_error(em_tensor_def.Si, em_tensor.Si, "emtensor.Si", 1.e-11);
+        relative_error(em_tensor_def.Si, em_tensor.Si, "emtensor.Si", 3.e-11);
     failed |= relative_error(em_tensor_def.Sij, em_tensor.Sij, "emtensor.Sij",
-                             1.e-11);
+                             3.e-11);
     failed |=
-        relative_error(em_tensor_def.S, em_tensor.S, "emtensor.S", 1.e-11);
+        relative_error(em_tensor_def.S, em_tensor.S, "emtensor.S", 3.e-11);
 
     return failed;
 }

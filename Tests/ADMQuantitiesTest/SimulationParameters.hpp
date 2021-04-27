@@ -70,7 +70,7 @@ class SimulationParameters : public ChomboParameters
 
   public:
     KerrBH::params_t kerr_params;
-    SphericalExtraction::params_t extraction_params;
+    spherical_extraction_params_t extraction_params;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */

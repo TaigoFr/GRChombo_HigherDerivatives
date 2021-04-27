@@ -7,6 +7,8 @@
 #define SIMULATIONPARAMETERS_HPP_
 
 #include "ChomboParameters.hpp"
-using SimulationParameters = ChomboParameters;
+class SimulationParameters : public ChomboParameters
+{
+};
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */
