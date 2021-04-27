@@ -11,18 +11,9 @@
 #ifndef SCHWARZSCHILD_SOLVEDCONSTRAINTS_IMPL_HPP_
 #define SCHWARZSCHILD_SOLVEDCONSTRAINTS_IMPL_HPP_
 
-inline Schwarzschild_SolvedConstraints::Schwarzschild_SolvedConstraints(
-    params_t a_params, double a_dx, const std::string &append)
-    : m_params(a_params), m_dx(a_dx),
-      file_psi("Npoints" + append, "rs" + append, "psi" + append, 1.),
-      file_Krr("Npoints" + append, "rs" + append, "Krr" + append, 0.)
-{
-}
-
 // Compute the value of the initial vars on the grid
 template <class data_t>
-void Schwarzschild_SolvedConstraints<matter_t>::compute(
-    Cell<data_t> current_cell) const
+void Schwarzschild_SolvedConstraints::compute(Cell<data_t> current_cell) const
 {
     BSSNVars::VarsWithGauge<data_t> vars;
     VarsTools::assign(vars, 0.); // Set only the non-zero components below
@@ -34,14 +25,14 @@ void Schwarzschild_SolvedConstraints<matter_t>::compute(
     // conformal metric is flat
     FOR1(i) vars.h[i][i] = 1.;
 
-    fill_from_data(vars.chi, vars.A, coords);
+    fill_from_files(vars.chi, vars.A, coords);
 
     // Store the initial values of the variables
     current_cell.store_vars(vars);
 }
 
 template <class data_t>
-void Schwarzschild_SolvedConstraints<matter_t>::fill_from_data(
+void Schwarzschild_SolvedConstraints::fill_from_files(
     data_t &chi, Tensor<2, data_t> &A, const Coordinates<data_t> &coords) const
 {
     data_t r = coords.get_radius();
@@ -53,7 +44,7 @@ void Schwarzschild_SolvedConstraints<matter_t>::fill_from_data(
 
     // assuming K = 0, then Arr = Krr
 
-    data_t Arr = file_Arr.interpolate(r);
+    data_t Arr = file_Krr.interpolate(r);
 
     Tensor<1, data_t> xyz = {coords.x / r, coords.y / r, coords.z / r};
     FOR1(i)

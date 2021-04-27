@@ -30,13 +30,21 @@ class Schwarzschild_SolvedConstraints
 
   public:
     Schwarzschild_SolvedConstraints(params_t a_params, const double a_dx,
-                                    const std::string &append = "");
+                                    const std::string &append = "")
+        : m_params(a_params), m_dx(a_dx),
+          file_psi("Npoints" + append, "rs" + append, "psi" + append, 1.),
+          file_Krr("Npoints" + append, "rs" + append, "Krr" + append, 0.)
+    {
+    }
 
     //! Function to compute the value of all the initial vars on the grid
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
     template <class data_t>
-    void fill_from_data(data_t &chi, Tensor<2, data_t> &A,
-                        const Coordinates<data_t> &coords) const;
+    void fill_from_files(data_t &chi, Tensor<2, data_t> &A,
+                         const Coordinates<data_t> &coords) const;
 };
+
+#include "Schwarzschild_SolvedConstraints.impl.hpp"
+
 #endif /* SCHWARZSCHILD_SOLVEDCONSTRAINTS*/

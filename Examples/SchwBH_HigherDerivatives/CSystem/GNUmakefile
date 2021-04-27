@@ -6,11 +6,11 @@
 # Included makefiles need an absolute path to the Chombo installation
 # CHOMBO_HOME := Please set the CHOMBO_HOME locally (e.g. export CHOMBO_HOME=... in bash)
 
-cxxcppflags   := ${cxxcppflags} -DUSE_EBSYSTEM
+cxxcppflags   := ${cxxcppflags} -DUSE_CSYSTEM
 
 GRCHOMBO_SOURCE = ../../../Source
 
-ebase := EBSystemTest
+ebase := Main_HigherDerivatives_CSystem
 
 LibNames := AMRTimeDependent AMRTools BoxTools
 
@@ -21,12 +21,12 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/BoxUtils  \
             $(GRCHOMBO_SOURCE)/GRChomboCore  \
             $(GRCHOMBO_SOURCE)/TaggingCriteria  \
-            $(GRCHOMBO_SOURCE)/InitialConditions/BlackHoles \
+            $(GRCHOMBO_SOURCE)/InitialConditions/HigherDerivatives \
             $(GRCHOMBO_SOURCE)/BlackHoles \
             $(GRCHOMBO_SOURCE)/AMRInterpolator  \
             $(GRCHOMBO_SOURCE)/ApparentHorizonFinder \
             $(GRCHOMBO_SOURCE)/HigherDerivatives \
-            $(GRCHOMBO_SOURCE)/HigherDerivatives/EBSystem \
+            $(GRCHOMBO_SOURCE)/HigherDerivatives/CSystem \
             ..
 
 include $(CHOMBO_HOME)/mk/Make.test

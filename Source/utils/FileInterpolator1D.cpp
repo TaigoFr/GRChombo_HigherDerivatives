@@ -45,6 +45,9 @@ FileInterpolator1D::FileInterpolator1D(const std::string &Nlabel,
         source.set({m_N}, {m_dx});
         box.set({m_N}, ys);
     }
+    else
+        MayDay::Warning(
+            "No file found or too little points for interpolation.");
 }
 
 double FileInterpolator1D::interpolate(double x, int derivative)

@@ -16,7 +16,7 @@ template <int N_DIMS> class SimpleInterpSource : public InterpSource<N_DIMS>
     std::array<bool, N_DIMS> m_is_periodic;
     std::array<double, N_DIMS> m_dxs;
 
-    LevelData<FArrayBox> m_fake;
+    LevelData<FArrayBox> *m_fake;
 
   public:
     SimpleInterpSource() {}
@@ -39,7 +39,8 @@ template <int N_DIMS> class SimpleInterpSource : public InterpSource<N_DIMS>
     const LevelData<FArrayBox> &
     getLevelData(const VariableType var_type = VariableType::evolution) const
     {
-        return m_fake;
+        CH_assert("This should not be needed.");
+        return *m_fake;
     }
 
     bool contains(const std::array<double, N_DIMS> &point) const

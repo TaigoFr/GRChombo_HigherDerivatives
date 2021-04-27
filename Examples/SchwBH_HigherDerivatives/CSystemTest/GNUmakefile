@@ -10,7 +10,7 @@ cxxcppflags   := ${cxxcppflags} -DUSE_CSYSTEM
 
 GRCHOMBO_SOURCE = ../../../Source
 
-ebase := Main_HigherDerivatives_CSystem
+ebase := CSystemTest
 
 LibNames := AMRTimeDependent AMRTools BoxTools
 
@@ -21,7 +21,7 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/BoxUtils  \
             $(GRCHOMBO_SOURCE)/GRChomboCore  \
             $(GRCHOMBO_SOURCE)/TaggingCriteria  \
-            $(GRCHOMBO_SOURCE)/InitialConditions/BlackHoles \
+            $(GRCHOMBO_SOURCE)/InitialConditions/HigherDerivatives \
             $(GRCHOMBO_SOURCE)/BlackHoles \
             $(GRCHOMBO_SOURCE)/AMRInterpolator  \
             $(GRCHOMBO_SOURCE)/ApparentHorizonFinder \

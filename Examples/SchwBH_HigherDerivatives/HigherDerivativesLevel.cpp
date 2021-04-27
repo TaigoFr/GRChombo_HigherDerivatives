@@ -70,7 +70,7 @@ void HigherDerivativesLevel::initialData()
 
     // First set everything to zero then desired initial data
     BoxLoops::loop(make_compute_pack(SetValue(0.), id), m_state_new,
-                   m_state_new, INCLUDE_GHOST_CELLS);
+                   m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 
     fillAllGhosts();
 
@@ -166,7 +166,8 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
     fillAllGhosts();
 #endif
 
-    m_p.hd_params.update_min_chi(a_time, m_p.id_params.spin);
+    // m_p.hd_params.update_min_chi(a_time, m_p.id_params.spin);
+    m_p.hd_params.update_min_chi(a_time, 0.);
     m_p.diffusion_params.chiCutoff = m_p.hd_params.chi_threshold;
 
     bool apply_weak_field = true;

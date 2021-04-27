@@ -27,13 +27,15 @@ typedef CSystem System;
 // #include "MinkowskiPerturbed.hpp"
 // #include "SchwarzschildIsotropic.hpp"
 // #include "SchwarzschildKS.hpp"
-#include "KerrBH.hpp"
+// #include "KerrBH.hpp"
+#include "Schwarzschild_SolvedConstraints.hpp"
 
 // which one to use:
 // typedef MinkowskiPerturbed InitialData;
 // typedef SchwarzschildIsotropic InitialData;
 // typedef SchwarzschildKS InitialData;
-typedef KerrBH InitialData;
+// typedef KerrBH InitialData;
+typedef Schwarzschild_SolvedConstraints InitialData;
 
 class SimulationParameters : public SimulationParametersBase
 {
@@ -49,7 +51,7 @@ class SimulationParameters : public SimulationParametersBase
     {
         // Initial data
         pp.load("mass", id_params.mass);
-        pp.load("spin", id_params.spin); // for Kerr only
+        // pp.load("spin", id_params.spin); // for Kerr only
         // pp.load("amplitude", id_params.amplitude);
         // pp.load("r0", id_params.r0);
         id_params.center = center;
@@ -75,7 +77,8 @@ class SimulationParameters : public SimulationParametersBase
             hd_params.chi_width =
                 (1. - hd_params.chi_threshold_percentage) / 4.;
         }
-        hd_params.update_min_chi(0., id_params.spin);
+        // hd_params.update_min_chi(0., id_params.spin);
+        hd_params.update_min_chi(0., 0.);
 
         // this is such that the  'epsilon' in the EOM is replaced by
         // 'epsilon' when doing 'kappa / 2 * EM-tensor'
@@ -113,15 +116,17 @@ class SimulationParameters : public SimulationParametersBase
 
     void check_params()
     {
-
-        check_parameter("spin", id_params.spin,
-                        abs(id_params.spin) <= id_params.mass,
-                        "must be between -mass and +mass");
+        // check_parameter("spin", id_params.spin,
+        //                 abs(id_params.spin) <= id_params.mass,
+        //                 "must be between -mass and +mass");
 
         check_parameter("chi_threshold_percentage",
                         hd_params.chi_threshold_percentage,
                         hd_params.chi_threshold_percentage < 0.98,
                         "must be sufficiently below 1");
+
+        // try to create InitialData -> will give error if it has to
+        InitialData id(id_params, 1. /*dummy*/);
     }
 
     double G_Newton;
