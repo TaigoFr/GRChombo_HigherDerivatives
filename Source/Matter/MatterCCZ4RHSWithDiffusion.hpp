@@ -8,13 +8,45 @@
 
 #include "MatterCCZ4RHS.hpp"
 
-struct diffusion_params_t
+struct ah_chi_params_t
+{
+    // damping is <10^{-k} for chi > threshold*(1+k*width) and >1-10^{-k}
+    // for x<threshold*(1-k*width)
+    double chi_threshold;
+    double chi_width;
+    double chi_ignore_threshold; // don't even try above this chi, just to
+                                 // make it faster, to avoid entering in
+                                 // cells far from the BH
+                                 // not used in diffusion, but used in C2EFT
+
+    double chi_damp_coeff, chi_damp_timescale;
+    double chi_threshold_percentage;
+    double min_chi(double time, double spin)
+    {
+        double oms2 = sqrt(1. - spin * spin);
+        // approximation based on fit
+        double chi_asymptotic = 0.26 * oms2;
+        // minimum chi for Kerr ID (chi is not constant at higher spin)
+        double chi_t0 =
+            pow(oms2 * (1. + oms2) * (1. + oms2) / 4., 1. / 3.) / 16.;
+
+        double chi_t =
+            chi_asymptotic + exp(-chi_damp_coeff * time / chi_damp_timescale) *
+                                 (chi_t0 - chi_asymptotic);
+        return chi_t;
+    }
+    void update_min_chi(double time, double spin)
+    {
+        chi_ignore_threshold = min_chi(time, spin);
+        chi_threshold = chi_ignore_threshold * chi_threshold_percentage;
+    }
+};
+
+struct diffusion_params_t : public ah_chi_params_t
 {
     double diffCFLFact;  //!< diffusion terms CFL factor cutoff
     double lapidusCoeff; //!< Lapidus coefficient
     double lapidusPower; //!< Lapidus power
-    double chiCutoff;    //!< Cut off for diffusion terms
-    double chiCutoff_width;
 };
 
 template <class matter_t, class gauge_t = MovingPunctureGauge,

@@ -45,23 +45,6 @@ print_progress_only_to_rank_0 = 1
 # amplitude = 0.05
 # r0 = 1.
 
-# provide INITIAL_DATA.dat with 'epsilon'
-
-# epsilon = 0.0001 # energy scale
-tau     = 0.1    # damping time scale for evolved Eij/Bij
-
-#chi_width     = 0.05 # automatic now
-weak_field_threshold = 1.e-10
-weak_field_width     = 0.05
-chi_damp_coeff = 2.
-chi_damp_timescale = 20.
-chi_threshold_percentage = 0.8
-
-#Diffusion parameters
-diffCFLFact = 1E20
-lapidusCoeff = 0.00
-lapidusPower = 1.0
-
 #################################################
 # Grid parameters
 
@@ -176,6 +159,28 @@ sigma = 1.0
 # min_lapse = 1.e-4
 
 #################################################
+# Higher Derivatives Evolution parameters
+
+# provide INITIAL_DATA.dat with 'epsilon'
+
+# epsilon = 0.0001 # energy scale
+tau     = 0.1    # damping time scale for evolved Eij/Bij
+
+#chi_width     = 0.05 # automatic now
+weak_field_threshold = 1.e-10
+weak_field_width     = 0.05
+chi_damp_coeff = 2.
+chi_damp_timescale = 20.
+chi_threshold_percentage = 0.8
+
+#Diffusion parameters
+diffCFLFact = 1E20
+lapidusCoeff = 0.00
+lapidusPower = 1.0
+diffusion_chi_threshold_percentage = 0.9
+diffusion_chi_width = 0.05 # O(10^-2) at horizon, a bit big
+
+#################################################
 # Extraction parameters
 
 # extraction_center = 256 256 256 # defaults to center
@@ -185,6 +190,8 @@ extraction_radii = 30. 40. 50.
 extraction_levels = 2 1 0
 num_points_phi = 50
 num_points_theta = 51
+extraction_extrapolation_order = 3
+extraction_extrapolation_radii = 0 1 2
 # num_modes = 3
 # modes = 2 0 # l m for spherical harmonics
 #        2 1

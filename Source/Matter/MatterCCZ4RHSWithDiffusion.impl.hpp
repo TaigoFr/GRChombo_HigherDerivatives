@@ -95,9 +95,8 @@ MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::add_diffusion_terms(
                               //!< violate the Courant condition
 
     // Introduce a smooth cutoff:
-    auto chi_above_cutoff =
-        sigmoid(vars.chi, m_diffusion_params.chiCutoff_width,
-                m_diffusion_params.chiCutoff);
+    auto chi_above_cutoff = sigmoid(vars.chi, m_diffusion_params.chi_width,
+                                    m_diffusion_params.chi_threshold);
     diffCoeffSafe *= chi_above_cutoff;
 
     data_t space_laplace_lapse = 0.;

@@ -77,8 +77,9 @@ class SimulationParameters : public SimulationParametersBase
             hd_params.chi_width =
                 (1. - hd_params.chi_threshold_percentage) / 4.;
         }
-        // hd_params.update_min_chi(0., id_params.spin);
-        hd_params.update_min_chi(0., 0.);
+        double time = 0., spin = 0.;
+        // hd_params.update_min_chi(time, id_params.spin);
+        hd_params.update_min_chi(time, spin);
 
         // this is such that the  'epsilon' in the EOM is replaced by
         // 'epsilon' when doing 'kappa / 2 * EM-tensor'
@@ -101,10 +102,22 @@ class SimulationParameters : public SimulationParametersBase
         /////////////
         // Diffusion parameters
         pp.load("diffCFLFact", diffusion_params.diffCFLFact, 1e20);
-        pp.load("lapidusCoeff", diffusion_params.lapidusCoeff, 0.001);
+        pp.load("lapidusCoeff", diffusion_params.lapidusCoeff, 0.0);
         pp.load("lapidusPower", diffusion_params.lapidusPower, 1.0);
-        diffusion_params.chiCutoff = hd_params.chi_threshold;
-        diffusion_params.chiCutoff_width = hd_params.chi_width;
+        diffusion_params.chi_damp_coeff = hd_params.chi_damp_coeff;
+        diffusion_params.chi_damp_timescale = hd_params.chi_damp_timescale;
+        pp.load("diffusion_chi_threshold_percentage",
+                diffusion_params.chi_threshold_percentage,
+                hd_params.chi_threshold_percentage);
+        if (pp.contains("diffusion_chi_width"))
+            pp.load("diffusion_chi_width", diffusion_params.chi_width);
+        else
+        {
+            // ensure excision is O(10^-4) just before the horizon
+            diffusion_params.chi_width =
+                (1. - diffusion_params.chi_threshold_percentage) / 4.;
+        }
+        diffusion_params.update_min_chi(time, spin);
         /////////////
 
         pp.load("activate_extraction", activate_extraction, false);

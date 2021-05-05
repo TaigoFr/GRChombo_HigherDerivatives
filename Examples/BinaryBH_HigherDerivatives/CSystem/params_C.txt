@@ -199,7 +199,8 @@ chi_threshold_percentage = 0.8
 diffCFLFact = 1E20
 lapidusCoeff = 0.00
 lapidusPower = 1.0
-
+diffusion_chi_threshold_percentage = 0.9
+diffusion_chi_width = 0.05 # O(10^-2) at horizon, a bit big
 
 #################################################
 # Extraction parameters

@@ -7,30 +7,19 @@
 #define C2EFT_HPP_
 
 #include "GeometricQuantities.hpp"
+#include "MatterCCZ4RHSWithDiffusion.hpp"
 #include "Tensor.hpp"
 
 template <class System> class C2EFT
 {
   public:
-    struct params_t
+    struct params_t : public ah_chi_params_t
     {
         double epsilon;
 
         // weak field parameters
-        // damping is <10^{-k} for chi > threshold*(1+k*width) and >1-10^{-k}
-        // for x<threshold*(1-k*width)
-        double chi_threshold;
-        double chi_width;
         double weak_field_threshold;
         double weak_field_width;
-        double chi_ignore_threshold; // don't even try above this chi, just to
-                                     // make it faster, to avoid entering in
-                                     // cells far from the BH
-
-        double chi_damp_coeff, chi_damp_timescale;
-        double chi_threshold_percentage;
-        double min_chi(double time, double spin);
-        void update_min_chi(double time, double spin);
     };
 
     template <class data_t> using Vars = typename System::template Vars<data_t>;

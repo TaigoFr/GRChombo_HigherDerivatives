@@ -172,7 +172,7 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 
     double spin = 0.;
     m_p.hd_params.update_min_chi(a_time, spin);
-    m_p.diffusion_params.chiCutoff = m_p.hd_params.chi_threshold;
+    m_p.diffusion_params.update_min_chi(a_time, spin);
 
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);

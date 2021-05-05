@@ -11,28 +11,6 @@
 #define C2EFT_IMPL_HPP_
 #include "DimensionDefinitions.hpp"
 
-template <class System>
-double C2EFT<System>::params_t::min_chi(double time, double spin)
-{
-    double oms2 = sqrt(1. - spin * spin);
-    // approximation based on fit
-    double chi_asymptotic = 0.26 * oms2;
-    // valid for Kerr ID. It is the minimum chi (chi is not constant at
-    // higher spin)
-    double chi_t0 = pow(oms2 * (1. + oms2) * (1. + oms2) / 4., 1. / 3.) / 16.;
-
-    double chi_t =
-        chi_asymptotic + exp(-chi_damp_coeff * time / chi_damp_timescale) *
-                             (chi_t0 - chi_asymptotic);
-    return chi_t;
-}
-template <class System>
-void C2EFT<System>::params_t::update_min_chi(double time, double spin)
-{
-    chi_ignore_threshold = min_chi(time, spin);
-    chi_threshold = chi_ignore_threshold * chi_threshold_percentage;
-}
-
 // Calculate the stress energy tensor elements
 template <class System>
 template <class data_t, template <typename> class vars_t,
