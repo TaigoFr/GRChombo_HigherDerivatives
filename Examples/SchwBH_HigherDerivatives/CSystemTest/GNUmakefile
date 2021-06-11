@@ -27,6 +27,7 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/ApparentHorizonFinder \
             $(GRCHOMBO_SOURCE)/HigherDerivatives \
             $(GRCHOMBO_SOURCE)/HigherDerivatives/CSystem \
+			$(GRCHOMBO_SOURCE)/utils/CubicSpline1DInterpolation \
             ..
 
 include $(CHOMBO_HOME)/mk/Make.test

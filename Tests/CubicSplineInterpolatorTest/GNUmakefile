@@ -8,7 +8,7 @@
 
 GRCHOMBO_SOURCE = $(shell pwd)/../../Source
 
-ebase := FileInterpolator1DTest
+ebase := CubicSplineInterpolatorTest
 
 LibNames := AMRTimeDependent AMRTools BoxTools
 

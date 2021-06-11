@@ -33,9 +33,13 @@ class Schwarzschild_SolvedConstraints
                                     const std::string &append = "")
         : m_params(a_params), m_dx(a_dx),
           file_psi("Npoints" + append, "rs" + append, "psi" + append,
-                   -1.), // negative such that we identify when there is no file
+                   -1.), // negative such that we identify when there is no
+                         // file and set the usual chi=(1+M/(2r))^4
+                         // (see 'fill_from_files')
           file_Krr("Npoints" + append, "rs" + append, "Krr" + append, 0.)
     {
+        file_psi.allow_extrapolation(true);
+        file_Krr.allow_extrapolation(true);
     }
 
     //! Function to compute the value of all the initial vars on the grid
