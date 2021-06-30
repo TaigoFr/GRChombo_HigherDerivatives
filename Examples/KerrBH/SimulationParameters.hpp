@@ -36,10 +36,6 @@ class SimulationParameters : public SimulationParametersBase
 
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * kerr_params.mass);
-#ifdef USE_CHI_CONTOURS
-        pp.load("look_for_chi_contour", look_for_chi_contour);
-        CH_assert(look_for_chi_contour > 0.);
-#endif
 #endif
     }
 
@@ -51,7 +47,7 @@ class SimulationParameters : public SimulationParametersBase
                         std::abs(kerr_params.spin) <= kerr_params.mass,
                         "must satisfy |a| <= M = " +
                             std::to_string(kerr_params.mass));
-        FOR1(idir)
+        FOR(idir)
         {
             std::string name = "kerr_center[" + std::to_string(idir) + "]";
             warn_parameter(
@@ -67,11 +63,6 @@ class SimulationParameters : public SimulationParametersBase
 
 #ifdef USE_AHFINDER
     double AH_initial_guess;
-    // example of how to change the expansion function
-    double look_for_chi_contour; // look for a chi contour instead of the AH
-                                 // (negative number to look for AH)
-                                 // changes only the expansion function
-                                 // (ApparentHorizon::get_expansion)
 #endif
 };
 

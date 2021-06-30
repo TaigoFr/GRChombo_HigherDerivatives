@@ -11,6 +11,7 @@
 #define _APPARENTHORIZON_IMPL_HPP_
 
 #include "GRAMR.hpp"
+#include "PETScCommunicator.hpp"
 #include "SmallDataIO.hpp"
 #include "TensorAlgebra.hpp"
 #include "UserVariables.hpp"
@@ -20,32 +21,16 @@
 #include "SimpleArrayBox.hpp"
 #include "SimpleInterpSource.hpp"
 
-#include <iomanip> // for 'setw' in stringstream
-#include <limits>  // infinity for min and max calculation
-
 template <class SurfaceGeometry, class AHFunction>
 ApparentHorizon<SurfaceGeometry, AHFunction>::ApparentHorizon(
-    const AHInterpolation<SurfaceGeometry, AHFunction> &a_interp,
-    double a_initial_guess, const AHFinder::params &a_params,
-    const std::string &a_stats, const std::string &a_coords,
-    bool solve_first_step)
-    : ApparentHorizon(a_interp, a_initial_guess, a_params, AHFunction::params(),
-                      a_stats, a_coords, solve_first_step)
-{
-}
-
-template <class SurfaceGeometry, class AHFunction>
-ApparentHorizon<SurfaceGeometry, AHFunction>::ApparentHorizon(
-    const AHInterpolation<SurfaceGeometry, AHFunction> &a_interp,
-    double a_initial_guess, const AHFinder::params &a_params,
-    const typename AHFunction::params &a_func_params,
-    const std::string &a_stats, const std::string &a_coords,
-    bool solve_first_step)
+    const AHInterpolation &a_interp, const AHInitialGuessPtr a_initial_guess,
+    const AHParams &a_params, const std::string &a_stats,
+    const std::string &a_coords, bool solve_first_step)
     : m_params(a_params),
 
       m_stats(a_stats), m_coords(a_coords),
 
-      m_func_params(a_func_params),
+      solver(a_interp, a_initial_guess, a_params),
 
       m_printed_once(false),
 
@@ -54,8 +39,6 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::ApparentHorizon(
       m_has_been_found(false),
 
       m_num_failed_convergences(0),
-
-      m_initial_guess(a_initial_guess),
 
       m_old_centers(3, a_interp.get_coord_system().get_origin()),
 
@@ -74,28 +57,11 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::ApparentHorizon(
       m_area(NAN), m_spin(NAN), m_mass(NAN), m_irreducible_mass(NAN),
       m_spin_z_alt(NAN), m_dimensionless_spin_vector({NAN}),
 
-      origin_already_updated(false),
-
-      m_interp(a_interp), m_interp_plus(a_interp), m_interp_minus(a_interp),
-
-      m_periodic_u(a_interp.get_coord_system().is_u_periodic()),
-      m_num_global_u(a_params.num_points_u)
-
-#if CH_SPACEDIM == 3
-      ,
-      m_periodic_v(a_interp.get_coord_system().is_v_periodic()),
-      m_num_global_v(a_params.num_points_v)
-#endif
+      origin_already_updated(false)
 {
-    initialise_PETSc();
     set_origin(a_interp.get_coord_system().get_origin());
     check_integration_methods();
     restart(solve_first_step);
-}
-template <class SurfaceGeometry, class AHFunction>
-ApparentHorizon<SurfaceGeometry, AHFunction>::~ApparentHorizon()
-{
-    finalise_PETSc();
 }
 
 template <class SurfaceGeometry, class AHFunction>
@@ -138,33 +104,30 @@ template <class SurfaceGeometry, class AHFunction>
 const std::array<double, CH_SPACEDIM> &
 ApparentHorizon<SurfaceGeometry, AHFunction>::get_origin() const
 {
-    return m_interp.get_coord_system().get_origin();
+    return solver.get_origin();
 }
 
 template <class SurfaceGeometry, class AHFunction>
-const AHInterpolation<SurfaceGeometry, AHFunction> &
+const AHInterpolation_t<SurfaceGeometry, AHFunction> &
 ApparentHorizon<SurfaceGeometry, AHFunction>::get_ah_interp() const
 {
-    return m_interp;
+    return solver.m_interp;
+}
+
+template <class SurfaceGeometry, class AHFunction>
+PETScAHSolver<SurfaceGeometry, AHFunction> &
+ApparentHorizon<SurfaceGeometry, AHFunction>::get_petsc_solver()
+{
+    return solver;
 }
 
 template <class SurfaceGeometry, class AHFunction>
 void ApparentHorizon<SurfaceGeometry, AHFunction>::set_origin(
     const std::array<double, CH_SPACEDIM> &a_origin)
 {
-    m_interp.set_origin(a_origin);
-    m_interp_plus.set_origin(a_origin);
-    m_interp_minus.set_origin(a_origin);
-    origin_already_updated = true;
+    solver.set_origin(a_origin);
 
-    if (m_params.verbose > AHFinder::SOME)
-    {
-        pout() << "Setting origin to (" << a_origin[0] << "," << a_origin[1]
-#if CH_SPACEDIM == 3
-               << "," << a_origin[2]
-#endif
-               << ")" << std::endl;
-    }
+    origin_already_updated = true;
 }
 
 template <class SurfaceGeometry, class AHFunction>
@@ -220,82 +183,23 @@ double ApparentHorizon<SurfaceGeometry, AHFunction>::get_std_F() const
 }
 
 template <class SurfaceGeometry, class AHFunction>
-double ApparentHorizon<SurfaceGeometry, AHFunction>::get_initial_guess() const
-{
-    return m_initial_guess;
-}
-
-template <class SurfaceGeometry, class AHFunction>
-void ApparentHorizon<SurfaceGeometry, AHFunction>::set_initial_guess(
-    double a_initial_guess)
-{
-    m_initial_guess = a_initial_guess;
-}
-template <class SurfaceGeometry, class AHFunction>
-void ApparentHorizon<SurfaceGeometry, AHFunction>::reset_initial_guess()
-{
-    CH_TIME("ApparentHorizon::reset_initial_guess");
-
-    if (!AHFinder::is_rank_active())
-        return;
-
-    auto origin = get_origin();
-
-    // verify origin +- initial guess is inside the grid
-    bool out_of_grid = m_interp.is_in_grid(origin, m_initial_guess);
-    CH_assert(!out_of_grid);
-
-    if (m_params.verbose > AHFinder::NONE)
-    {
-        pout() << "Setting Initial Guess to f=" << m_initial_guess
-               << " centered at (" << origin[0] << "," << origin[1]
-#if CH_SPACEDIM == 3
-               << "," << origin[2]
-#endif
-               << ")" << std::endl;
-    }
-
-    // read PETSc array to 'f'
-    dmda_arr_t f;
-    DMDAVecGetArray(m_dmda, m_snes_soln, &f);
-
-#if CH_SPACEDIM == 3
-    for (int v = m_vmin; v < m_vmax; ++v)
-#endif
-    {
-        for (int u = m_umin; u < m_umax; ++u)
-        {
-#if CH_SPACEDIM == 3
-            double &f_point = f[v][u];
-#else
-            double &f_point = f[u];
-#endif
-
-            f_point = m_initial_guess;
-        }
-    }
-
-    // write PETSc array back
-    DMDAVecRestoreArray(m_dmda, m_snes_soln, &f);
-}
-template <class SurfaceGeometry, class AHFunction>
 void ApparentHorizon<SurfaceGeometry, AHFunction>::predict_next_origin()
 {
     std::array<double, CH_SPACEDIM> new_center = m_old_centers[0];
     if (m_converged >= 3) // add 2nd derivative
     {
-        FOR1(a)
+        FOR(a)
         {
-            if (!m_interp.get_interpolator()->get_boundary_reflective(Side::Lo,
-                                                                      a) &&
-                !m_interp.get_interpolator()->get_boundary_reflective(Side::Hi,
-                                                                      a))
+            if (!solver.m_interp.get_interpolator()->get_boundary_reflective(
+                    Side::Lo, a) &&
+                !solver.m_interp.get_interpolator()->get_boundary_reflective(
+                    Side::Hi, a))
             {
                 new_center[a] += (m_old_centers[0][a] + m_old_centers[2][a] -
                                   2. * m_old_centers[1][a]);
             }
         }
-        if (m_params.verbose > AHFinder::SOME)
+        if (m_params.verbose > AHParams::SOME)
         {
             pout() << "OLD[-2]: (" << m_old_centers[2][0] << ","
                    << m_old_centers[2][1]
@@ -307,18 +211,18 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::predict_next_origin()
     }
     if (m_converged >= 2) // add 1st derivative
     {
-        FOR1(a)
+        FOR(a)
         {
-            if (!m_interp.get_interpolator()->get_boundary_reflective(Side::Lo,
-                                                                      a) &&
-                !m_interp.get_interpolator()->get_boundary_reflective(Side::Hi,
-                                                                      a))
+            if (!solver.m_interp.get_interpolator()->get_boundary_reflective(
+                    Side::Lo, a) &&
+                !solver.m_interp.get_interpolator()->get_boundary_reflective(
+                    Side::Hi, a))
             {
                 new_center[a] += (m_old_centers[0][a] - m_old_centers[1][a]);
             }
         }
 
-        if (m_params.verbose > AHFinder::SOME)
+        if (m_params.verbose > AHParams::SOME)
         {
             pout() << "OLD[-1]: (" << m_old_centers[1][0] << ","
                    << m_old_centers[1][1]
@@ -333,7 +237,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::predict_next_origin()
 #endif
                    << ")" << std::endl;
         }
-        if (m_params.verbose > AHFinder::MIN)
+        if (m_params.verbose > AHParams::MIN)
         {
             pout() << "Estimated center: (" << new_center[0] << ","
                    << new_center[1]
@@ -351,11 +255,12 @@ template <class SurfaceGeometry, class AHFunction>
 void ApparentHorizon<SurfaceGeometry, AHFunction>::update_old_centers(
     std::array<double, CH_SPACEDIM> new_center)
 {
-    FOR1(a)
+    FOR(a)
     {
-        if (!m_interp.get_interpolator()->get_boundary_reflective(Side::Lo,
-                                                                  a) &&
-            !m_interp.get_interpolator()->get_boundary_reflective(Side::Hi, a))
+        if (!solver.m_interp.get_interpolator()->get_boundary_reflective(
+                Side::Lo, a) &&
+            !solver.m_interp.get_interpolator()->get_boundary_reflective(
+                Side::Hi, a))
         {
             m_old_centers[2][a] = m_old_centers[1][a];
             m_old_centers[1][a] = m_old_centers[0][a];
@@ -373,7 +278,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::solve(double a_dt,
     if (!good_to_go(a_dt, a_time))
         return;
 
-    m_interp.refresh_interpolator(
+    solver.m_interp.refresh_interpolator(
         do_print(a_dt, a_time),
         m_params.extra_vars); // (ALL CHOMBO ranks do it!!)
 
@@ -387,34 +292,21 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::solve(double a_dt,
     }
 
     // PETSc processes go inside 'if', others "wait" until 'if' gets to
-    // 'm_interp.break_interpolation_loop()'
-    if (m_interp.keep_interpolating_if_inactive())
+    // 'solver.m_interp.break_interpolation_loop()'
+    if (solver.m_interp.keep_interpolating_if_inactive())
     {
         CH_TIME("ApparentHorizon::solve::solving");
 
         if (!get_converged())
-            reset_initial_guess(); // reset initial guess if diverged (or in
-                                   // first attempt)
+            solver.reset_initial_guess(); // reset initial guess if diverged (or
+                                          // in first attempt)
 
-        // actual solve happens here!
-        SNESSolve(m_snes, NULL, m_snes_soln);
-
-        PetscInt its;
-        SNESGetIterationNumber(m_snes, &its);
-        if (m_params.verbose > AHFinder::MIN)
-        {
-            pout() << "SNES Iteration number " << its << endl;
-        }
-        SNESGetLinearSolveIterations(m_snes, &its);
-        if (m_params.verbose > AHFinder::MIN)
-        {
-            pout() << "KSP Iteration number " << its << endl;
-        }
-        m_interp.break_interpolation_loop();
+        solver.solve();
+        solver.m_interp.break_interpolation_loop();
     }
 
     {
-        if (m_params.verbose > AHFinder::SOME)
+        if (m_params.verbose > AHParams::SOME)
         {
             pout() << "In [ApparentHorizon::solve::post-solving]" << endl;
         }
@@ -433,7 +325,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::solve(double a_dt,
         if (save_converged && !get_converged() && m_params.allow_re_attempt)
         {
             --m_num_failed_convergences; // reduce failed and try again
-            if (m_params.verbose > AHFinder::NONE)
+            if (m_params.verbose > AHParams::NONE)
             {
                 pout() << "Re-attempting to solve using initial guess."
                        << std::endl;
@@ -463,18 +355,18 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::solve(double a_dt,
 
 #if CH_SPACEDIM == 3
         m_spin = J_norm / m_mass;
-        FOR1(a) { m_dimensionless_spin_vector[a] = J[a] / (m_mass * m_mass); }
+        FOR(a) { m_dimensionless_spin_vector[a] = J[a] / (m_mass * m_mass); }
 
         m_spin_z_alt = calculate_spin_dimensionless(m_area);
 #endif
 
-        if (m_params.verbose > AHFinder::NONE)
+        if (m_params.verbose > AHParams::NONE)
         {
             pout() << "mass = " << m_mass << endl;
 #if CH_SPACEDIM == 3
             pout() << "spin = " << m_spin << endl;
 #endif
-            if (m_params.verbose > AHFinder::MIN)
+            if (m_params.verbose > AHParams::MIN)
             {
                 pout() << "irreducible mass = " << m_irreducible_mass << endl;
 #if CH_SPACEDIM == 3
@@ -510,7 +402,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::solve(double a_dt,
         MayDay::Error("Reached max fails. Stopping. Parameter "
                       "'stop_if_max_fails' is set to true.");
 
-    if (m_params.verbose > AHFinder::SOME)
+    if (m_params.verbose > AHParams::SOME)
     {
         pout() << "ApparentHorizon::solve finished successfully!" << endl;
     }
@@ -525,7 +417,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_outputs(
     // the frequency of writing outputs) and the class will still be able to
     // restart from the correct file  (this only applies for frequency increase,
     // for which the file number will suddenly jump, as for frequency decrease
-    // the AHFinder may override old coord files)
+    // the AH may override old coord files)
 
     // print stats (area, spin, origin, center) and coordinates
     // stop printing if it stopped converging
@@ -533,7 +425,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_outputs(
     if (do_print(a_dt, a_time))
     {
         CH_TIME("ApparentHorizon::solve::printing");
-        if (m_params.verbose > AHFinder::MIN)
+        if (m_params.verbose > AHParams::MIN)
         {
             pout() << "Printing statistics and coordinates." << std::endl;
         }
@@ -569,7 +461,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_outputs(
         values[idx++] = m_irreducible_mass;
 #if CH_SPACEDIM == 3
         values[idx++] = m_spin;
-        FOR1(a) { values[idx++] = m_dimensionless_spin_vector[a]; }
+        FOR(a) { values[idx++] = m_dimensionless_spin_vector[a]; }
         values[idx++] = m_spin_z_alt;
 #endif
 #endif
@@ -621,7 +513,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_outputs(
         file.write_time_data_line(values);
 
         // write coordinates
-        m_interp.interpolate_extra_vars(m_params.extra_vars);
+        solver.m_interp.interpolate_extra_vars(m_params.extra_vars);
         write_coords_file(a_dt, a_time, a_restart_time,
                           m_params.coords_path + m_coords,
                           m_params.print_geometry_data);
@@ -636,10 +528,9 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::check_convergence()
     // https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESConvergedReason.html#SNESConvergedReason
 
     int result;
-    if (AHFinder::is_rank_active())
+    if (PETScCommunicator::is_rank_active())
     {
-        SNESConvergedReason reason;
-        SNESGetConvergedReason(m_snes, &reason);
+        SNESConvergedReason reason = solver.getConvergedReason();
 
         // result will be 0 if any of the PETSc ranks says 'reason <=0' (PETSc
         // convergence error)
@@ -673,16 +564,19 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::check_convergence()
         ++m_num_failed_convergences;
     }
 
-    if (m_params.verbose > AHFinder::NONE)
+    if (m_params.verbose > AHParams::NONE)
     {
         pout() << (m_converged ? "Solver converged. Horizon FOUND."
                                : "Solver diverged. Horizon NOT found.")
                << std::endl;
 
-        if (m_params.verbose > AHFinder::MIN)
-        {
+        if (m_params.verbose > AHParams::MIN)
             pout() << "SNESConvergedReason = " << result << std::endl;
-        }
+
+        if (result == SNES_DIVERGED_MAX_IT)
+            pout() << "(maximum iterations reached, try increasing "
+                      "AH_SNES_max_iterations)"
+                   << std::endl;
     }
 
     if (!m_has_been_found && m_converged)
@@ -700,8 +594,8 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
     // GUIDING PRINCIPLE : restart should not depend on m_params, as these might
     // have changed! We should be able to figure everything out without them
 
-    const GRAMR &gramr =
-        (static_cast<const GRAMR &>(m_interp.get_interpolator()->getAMR()));
+    const GRAMR &gramr = (static_cast<const GRAMR &>(
+        solver.m_interp.get_interpolator()->getAMR()));
 
     int current_step = AMR::s_step;
     int restart_step = gramr.get_restart_step();
@@ -733,7 +627,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
     double old_print_dt = 0.;
     if (stats.size() == 0)
     { // case when it never ran the AH or the file doesn't exist
-        if (m_params.verbose > AHFinder::NONE && current_step != 0)
+        if (m_params.verbose > AHParams::NONE && current_step != 0)
         {
             pout() << "Empty stats file '" << file
                    << "'. Assuming AHFinder was not run yet for this AH."
@@ -764,7 +658,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
         else // if we can't know, just default to the current one
             old_print_dt = current_solve_dt * m_params.print_interval;
 
-        if (m_params.verbose > AHFinder::SOME)
+        if (m_params.verbose > AHParams::SOME)
         {
             if (idx >= 0)
                 pout() << "stats[0][idx] = " << stats[0][idx] << std::endl;
@@ -778,7 +672,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
         if (idx < 0)
         { // case when job was restarted at a point before the AH was first ever
           // found
-            if (m_params.verbose > AHFinder::NONE)
+            if (m_params.verbose > AHParams::NONE)
             {
                 pout()
                     << "First time step is after restart in '" << file
@@ -795,7 +689,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
                  -(old_print_dt == 0. ? eps : old_print_dt - eps))
         { // case when the PETSc stopped converging and stopped printing
           // so there is a mismatch with the last time in the file
-            if (m_params.verbose > AHFinder::NONE)
+            if (m_params.verbose > AHParams::NONE)
             {
                 pout() << "Last time step not found in '" << file
                        << "'. Assuming AH stopped converging." << std::endl;
@@ -811,7 +705,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
           // having converged
           // OR when job was restarted at a point before the AH was first ever
           // found
-            if (m_params.verbose > AHFinder::NONE)
+            if (m_params.verbose > AHParams::NONE)
             {
                 pout() << "Last time step is NAN in '" << file
                        << "'. Assuming AH wasn't found and PETSc didn't "
@@ -826,7 +720,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
         }
         else
         { // case when the AH was found and there is a coordinate file
-            if (m_params.verbose > AHFinder::NONE)
+            if (m_params.verbose > AHParams::NONE)
             {
                 pout() << "Last time step found in '" << file
                        << "'. Reading coordinates file." << std::endl;
@@ -873,9 +767,9 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
 #endif
 
         int offset = CH_SPACEDIM + was_center_tracked * CH_SPACEDIM;
-        FOR1(a) { origin[a] = stats[cols - offset + a][idx]; }
+        FOR(a) { origin[a] = stats[cols - offset + a][idx]; }
 
-        if (m_params.verbose > AHFinder::NONE)
+        if (m_params.verbose > AHParams::NONE)
         {
             pout() << "Setting origin from stats file '"
                    << m_params.stats_path + m_stats << "' at (" << origin[0]
@@ -898,7 +792,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
             // SET OLD CENTERS directly if old 'dt' matches current 'dt'
             if (std::abs(old_print_dt - current_solve_dt) < eps)
             {
-                if (m_params.verbose > AHFinder::NONE &&
+                if (m_params.verbose > AHParams::NONE &&
                     m_params.predict_origin)
                 {
                     pout() << "Reading old centers to predict next origin."
@@ -942,7 +836,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
                         old_centers_time_index.push_back(index);
                 }
 
-                if (m_params.verbose > AHFinder::NONE &&
+                if (m_params.verbose > AHParams::NONE &&
                     m_params.predict_origin)
                 {
                     if (old_centers_time_index.size() == 0)
@@ -985,7 +879,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
                     m_converged++;
                     update_old_centers(old_center);
 
-                    if (m_params.verbose > AHFinder::SOME)
+                    if (m_params.verbose > AHParams::SOME)
                     {
                         pout() << "OLD[-" << i + 1 << "] = (" << old_center[0]
                                << "," << old_center[1]
@@ -1019,24 +913,17 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::restart(
 
         auto coords = SmallDataIO::read(coords_filename);
 
-        if (m_params.verbose > AHFinder::NONE)
+        if (m_params.verbose > AHParams::NONE)
         {
             pout() << "Setting Initial Guess to previous file '"
                    << coords_filename << "' found." << std::endl;
         }
 
         // now write local points based on file (or interpolated file)
-        if (AHFinder::is_rank_active())
+        if (PETScCommunicator::is_rank_active())
         {
-            // read PETSc array to 'f'
-            dmda_arr_t f;
-            DMDAVecGetArray(m_dmda, m_snes_soln, &f);
-
             // doesn't change anything if number of points remained the same
-            force_restart |= interpolate_ah(f, coords);
-
-            // write PETSc array back
-            DMDAVecRestoreArray(m_dmda, m_snes_soln, &f);
+            force_restart |= solver.interpolate_ah(coords);
         }
 
 #ifdef CH_MPI
@@ -1073,7 +960,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
         return;
     }
 
-    if (m_params.verbose > AHFinder::NONE && write_geometry_data)
+    if (m_params.verbose > AHParams::NONE && write_geometry_data)
         pout() << "Writing geometry data." << std::endl;
 
     CH_assert(a_dt != 0); // Check if time was set!!
@@ -1130,7 +1017,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
     // geometry headers
     if (write_geometry_data)
         AHFunction::write_headers(&components[el]);
-    file.write_header_line(components, m_interp.get_labels());
+    file.write_header_line(components, solver.m_interp.get_labels());
 
     //////////////////
     // method:
@@ -1152,7 +1039,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
         num_components + m_params.num_extra_vars + CH_SPACEDIM;
 
     // step 1
-    if (AHFinder::is_rank_active())
+    if (PETScCommunicator::is_rank_active())
     {
 
 #ifdef CH_MPI
@@ -1174,9 +1061,10 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
 #endif
 
 #if CH_SPACEDIM == 3
-        int local_total = (m_vmax - m_vmin) * (m_umax - m_umin);
+        int local_total =
+            (solver.m_vmax - solver.m_vmin) * (solver.m_umax - solver.m_umin);
 #elif CH_SPACEDIM == 2
-        int local_total = (m_umax - m_umin);
+        int local_total = (solver.m_umax - solver.m_umin);
 #endif
 
 #ifdef CH_MPI
@@ -1186,21 +1074,21 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
 
         int idx = 0;
 #if CH_SPACEDIM == 3
-        for (int v = m_vmin; v < m_vmax; ++v)
+        for (int v = solver.m_vmin; v < solver.m_vmax; ++v)
 #endif
         {
-            for (int u = m_umin; u < m_umax; ++u)
+            for (int u = solver.m_umin; u < solver.m_umax; ++u)
             {
 #if CH_SPACEDIM == 3
-                output[idx * num_components_total] = m_u[idx];
-                output[idx * num_components_total + 1] = m_v[idx];
-                output[idx * num_components_total + 2] = m_F[idx];
+                output[idx * num_components_total] = solver.m_u[idx];
+                output[idx * num_components_total + 1] = solver.m_v[idx];
+                output[idx * num_components_total + 2] = solver.m_F[idx];
 #elif CH_SPACEDIM == 2
-                output[idx * num_components_total] = m_u[idx];
-                output[idx * num_components_total + 1] = m_F[idx];
+                output[idx * num_components_total] = solver.m_u[idx];
+                output[idx * num_components_total + 1] = solver.m_F[idx];
 #endif
 
-                auto extra = m_interp.get_extra_data(idx);
+                auto extra = solver.m_interp.get_extra_data(idx);
 
                 int el = 0;
 
@@ -1234,9 +1122,10 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
                 // geometry vars
                 if (write_geometry_data)
                 {
-                    const auto data = m_interp.get_data(idx);
-                    const auto coords = m_interp.get_coords(idx);
-                    const auto coords_cart = m_interp.get_cartesian_coords(idx);
+                    const auto data = solver.m_interp.get_data(idx);
+                    const auto coords = solver.m_interp.get_coords(idx);
+                    const auto coords_cart =
+                        solver.m_interp.get_cartesian_coords(idx);
                     AHFunction func(data, coords, coords_cart);
                     func.write_vars(
                         &output[idx * num_components_total + CH_SPACEDIM + el]);
@@ -1249,7 +1138,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
                 // has) sends are tagged by global index, so that receives
                 // can be unique and writes indexed correctly
 #if CH_SPACEDIM == 3
-                int idx_global = v * m_num_global_u + u;
+                int idx_global = v * solver.m_num_global_u + u;
 #elif CH_SPACEDIM == 2
                 int idx_global = u;
 #endif
@@ -1275,9 +1164,9 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
         // step 2
 #ifdef CH_MPI
 #if CH_SPACEDIM == 3
-        int total = m_num_global_u * m_num_global_v;
+        int total = solver.m_num_global_u * solver.m_num_global_v;
 #elif CH_SPACEDIM == 2
-        int total = m_num_global_u;
+        int total = solver.m_num_global_u;
 #endif
         double temp[total * num_components_total];
         if (rank_petsc == 0)
@@ -1295,10 +1184,10 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::write_coords_file(
         // step 3
         idx = 0;
 #if CH_SPACEDIM == 3
-        for (int v = m_vmin; v < m_vmax; ++v)
+        for (int v = solver.m_vmin; v < solver.m_vmax; ++v)
 #endif
         {
-            for (int u = m_umin; u < m_umax; ++u)
+            for (int u = solver.m_umin; u < solver.m_umax; ++u)
             {
                 MPI_Wait(&(requests[idx]), MPI_STATUS_IGNORE);
                 idx++;
@@ -1332,11 +1221,12 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::check_integration_methods()
     // check if integration methods are valid given periodicity and number of
     // points
     bool valid_u = m_integration_methods[0].is_valid(
-        m_params.num_points_u, m_interp.get_coord_system().is_u_periodic());
+        m_params.num_points_u,
+        solver.m_interp.get_coord_system().is_u_periodic());
 
     const IntegrationMethod &method_default_u =
-        m_interp.get_coord_system().get_recommended_integration_method_u(
-            m_num_global_u);
+        solver.m_interp.get_coord_system().get_recommended_integration_method_u(
+            solver.m_num_global_u);
     if (!valid_u)
     {
         std::string warn =
@@ -1344,16 +1234,17 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::check_integration_methods()
             "not valid with this num_points_u.\n"
             "Reverting to trapezium rule.";
         MayDay::Warning(warn.c_str());
-        pout() << warn << std::endl;
+        pout() << warn << std ::endl;
         m_integration_methods[0] = method_default_u;
     }
 
 #if CH_SPACEDIM == 3
     bool valid_v = m_integration_methods[1].is_valid(
-        m_params.num_points_v, m_interp.get_coord_system().is_v_periodic());
+        m_params.num_points_v,
+        solver.m_interp.get_coord_system().is_v_periodic());
     const IntegrationMethod &method_default_v =
-        m_interp.get_coord_system().get_recommended_integration_method_v(
-            m_num_global_v);
+        solver.m_interp.get_coord_system().get_recommended_integration_method_v(
+            solver.m_num_global_v);
     if (!valid_v)
     {
         std::string warn =
@@ -1388,36 +1279,33 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_spin_dimensionless(
                           // non-PETSc processes
 
     // PETSc processes go inside 'if', others "wait" until 'if' gets to
-    // 'm_interp.break_interpolation_loop()'
-    if (m_interp.keep_interpolating_if_inactive())
+    // 'solver.m_interp.break_interpolation_loop()'
+    if (solver.m_interp.keep_interpolating_if_inactive())
     {
 
         int idx = 0;
 
         Vec localF;
-
-        DMGetLocalVector(m_dmda, &localF);
-        DMGlobalToLocalBegin(m_dmda, m_snes_soln, INSERT_VALUES, localF);
-        DMGlobalToLocalEnd(m_dmda, m_snes_soln, INSERT_VALUES, localF);
-
         dmda_arr_t in;
-        DMDAVecGetArray(m_dmda, localF, &in);
+        solver.get_dmda_arr_t(localF, in);
 
-        // m_F is already set from solve
+        // solver.m_F is already set from solve
 
-        int u_equator = std::round(M_PI / 2.0 / m_du);
+        int u_equator = std::round(M_PI / 2.0 / solver.m_du);
 
-        for (int v = m_vmin; v < m_vmax; ++v)
+        for (int v = solver.m_vmin; v < solver.m_vmax; ++v)
         {
-            for (int u = m_umin; u < m_umax; ++u)
+            for (int u = solver.m_umin; u < solver.m_umax; ++u)
             {
                 if (u_equator == u)
                 {
-                    AHDeriv deriv = diff(in, u, v);
-                    const auto geometry_data = m_interp.get_geometry_data(idx);
-                    const auto data = m_interp.get_data(idx);
-                    const auto coords = m_interp.get_coords(idx);
-                    const auto coords_cart = m_interp.get_cartesian_coords(idx);
+                    AHDerivData deriv = solver.diff(in, u, v);
+                    const auto geometry_data =
+                        solver.m_interp.get_geometry_data(idx);
+                    const auto data = solver.m_interp.get_data(idx);
+                    const auto coords = solver.m_interp.get_coords(idx);
+                    const auto coords_cart =
+                        solver.m_interp.get_cartesian_coords(idx);
                     AHFunction func(data, coords, coords_cart);
                     auto &g = func.get_metric();
 
@@ -1430,24 +1318,22 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_spin_dimensionless(
                               deriv.dvF * geometry_data.dxdf[2];
 
                     double norm2 = 0.;
-                    FOR2(i, j) norm2 += g[i][j] * dxdv[i] * dxdv[j];
+                    FOR(i, j) norm2 += g[i][j] * dxdv[i] * dxdv[j];
                     CH_assert(norm2 >= 0.);
 
                     double weight = m_integration_methods[1].weight(
                         v, m_params.num_points_v,
-                        m_interp.get_coord_system().is_v_periodic());
+                        solver.m_interp.get_coord_system().is_v_periodic());
 
-                    integral += sqrt(norm2) * weight * m_dv;
+                    integral += sqrt(norm2) * weight * solver.m_dv;
                 }
 
                 idx++;
             }
         }
 
-        DMDAVecRestoreArray(m_dmda, localF, &in);
-        DMRestoreLocalVector(m_dmda, &localF);
-
-        m_interp.break_interpolation_loop();
+        solver.restore_dmda_arr_t(localF, in);
+        solver.m_interp.break_interpolation_loop();
     }
 
     // reduction across all Chombo processes (note that 'integral' is 0 for
@@ -1492,35 +1378,32 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_angular_momentum_J()
                                         // in scope for non-PETSc processes
 
     // PETSc processes go inside 'if', others "wait" until 'if' gets to
-    // 'm_interp.break_interpolation_loop()'
-    if (m_interp.keep_interpolating_if_inactive())
+    // 'solver.m_interp.break_interpolation_loop()'
+    if (solver.m_interp.keep_interpolating_if_inactive())
     {
 
         int idx = 0;
 
         Vec localF;
-
-        DMGetLocalVector(m_dmda, &localF);
-        DMGlobalToLocalBegin(m_dmda, m_snes_soln, INSERT_VALUES, localF);
-        DMGlobalToLocalEnd(m_dmda, m_snes_soln, INSERT_VALUES, localF);
-
         dmda_arr_t in;
-        DMDAVecGetArray(m_dmda, localF, &in);
+        solver.get_dmda_arr_t(localF, in);
 
-        // m_F is already set from solve
+        // solver.m_F is already set from solve
 
         const std::array<double, CH_SPACEDIM> &center = get_center();
 
-        for (int v = m_vmin; v < m_vmax; ++v)
+        for (int v = solver.m_vmin; v < solver.m_vmax; ++v)
         {
             Tensor<1, double> inner_integral = {0.};
-            for (int u = m_umin; u < m_umax; ++u)
+            for (int u = solver.m_umin; u < solver.m_umax; ++u)
             {
-                AHDeriv deriv = diff(in, u, v);
-                const auto geometric_data = m_interp.get_geometry_data(idx);
-                const auto data = m_interp.get_data(idx);
-                const auto coords = m_interp.get_coords(idx);
-                const auto coords_cart = m_interp.get_cartesian_coords(idx);
+                AHDerivData deriv = solver.diff(in, u, v);
+                const auto geometric_data =
+                    solver.m_interp.get_geometry_data(idx);
+                const auto data = solver.m_interp.get_data(idx);
+                const auto coords = solver.m_interp.get_coords(idx);
+                const auto coords_cart =
+                    solver.m_interp.get_cartesian_coords(idx);
                 AHFunction func(data, coords, coords_cart);
                 Tensor<2, double> g = func.get_metric();
                 Tensor<2, double> K = func.get_extrinsic_curvature();
@@ -1529,17 +1412,14 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_angular_momentum_J()
                 Tensor<1, double> S_U = func.get_spatial_normal_U(s_L);
 
                 Tensor<1, double> coords_cart_centered;
-                FOR1(i)
-                {
-                    coords_cart_centered[i] = coords_cart[i] - center[i];
-                }
+                FOR(i) { coords_cart_centered[i] = coords_cart[i] - center[i]; }
 
                 Tensor<1, double> spin_integrand = {0.};
                 double directions[3][3] = {
                     {0, -coords_cart_centered[2], coords_cart_centered[1]},
                     {coords_cart_centered[2], 0., -coords_cart_centered[0]},
                     {-coords_cart_centered[1], coords_cart_centered[0], 0.}};
-                FOR3(a, b, c)
+                FOR(a, b, c)
                 {
                     // as in arXiv:gr-qc/0206008 eq. 25
                     // but computing with 'killing vector' in directions 'x,y,z'
@@ -1553,7 +1433,7 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_angular_momentum_J()
                 // Calculate Jacobian matrix for transformation from Cartesian
                 // to (f,u,v) coords
                 Tensor<2, double> Jac;
-                FOR1(k)
+                FOR(k)
                 {
                     Jac[0][k] = geometric_data.dxdf[k];
                     Jac[1][k] = geometric_data.dxdu[k];
@@ -1562,7 +1442,7 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_angular_momentum_J()
 
                 // Now do the coordinate transformation
                 Tensor<2, double> g_spherical = {0.};
-                FOR4(i, j, k, l)
+                FOR(i, j, k, l)
                 {
                     g_spherical[i][j] += Jac[i][k] * Jac[j][l] * g[k][l];
                 }
@@ -1587,12 +1467,12 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_angular_momentum_J()
 
                 double weight = m_integration_methods[0].weight(
                     u, m_params.num_points_u,
-                    m_interp.get_coord_system().is_u_periodic());
+                    solver.m_interp.get_coord_system().is_u_periodic());
 
-                FOR1(a)
+                FOR(a)
                 {
                     double element = spin_integrand[a] / (8. * M_PI) *
-                                     sqrt(det) * weight * m_du;
+                                     sqrt(det) * weight * solver.m_du;
 
                     // hack for the poles (theta=0,\pi)
                     // where nans appear in 'spin_integrand', but
@@ -1606,14 +1486,12 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_angular_momentum_J()
             }
             double weight = m_integration_methods[1].weight(
                 v, m_params.num_points_v,
-                m_interp.get_coord_system().is_v_periodic());
-            FOR1(a) { integrals[a] += weight * m_dv * inner_integral[a]; }
+                solver.m_interp.get_coord_system().is_v_periodic());
+            FOR(a) { integrals[a] += weight * solver.m_dv * inner_integral[a]; }
         }
 
-        DMDAVecRestoreArray(m_dmda, localF, &in);
-        DMRestoreLocalVector(m_dmda, &localF);
-
-        m_interp.break_interpolation_loop();
+        solver.restore_dmda_arr_t(localF, in);
+        solver.m_interp.break_interpolation_loop();
     }
 
     // reduction across all Chombo processes (note that 'integral' is 0 for
@@ -1624,7 +1502,7 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_angular_momentum_J()
     MPI_Allreduce(&integrals, &J, GR_SPACEDIM, MPI_DOUBLE, MPI_SUM,
                   Chombo_MPI::comm);
 #else // serial
-    FOR1(a) { J[a] = integrals[a]; }
+    FOR(a) { J[a] = integrals[a]; }
 #endif
 
     return J;
@@ -1644,41 +1522,38 @@ double ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_area()
         0.; // temporary, but defined outside to exist for non-PETSc processes
 
     // PETSc processes go inside 'if', others "wait" until 'if' gets to
-    // 'm_interp.break_interpolation_loop()'
-    if (m_interp.keep_interpolating_if_inactive())
+    // 'solver.m_interp.break_interpolation_loop()'
+    if (solver.m_interp.keep_interpolating_if_inactive())
     {
 
         int idx = 0;
 
         Vec localF;
-
-        DMGetLocalVector(m_dmda, &localF);
-        DMGlobalToLocalBegin(m_dmda, m_snes_soln, INSERT_VALUES, localF);
-        DMGlobalToLocalEnd(m_dmda, m_snes_soln, INSERT_VALUES, localF);
-
         dmda_arr_t in;
-        DMDAVecGetArray(m_dmda, localF, &in);
+        solver.get_dmda_arr_t(localF, in);
 
-        // m_F is already set from solve
+        // solver.m_F is already set from solve
 
 #if CH_SPACEDIM == 3
-        for (int v = m_vmin; v < m_vmax; ++v)
+        for (int v = solver.m_vmin; v < solver.m_vmax; ++v)
 #endif
         {
             double inner_integral = 0.;
-            for (int u = m_umin; u < m_umax; ++u)
+            for (int u = solver.m_umin; u < solver.m_umax; ++u)
             {
-                const auto geometric_data = m_interp.get_geometry_data(idx);
-                const auto data = m_interp.get_data(idx);
-                const auto coords = m_interp.get_coords(idx);
-                const auto coords_cart = m_interp.get_cartesian_coords(idx);
+                const auto geometric_data =
+                    solver.m_interp.get_geometry_data(idx);
+                const auto data = solver.m_interp.get_data(idx);
+                const auto coords = solver.m_interp.get_coords(idx);
+                const auto coords_cart =
+                    solver.m_interp.get_cartesian_coords(idx);
                 AHFunction func(data, coords, coords_cart);
                 Tensor<2, double> g = func.get_metric();
 
                 // Calculate Jacobian matrix for transformation from Cartesian
                 // to (f,u,v) coords
                 Tensor<2, double> Jac;
-                FOR1(k)
+                FOR(k)
                 {
                     Jac[0][k] = geometric_data.dxdf[k];
                     Jac[1][k] = geometric_data.dxdu[k];
@@ -1687,16 +1562,16 @@ double ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_area()
 #endif
                 }
 
-                AHDeriv deriv = diff(in, u
+                AHDerivData deriv = solver.diff(in, u
 #if CH_SPACEDIM == 3
-                                     ,
-                                     v
+                                                ,
+                                                v
 #endif
                 );
 
                 // Now do the coordinate transformation
                 Tensor<2, double> g_spherical = {0.};
-                FOR4(i, j, k, l)
+                FOR(i, j, k, l)
                 {
                     g_spherical[i][j] += Jac[i][k] * Jac[j][l] * g[k][l];
                 }
@@ -1723,9 +1598,9 @@ double ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_area()
 
                 double weight = m_integration_methods[0].weight(
                     u, m_params.num_points_u,
-                    m_interp.get_coord_system().is_u_periodic());
+                    solver.m_interp.get_coord_system().is_u_periodic());
 
-                double element = sqrt(det) * weight * m_du;
+                double element = sqrt(det) * weight * solver.m_du;
 
 // assume a (GR_SPACEDIM - CH_SPACEDIM)-sphere leftover
 #if GR_SPACEDIM != CH_SPACEDIM
@@ -1741,8 +1616,8 @@ double ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_area()
 #if CH_SPACEDIM == 3
             double weight = m_integration_methods[1].weight(
                 v, m_params.num_points_v,
-                m_interp.get_coord_system().is_v_periodic());
-            integral += weight * m_dv * inner_integral;
+                solver.m_interp.get_coord_system().is_v_periodic());
+            integral += weight * solver.m_dv * inner_integral;
 #elif CH_SPACEDIM == 2
             integral += inner_integral;
 #endif
@@ -1757,10 +1632,8 @@ double ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_area()
         integral *= n_sphere_coeff;
 #endif
 
-        DMDAVecRestoreArray(m_dmda, localF, &in);
-        DMRestoreLocalVector(m_dmda, &localF);
-
-        m_interp.break_interpolation_loop();
+        solver.restore_dmda_arr_t(localF, in);
+        solver.m_interp.break_interpolation_loop();
     }
 
 // reduction across all Chombo processes (note that 'area' is 0 for non-PETSc
@@ -1775,7 +1648,7 @@ double ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_area()
     area = integral;
 #endif
 
-    if (m_params.verbose > AHFinder::MIN)
+    if (m_params.verbose > AHParams::MIN)
     {
         pout() << "area = " << area << endl;
     }
@@ -1811,25 +1684,27 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_center()
     std::array<double, CH_SPACEDIM> min_temp = max_temp;
 
     int idx = 0;
-    if (AHFinder::is_rank_active()) // in principle this wouldn't be needed, as
-                                    // non-PETSc processes wouldn't even enter
-                                    // the loop anyways
+    if (PETScCommunicator::is_rank_active()) // in principle this wouldn't be
+                                             // needed, as non-PETSc processes
+                                             // wouldn't even enter the loop
+                                             // anyways
     {
 #if CH_SPACEDIM == 3
-        for (int v = m_vmin; v < m_vmax; ++v)
+        for (int v = solver.m_vmin; v < solver.m_vmax; ++v)
 #endif
         {
-            for (int u = m_umin; u < m_umax; ++u)
+            for (int u = solver.m_umin; u < solver.m_umax; ++u)
             {
                 for (unsigned i = 0; i < CH_SPACEDIM; ++i)
                 {
-                    double coord_i = m_interp.get_coord_system().get_grid_coord(
-                        i, m_F[idx], m_u[idx]
+                    double coord_i =
+                        solver.m_interp.get_coord_system().get_grid_coord(
+                            i, solver.m_F[idx], solver.m_u[idx]
 #if CH_SPACEDIM == 3
-                        ,
-                        m_v[idx]
+                            ,
+                            solver.m_v[idx]
 #endif
-                    );
+                        );
 
                     // temp[i] += point[i]; // old method
                     if (coord_i > max_temp[i])
@@ -1870,7 +1745,7 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_center()
         center[i] = (max_point[i] + min_point[i]) / 2.;
     }
 
-    if (m_params.verbose > AHFinder::SOME)
+    if (m_params.verbose > AHParams::SOME)
     {
         pout() << "max_point: (" << max_point[0] << ", " << max_point[1]
 #if CH_SPACEDIM == 3
@@ -1886,7 +1761,7 @@ ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_center()
 
     update_old_centers(center); // set new
 
-    if (m_params.verbose > AHFinder::MIN)
+    if (m_params.verbose > AHParams::MIN)
     {
         pout() << "center: (" << center[0] << ", " << center[1]
 #if CH_SPACEDIM == 3
@@ -1906,9 +1781,10 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_minmax_F() const
 
     double local_max = std::numeric_limits<int>::min();
     double local_min = std::numeric_limits<int>::max();
-    if (AHFinder::is_rank_active())
+    if (PETScCommunicator::is_rank_active())
     {
-        auto local_minmax = (std::minmax_element(m_F.begin(), m_F.end()));
+        auto local_minmax =
+            (std::minmax_element(solver.m_F.begin(), solver.m_F.end()));
         local_min = *(local_minmax.first);
         local_max = *(local_minmax.second);
     }
@@ -1935,7 +1811,7 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_average_F() const
     int local_size = 0;
     double local_sum = 0.;
     double local_sum_sq = 0.;
-    if (AHFinder::is_rank_active())
+    if (PETScCommunicator::is_rank_active())
     {
         std::pair<double, double> sums(0., 0.);
         auto lambda_sum = [](std::pair<double, double> sums, double r) {
@@ -1944,10 +1820,10 @@ void ApparentHorizon<SurfaceGeometry, AHFunction>::calculate_average_F() const
             return std::move(sums);
         };
 
-        auto local_sums =
-            std::accumulate(m_F.begin(), m_F.end(), sums, lambda_sum);
+        auto local_sums = std::accumulate(solver.m_F.begin(), solver.m_F.end(),
+                                          sums, lambda_sum);
 
-        local_size = m_F.size();
+        local_size = solver.m_F.size();
         local_sum = local_sums.first;
         local_sum_sq = local_sums.second;
     }

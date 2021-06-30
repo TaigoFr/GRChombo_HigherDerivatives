@@ -6,10 +6,11 @@
 #ifndef _AHFUNCTIONDEFAULT_HPP_
 #define _AHFUNCTIONDEFAULT_HPP_
 
-#include "AHData.hpp"
-#include "AHDeriv.hpp"
+#include "AHDerivData.hpp"
 #include "AHGeometryData.hpp"
+#include "AHVarsData.hpp"
 #include "AlwaysInline.hpp"
+#include "GRParmParse.hpp"
 #include "Tensor.hpp"
 
 /////////////////////////////////////////////////////////
@@ -42,8 +43,13 @@ struct AHFunctionDefault
     {
         // cartesian flat metric
         Tensor<2, double> g = {0.};
-        FOR1(i) { g[i][i] = 1.; }
+        FOR(i) { g[i][i] = 1.; }
         return g;
+    }
+    ALWAYS_INLINE const Tensor<2, double> get_inverse_metric() const
+    {
+        // cartesian flat metric
+        return get_metric();
     }
     ALWAYS_INLINE const Tensor<2, double> get_extrinsic_curvature() const
     {
@@ -57,12 +63,13 @@ struct AHFunctionDefault
 
     struct params // no params needed
     {
+        void read_params(GRParmParse &pp) {}
     };
 
     // not defined by default
     Tensor<1, double>
     get_level_function_derivative(const AHGeometryData &geo_data,
-                                  const AHDeriv &deriv) const
+                                  const AHDerivData &deriv) const
     {
         return {0.};
     }
@@ -72,7 +79,7 @@ struct AHFunctionDefault
     }
     // not defined by default
     Tensor<2, double> get_level_function_2nd_covariant_derivative(
-        const AHGeometryData &geo_data, const AHDeriv &deriv,
+        const AHGeometryData &geo_data, const AHDerivData &deriv,
         const Tensor<1, double> &s_L) const
     {
         return {0.};
@@ -80,12 +87,12 @@ struct AHFunctionDefault
 
     // WHAT TO ADD TO YOUR OWN FUNCTIONS:
     // some constructor with these arguments:
-    // AHFunctionDefault(const AHData<int, double> &a_data,
+    // AHFunctionDefault(const AHVarsData<int, double> &a_data,
     // const Tensor<1, double> &a_coords,
     // const Tensor<1, double> &a_coords_cartesian);
 
     // and some 'get'
-    // double get(const AHGeometryData &geo_data, const AHDeriv &deriv,
+    // double get(const AHGeometryData &geo_data, const AHDerivData &deriv,
     // const params &a_params) const;
 };
 

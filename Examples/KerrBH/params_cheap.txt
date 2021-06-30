@@ -188,11 +188,12 @@ AH_predict_origin = false
 # AH_max_fails_after_lost = 0 # -1 to never
 # AH_print_geometry_data = 0
 # AH_re_solve_at_restart = 0
-AH_verbose = 2
+# AH_verbose = 1
+# AH_expansion_radius_power = 1.
 
 # AH_initial_guess = 0.5
 
-# look_for_chi_contour = 0.2
+# AH_look_for_chi_contour = 0.2
 
 AH_num_write_vars = 3
 AH_write_vars = chi Ham d1_Ham

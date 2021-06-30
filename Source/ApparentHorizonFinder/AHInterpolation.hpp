@@ -6,8 +6,8 @@
 #ifndef _AHINTERPOLATION_HPP_
 #define _AHINTERPOLATION_HPP_
 
-#include "AHData.hpp"
 #include "AHGeometryData.hpp"
+#include "AHVarsData.hpp"
 #include "AMRInterpolator.hpp"
 #include "Lagrange.hpp"
 
@@ -16,7 +16,7 @@
 
 //! Class used for interpolation of the variables needed to calculate expansion
 //! with the data from a given 'SurfaceGeometry'
-template <class SurfaceGeometry, class AHFunction> class AHInterpolation
+template <class SurfaceGeometry, class AHFunction> class AHInterpolation_t
 {
   private:
     SurfaceGeometry m_coord_system;
@@ -38,25 +38,16 @@ template <class SurfaceGeometry, class AHFunction> class AHInterpolation
     std::vector<double> m_z;
 #endif
 
-    AHData<int, std::vector<double>> m_data;
-    AHData<std::string, std::vector<double>> m_extra;
+    AHVarsData<int, std::vector<double>> m_data;
+    AHVarsData<std::string, std::vector<double>> m_extra;
 
     std::array<double, CH_SPACEDIM> m_coord_min,
         m_coord_max; //!< maximum and minimum of level 0 box, used in
                      //!< 'fit_in_grid'
 
-    //! when PETSc tried to diverge out of the grid, this doesn't let him do so
-    //! it forces him to stay on the grid, causing non-convergence
-    bool fit_in_grid(double &x, double &y
-#if CH_SPACEDIM == 3
-                     ,
-                     double &z
-#endif
-    );
-
   public:
-    AHInterpolation(const SurfaceGeometry &a_coordSystem,
-                    AMRInterpolator<Lagrange<4>> *a_interpolator);
+    AHInterpolation_t(const SurfaceGeometry &a_coordSystem,
+                      AMRInterpolator<Lagrange<4>> *a_interpolator);
 
     const AMRInterpolator<Lagrange<4>> *get_interpolator() const;
     const SurfaceGeometry &get_coord_system() const;
@@ -81,11 +72,17 @@ template <class SurfaceGeometry, class AHFunction> class AHInterpolation
     const AHGeometryData get_geometry_data(int idx) const;
     const Tensor<1, double> get_cartesian_coords(int idx) const;
     const Tensor<1, double> get_coords(int idx) const;
-    const AHData<int, double> get_data(int idx) const;
+    const AHVarsData<int, double> get_data(int idx) const;
 
-    //! verify origin +- initial guess is inside the grid
-    bool is_in_grid(const std::array<double, CH_SPACEDIM> &a_origin,
-                    double a_initial_guess);
+    //! verify point is inside the grid
+    //! when PETSc tried to diverge out of the grid, this doesn't let him do so
+    //! it forces him to stay on the grid, causing non-convergence
+    bool is_in_grid(double &x, double &y
+#if CH_SPACEDIM == 3
+                    ,
+                    double &z
+#endif
+    );
 
     //! triplet of functions to be used together in blocks of code that require
     //! PETSc AND AMRInterpolator to interpolate
@@ -115,7 +112,7 @@ template <class SurfaceGeometry, class AHFunction> class AHInterpolation
     void interpolate_extra_vars(
         const std::map<std::string, std::tuple<int, VariableType, int>>
             &extra_vars);
-    const AHData<std::string, double> get_extra_data(int idx) const;
+    const AHVarsData<std::string, double> get_extra_data(int idx) const;
 };
 
 #include "AHInterpolation.impl.hpp"

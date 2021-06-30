@@ -10,19 +10,17 @@
 #ifndef _AHINTERPOLATION_IMPL_HPP_
 #define _AHINTERPOLATION_IMPL_HPP_
 
-#include "AHFinder.hpp"
-#include "DimensionDefinitions.hpp" // make sure GR_SPACEDIM exists
-#include "TensorAlgebra.hpp"
+#include "PETScCommunicator.hpp"
 
 template <class SurfaceGeometry, class AHFunction>
-AHInterpolation<SurfaceGeometry, AHFunction>::AHInterpolation(
+AHInterpolation_t<SurfaceGeometry, AHFunction>::AHInterpolation_t(
     const SurfaceGeometry &a_coord_system,
     AMRInterpolator<Lagrange<4>> *a_interpolator)
     : m_coord_system(a_coord_system), m_interpolator(a_interpolator)
 {
     // below:
     // determine maximum and minimum physical coordinate of the grid
-    // (so that 'fit_in_grid' knows when PETSc has diverged out of the grid and
+    // (so that 'is_in_grid' knows when PETSc has diverged out of the grid and
     // doesn't let him do so,
     //  as it would cause an error in the AMRInterpolator)
 
@@ -78,21 +76,21 @@ AHInterpolation<SurfaceGeometry, AHFunction>::AHInterpolation(
 
 template <class SurfaceGeometry, class AHFunction>
 const AMRInterpolator<Lagrange<4>> *
-AHInterpolation<SurfaceGeometry, AHFunction>::get_interpolator() const
+AHInterpolation_t<SurfaceGeometry, AHFunction>::get_interpolator() const
 {
     return m_interpolator;
 }
 
 template <class SurfaceGeometry, class AHFunction>
 const SurfaceGeometry &
-AHInterpolation<SurfaceGeometry, AHFunction>::get_coord_system() const
+AHInterpolation_t<SurfaceGeometry, AHFunction>::get_coord_system() const
 {
     return m_coord_system;
 }
 
 template <class SurfaceGeometry, class AHFunction>
 std::vector<std::string>
-AHInterpolation<SurfaceGeometry, AHFunction>::get_labels() const
+AHInterpolation_t<SurfaceGeometry, AHFunction>::get_labels() const
 {
     return
     {
@@ -105,74 +103,22 @@ AHInterpolation<SurfaceGeometry, AHFunction>::get_labels() const
 }
 
 template <class SurfaceGeometry, class AHFunction>
-void AHInterpolation<SurfaceGeometry, AHFunction>::set_origin(
+void AHInterpolation_t<SurfaceGeometry, AHFunction>::set_origin(
     const std::array<double, CH_SPACEDIM> &origin)
 {
     m_coord_system.set_origin(origin);
 }
 
 template <class SurfaceGeometry, class AHFunction>
-bool AHInterpolation<SurfaceGeometry, AHFunction>::is_in_grid(
-    const std::array<double, CH_SPACEDIM> &a_origin, double a_initial_guess)
-{
-    bool out_of_grid = false;
-
-    double x = a_origin[0];
-    double y = a_origin[1];
+bool AHInterpolation_t<SurfaceGeometry, AHFunction>::is_in_grid(double &x,
+                                                                double &y
 #if CH_SPACEDIM == 3
-    double z = a_origin[2];
-#endif
-
-#if CH_SPACEDIM == 3
-    out_of_grid |= fit_in_grid(x, y, z);
-
-    x = a_origin[0] - a_initial_guess;
-    out_of_grid |= fit_in_grid(x, y, z);
-
-    x = a_origin[0] + a_initial_guess;
-    out_of_grid |= fit_in_grid(x, y, z);
-
-    x = a_origin[0];
-    y = a_origin[1] - a_initial_guess;
-    out_of_grid |= fit_in_grid(x, y, z);
-
-    y = a_origin[1] + a_initial_guess;
-    out_of_grid |= fit_in_grid(x, y, z);
-
-    y = a_origin[1];
-    z = a_origin[2] - a_initial_guess;
-    out_of_grid |= fit_in_grid(x, y, z);
-
-    z = a_origin[2] + a_initial_guess;
-    out_of_grid |= fit_in_grid(x, y, z);
-#elif CH_SPACEDIM == 2
-    out_of_grid |= fit_in_grid(x, y);
-    /*
-        x = a_origin[0] - a_initial_guess;
-        out_of_grid |= fit_in_grid(x, y);
-
-        x = a_origin[0] + a_initial_guess;
-        out_of_grid |= fit_in_grid(x, y);
-    */
-    y = a_origin[1] - a_initial_guess;
-    out_of_grid |= fit_in_grid(x, y);
-
-    y = a_origin[1] + a_initial_guess;
-    out_of_grid |= fit_in_grid(x, y);
-#endif
-
-    return out_of_grid;
-}
-template <class SurfaceGeometry, class AHFunction>
-bool AHInterpolation<SurfaceGeometry, AHFunction>::fit_in_grid(double &x,
-                                                               double &y
-#if CH_SPACEDIM == 3
-                                                               ,
-                                                               double &z
+                                                                ,
+                                                                double &z
 #endif
 )
 {
-    CH_TIME("AHInterpolation::fit_in_grid");
+    CH_TIME("AHInterpolation::is_in_grid");
 
     bool out_of_grid = false;
 
@@ -230,12 +176,12 @@ bool AHInterpolation<SurfaceGeometry, AHFunction>::fit_in_grid(double &x,
  * }
  */
 template <class SurfaceGeometry, class AHFunction>
-bool AHInterpolation<SurfaceGeometry,
-                     AHFunction>::keep_interpolating_if_inactive()
+bool AHInterpolation_t<SurfaceGeometry,
+                       AHFunction>::keep_interpolating_if_inactive()
 {
     CH_TIME("AMRInterpolator::keep_interpolating_if_inactive");
 
-    if (!AHFinder::is_rank_active())
+    if (!PETScCommunicator::is_rank_active())
     {
         int keep_interpolating = 1;
         while (keep_interpolating)
@@ -247,7 +193,7 @@ bool AHInterpolation<SurfaceGeometry,
 }
 
 template <class SurfaceGeometry, class AHFunction>
-void AHInterpolation<SurfaceGeometry, AHFunction>::break_interpolation_loop()
+void AHInterpolation_t<SurfaceGeometry, AHFunction>::break_interpolation_loop()
     const
 {
     CH_TIME("AMRInterpolator::break_interpolation_loop");
@@ -262,7 +208,7 @@ void AHInterpolation<SurfaceGeometry, AHFunction>::break_interpolation_loop()
 #endif
 }
 template <class SurfaceGeometry, class AHFunction>
-int AHInterpolation<SurfaceGeometry, AHFunction>::interpolate()
+int AHInterpolation_t<SurfaceGeometry, AHFunction>::interpolate()
 {
     CH_TIME("AHInterpolation::interpolate");
 
@@ -305,7 +251,7 @@ int AHInterpolation<SurfaceGeometry, AHFunction>::interpolate()
 }
 
 template <class SurfaceGeometry, class AHFunction>
-void AHInterpolation<SurfaceGeometry, AHFunction>::refresh_interpolator(
+void AHInterpolation_t<SurfaceGeometry, AHFunction>::refresh_interpolator(
     bool printing_step,
     const std::map<std::string, std::tuple<int, VariableType, int>> &extra_vars)
 {
@@ -369,7 +315,7 @@ void AHInterpolation<SurfaceGeometry, AHFunction>::refresh_interpolator(
 // 'set_coordinates' calls 'interpolate'. All Chombo_MPI:comm need to run
 // 'interpolate' for it to work
 template <class SurfaceGeometry, class AHFunction>
-bool AHInterpolation<SurfaceGeometry, AHFunction>::set_coordinates(
+bool AHInterpolation_t<SurfaceGeometry, AHFunction>::set_coordinates(
     const vector<double> &f, const vector<double> &u,
 #if CH_SPACEDIM == 3
     const vector<double> &v,
@@ -420,10 +366,10 @@ bool AHInterpolation<SurfaceGeometry, AHFunction>::set_coordinates(
 
         // don't let PETSc diverge to outside of the grid (this can happen if
         // there is no BH)
-        out_of_grid |= fit_in_grid(m_x[i], m_y[i]
+        out_of_grid |= is_in_grid(m_x[i], m_y[i]
 #if CH_SPACEDIM == 3
-                                   ,
-                                   m_z[i]
+                                  ,
+                                  m_z[i]
 #endif
         );
     }
@@ -433,7 +379,7 @@ bool AHInterpolation<SurfaceGeometry, AHFunction>::set_coordinates(
 
 template <class SurfaceGeometry, class AHFunction>
 const AHGeometryData
-AHInterpolation<SurfaceGeometry, AHFunction>::get_geometry_data(int idx) const
+AHInterpolation_t<SurfaceGeometry, AHFunction>::get_geometry_data(int idx) const
 {
     CH_TIME("AHInterpolation::get_geometry_data");
 
@@ -447,7 +393,7 @@ AHInterpolation<SurfaceGeometry, AHFunction>::get_geometry_data(int idx) const
 
 template <class SurfaceGeometry, class AHFunction>
 const Tensor<1, double>
-AHInterpolation<SurfaceGeometry, AHFunction>::get_cartesian_coords(
+AHInterpolation_t<SurfaceGeometry, AHFunction>::get_cartesian_coords(
     int idx) const
 {
     return
@@ -462,7 +408,7 @@ AHInterpolation<SurfaceGeometry, AHFunction>::get_cartesian_coords(
 
 template <class SurfaceGeometry, class AHFunction>
 const Tensor<1, double>
-AHInterpolation<SurfaceGeometry, AHFunction>::get_coords(int idx) const
+AHInterpolation_t<SurfaceGeometry, AHFunction>::get_coords(int idx) const
 {
     return
     {
@@ -475,14 +421,14 @@ AHInterpolation<SurfaceGeometry, AHFunction>::get_coords(int idx) const
 }
 
 template <class SurfaceGeometry, class AHFunction>
-const AHData<int, double>
-AHInterpolation<SurfaceGeometry, AHFunction>::get_data(int idx) const
+const AHVarsData<int, double>
+AHInterpolation_t<SurfaceGeometry, AHFunction>::get_data(int idx) const
 {
-    return get_AHData_idx(idx, m_data);
+    return get_AHVarsData_idx(idx, m_data);
 }
 
 template <class SurfaceGeometry, class AHFunction>
-void AHInterpolation<SurfaceGeometry, AHFunction>::interpolate_extra_vars(
+void AHInterpolation_t<SurfaceGeometry, AHFunction>::interpolate_extra_vars(
     const std::map<std::string, std::tuple<int, VariableType, int>> &extra_vars)
 {
     CH_TIME("AHInterpolation::interpolate_extra_vars");
@@ -518,10 +464,10 @@ void AHInterpolation<SurfaceGeometry, AHFunction>::interpolate_extra_vars(
 }
 
 template <class SurfaceGeometry, class AHFunction>
-const AHData<std::string, double>
-AHInterpolation<SurfaceGeometry, AHFunction>::get_extra_data(int idx) const
+const AHVarsData<std::string, double>
+AHInterpolation_t<SurfaceGeometry, AHFunction>::get_extra_data(int idx) const
 {
-    return get_AHData_idx(idx, m_extra);
+    return get_AHVarsData_idx(idx, m_extra);
 }
 
 #endif // _AHINTERPOLATION_IMPL_HPP_

@@ -29,7 +29,8 @@ template <class data_t> void Weyl4::compute(Cell<data_t> current_cell) const
 
     // work out the Newman Penrose scalar
     const Coordinates<data_t> coords(current_cell, m_dx, m_center);
-    NPScalar_t<data_t> out = compute_Weyl4(ebfields, vars, d1, d2, coords);
+    NPScalar_t<data_t> out =
+        compute_Weyl4(ebfields, vars, d1, d2, gq.get_h_UU(), coords);
 
     // Write the rhs into the output FArrayBox
     current_cell.store_vars(out.Real, c_Weyl4_Re);
@@ -42,17 +43,18 @@ NPScalar_t<data_t> Weyl4::compute_Weyl4(const EBFields_t<data_t> &ebfields,
                                         const Vars<data_t> &vars,
                                         const Vars<Tensor<1, data_t>> &d1,
                                         const Diff2Vars<Tensor<2, data_t>> &d2,
+                                        const Tensor<2, data_t> &h_UU,
                                         const Coordinates<data_t> &coords) const
 {
     NPScalar_t<data_t> out;
 
     // Calculate the tetrads
-    const Tetrad_t<data_t> tetrad = compute_null_tetrad(vars, coords);
+    const Tetrad_t<data_t> tetrad = compute_null_tetrad(vars, h_UU, coords);
 
     // Projection of Electric and magnetic field components using tetrads
     out.Real = 0.0;
     out.Im = 0.0;
-    FOR2(i, j)
+    FOR(i, j)
     {
         out.Real += 0.5 * (ebfields.E[i][j] * (tetrad.w[i] * tetrad.w[j] -
                                                tetrad.v[i] * tetrad.v[j]) -
@@ -72,6 +74,7 @@ NPScalar_t<data_t> Weyl4::compute_Weyl4(const EBFields_t<data_t> &ebfields,
 template <class data_t>
 Tetrad_t<data_t>
 Weyl4::compute_null_tetrad(const Vars<data_t> &vars,
+                           const Tensor<2, data_t> &h_UU,
                            const Coordinates<data_t> &coords) const
 {
     Tetrad_t<data_t> out;
@@ -81,8 +84,7 @@ Weyl4::compute_null_tetrad(const Vars<data_t> &vars,
     const double y = coords.y;
     const double z = coords.z;
 
-    // the inverse metric and alternating levi civita symbol
-    const auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
+    // the alternating levi civita symbol
     const Tensor<3, double> epsilon = TensorAlgebra::epsilon();
 
     // calculate the tetrad
@@ -101,7 +103,7 @@ Weyl4::compute_null_tetrad(const Vars<data_t> &vars,
     // floor on chi
     const data_t chi = simd_max(vars.chi, 1e-4);
 
-    FOR4(i, j, k, m)
+    FOR(i, j, k, m)
     {
         out.w[i] += 1. / sqrt(chi) * h_UU[i][j] * epsilon[j][k][m] * out.v[k] *
                     out.u[m];
@@ -110,29 +112,29 @@ Weyl4::compute_null_tetrad(const Vars<data_t> &vars,
     // Gram Schmitt orthonormalisation
     // Choice of orthonormalisaion to avoid frame-dragging
     data_t omega_11 = 0.0;
-    FOR2(i, j) { omega_11 += out.v[i] * out.v[j] * vars.h[i][j] / chi; }
-    FOR1(i) { out.v[i] = out.v[i] / sqrt(omega_11); }
+    FOR(i, j) { omega_11 += out.v[i] * out.v[j] * vars.h[i][j] / chi; }
+    FOR(i) { out.v[i] = out.v[i] / sqrt(omega_11); }
 
     data_t omega_12 = 0.0;
-    FOR2(i, j) { omega_12 += out.v[i] * out.u[j] * vars.h[i][j] / chi; }
-    FOR1(i) { out.u[i] += -omega_12 * out.v[i]; }
+    FOR(i, j) { omega_12 += out.v[i] * out.u[j] * vars.h[i][j] / chi; }
+    FOR(i) { out.u[i] += -omega_12 * out.v[i]; }
 
     data_t omega_22 = 0.0;
-    FOR2(i, j) { omega_22 += out.u[i] * out.u[j] * vars.h[i][j] / chi; }
-    FOR1(i) { out.u[i] = out.u[i] / sqrt(omega_22); }
+    FOR(i, j) { omega_22 += out.u[i] * out.u[j] * vars.h[i][j] / chi; }
+    FOR(i) { out.u[i] = out.u[i] / sqrt(omega_22); }
 
     data_t omega_13 = 0.0;
     data_t omega_23 = 0.0;
-    FOR2(i, j)
+    FOR(i, j)
     {
         omega_13 += out.v[i] * out.w[j] * vars.h[i][j] / chi;
         omega_23 += out.u[i] * out.w[j] * vars.h[i][j] / chi;
     }
-    FOR1(i) { out.w[i] += -(omega_13 * out.v[i] + omega_23 * out.u[i]); }
+    FOR(i) { out.w[i] += -(omega_13 * out.v[i] + omega_23 * out.u[i]); }
 
     data_t omega_33 = 0.0;
-    FOR2(i, j) { omega_33 += out.w[i] * out.w[j] * vars.h[i][j] / chi; }
-    FOR1(i) { out.w[i] = out.w[i] / sqrt(omega_33); }
+    FOR(i, j) { omega_33 += out.w[i] * out.w[j] * vars.h[i][j] / chi; }
+    FOR(i) { out.w[i] = out.w[i] / sqrt(omega_33); }
 
     return out;
 }

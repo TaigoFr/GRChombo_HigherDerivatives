@@ -13,6 +13,15 @@
 // Problem specific includes:
 #include "BoostedBH.hpp"
 
+// define to use IsotropicBoostedBH initial data instead of SingleBH ID
+#define USE_ISOTROPIC_BOOSTED_BH
+
+#ifdef USE_ISOTROPIC_BOOSTED_BH
+#ifdef USE_AHFINDER
+#include "AHInitialGuess.hpp"
+#endif
+#endif
+
 class SimulationParameters : public SimulationParametersBase
 {
   public:
@@ -34,10 +43,25 @@ class SimulationParameters : public SimulationParametersBase
         // provided)
         std::array<double, CH_SPACEDIM> offset;
         pp.load("offset", offset, {0.0, 0.0, 0.0});
-        FOR1(idir) { bh_params.center[idir] = center[idir] + offset[idir]; }
+        FOR(idir) { bh_params.center[idir] = center[idir] + offset[idir]; }
 
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * bh_params.mass);
+#ifdef USE_ISOTROPIC_BOOSTED_BH
+        double r_x = AH_initial_guess, r_y = AH_initial_guess,
+               r_z = AH_initial_guess;
+
+        bool ah_use_ellipsoid;
+        pp.load("AH_use_ellipsoid", ah_use_ellipsoid, true);
+        if (ah_use_ellipsoid)
+        {
+            double vel = bh_params.momentum[0];
+            double contraction = sqrt(1. - vel * vel);
+            r_x *= contraction;
+        }
+
+        AH_initial_guess_elipsoid.set_params(r_x, r_y, r_z);
+#endif
 #endif
     }
 
@@ -49,6 +73,9 @@ class SimulationParameters : public SimulationParametersBase
 
 #ifdef USE_AHFINDER
     double AH_initial_guess;
+#ifdef USE_ISOTROPIC_BOOSTED_BH
+    AHInitialGuessElipsoid AH_initial_guess_elipsoid;
+#endif
 #endif
 };
 

@@ -24,7 +24,7 @@ void MatterWeyl4<matter_t>::compute(Cell<data_t> current_cell) const
     gq.set_formulation(m_formulation,
                        CCZ4::params_t() /*params don't matter here*/);
 
-    const auto emtensor = my_matter.compute_emtensor(gq);
+    const auto emtensor = m_matter.compute_emtensor(gq);
     gq.set_em_tensor(emtensor, m_G_Newton);
 
     // Compute the E and B fields
@@ -34,7 +34,8 @@ void MatterWeyl4<matter_t>::compute(Cell<data_t> current_cell) const
 
     // work out the Newman Penrose scalar
     const Coordinates<data_t> coords(current_cell, m_dx, m_center);
-    NPScalar_t<data_t> out = compute_Weyl4(ebfields, vars, d1, d2, coords);
+    NPScalar_t<data_t> out =
+        compute_Weyl4(ebfields, vars, d1, d2, gq.get_h_UU(), coords);
 
     // Write the rhs into the output FArrayBox
     current_cell.store_vars(out.Real, c_Weyl4_Re);

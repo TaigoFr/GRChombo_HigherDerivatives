@@ -7,6 +7,7 @@
 #include "DimensionDefinitions.hpp"
 #include "GeometricQuantities.hpp"
 #include "Tensor.hpp"
+#include <iomanip>
 #include <iostream>
 
 template <class data_t> struct vars_t
@@ -41,8 +42,10 @@ int main()
     auto chris = gq.get_chris();
     auto ricciZ = gq.get_ricci_2DZ();
 
+    std::cout << std::setprecision(16);
+
     // Compare
-    FOR2(i, j)
+    FOR(i, j)
     {
         double diff = h_UU[i][j] - h_UU_known[i][j];
         if (diff > 2e-14)
@@ -56,7 +59,7 @@ int main()
         }
     }
 
-    FOR3(i, j, k)
+    FOR(i, j, k)
     {
         double diff = chris.ULL[i][j][k] - chris_known[i][j][k];
         if (diff > 2e-14)
@@ -70,7 +73,7 @@ int main()
         }
     }
 
-    FOR1(i)
+    FOR(i)
     {
         double diff = chris.contracted[i] - chris_contracted_known[i];
         if (diff > 1e-14)
@@ -84,7 +87,7 @@ int main()
         }
     }
 
-    FOR2(i, j)
+    FOR(i, j)
     {
         double diff = ricciZ.LL[i][j] - ricciZ_known[i][j];
         if (diff > 1e-14)

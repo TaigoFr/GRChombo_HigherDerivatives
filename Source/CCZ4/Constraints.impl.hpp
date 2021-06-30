@@ -23,7 +23,7 @@ inline Constraints::Constraints(double dx,
 template <class data_t>
 void Constraints::compute(Cell<data_t> current_cell) const
 {
-    const auto vars = current_cell.template load_vars<MetricVars>();
+    const auto vars = cSurrent_cell.template load_vars<MetricVars>();
     const auto d1 = m_deriv.template diff1<MetricVars>(current_cell);
     const auto d2 = m_deriv.template diff2<Diff2MetricVars>(current_cell);
 
