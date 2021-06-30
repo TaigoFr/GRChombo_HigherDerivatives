@@ -13,10 +13,10 @@ plot_prefix = HigherDerivativesp_
 # restart_file = HigherDerivatives_000000.3d.hdf5
 
 # HDF5files are written every dt = L/N*dt_multiplier*checkpoint_interval
-checkpoint_interval = 0
+checkpoint_interval = 20
 # set to 0 to turn off plot files (except at t=0 and t=stop_time)
 # set to -1 to never ever print plotfiles
-plot_interval = 1
+plot_interval = 10
 num_plot_vars = 21
 plot_vars = chi lapse shift1 C dCdt Ham Mom C_diff Cphys WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus rhs_chi diffusion_chi det_h M_adm J_adm
 
@@ -230,7 +230,7 @@ AH_verbose = 2
 AH_num_write_vars = 3
 AH_write_vars = chi WeakFieldVar WeakFieldCondition
 
-# AH_coords_subpath = "data/coords"
+AH_coords_subpath = "data/coords"
 # AH_stats_prefix = "stats_AH"
 # AH_coords_prefix = "coords_AH"
 
