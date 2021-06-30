@@ -52,7 +52,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("centerB", centerB, center);
         pp.load("offsetA", offsetA, {0.0, 0.0, 0.0});
         pp.load("offsetB", offsetB, {0.0, 0.0, 0.0});
-        FOR1(idir)
+        FOR(idir)
         {
             bh1_params.center[idir] = centerA[idir] + offsetA[idir];
             bh2_params.center[idir] = centerB[idir] + offsetB[idir];
@@ -155,7 +155,7 @@ class SimulationParameters : public SimulationParametersBase
             std::sqrt(ArrayTools::norm2(bh2_params.momentum)) <
                 0.3 * bh1_params.mass,
             "approximation used for boosted BH only valid for small boosts");
-        FOR1(idir)
+        FOR(idir)
         {
             std::string nameA = "centerA[" + std::to_string(idir) + "]";
             std::string nameB = "centerB[" + std::to_string(idir) + "]";

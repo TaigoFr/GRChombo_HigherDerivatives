@@ -55,7 +55,7 @@ template <class data_t> void SchBH::compute(Cell<data_t> current_cell) const
     TensorAlgebra::make_trace_free(vars.A, vars.h, h_UU);
 
     // Make conformal
-    FOR2(i, j)
+    FOR(i, j)
     {
         vars.h[i][j] *= vars.chi;
         vars.A[i][j] *= vars.chi;

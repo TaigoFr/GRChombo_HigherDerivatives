@@ -1504,9 +1504,9 @@ template_GQ void GeometricQuantities_t::compute_levi_civita_spatial_LUU()
     const auto &metric_UU = get_metric_UU_spatial();
 
     m_levi_civita_spatial_LUU = new Tensor<3, data_t>({0.});
-    FOR3(i, j, k)
+    FOR(i, j, k)
     {
-        FOR2(m, n)
+        FOR(m, n)
         {
             (*m_levi_civita_spatial_LUU)[i][j][k] +=
                 levi_civita_LLL[i][m][n] * metric_UU[m][j] * metric_UU[n][k];
@@ -1534,7 +1534,7 @@ template_GQ void GeometricQuantities_t::compute_weyl_magnetic_part()
     const auto &covD_K_tensor = get_covd_extrinsic_curvature();
 
     m_weyl_magnetic_part = new Tensor<2, data_t>({0.});
-    FOR4(i, j, k, l)
+    FOR(i, j, k, l)
     {
         (*m_weyl_magnetic_part)[i][j] +=
             levi_civita_spatial_LUU[i][k][l] * covD_K_tensor[j][l][k];
@@ -2121,7 +2121,7 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
                                     : chris.contracted[i]) *
                                div_shift;
 
-            FOR1(j)
+            FOR(j)
             {
                 // Use the calculated christoffels in the lie derivative terms,
                 // not the evolved ones, for BSSN (as according to the old code
@@ -2136,7 +2136,7 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
                 rhs.A[i][j] = advec.A[i][j] + LIE.A[i][j] * vars.lapse -
                               2. / GR_SPACEDIM * vars.A[i][j] * div_shift;
 
-                FOR1(k)
+                FOR(k)
                 {
                     rhs.h[i][j] += vars.h[i][k] * d1.shift[k][j] +
                                    vars.h[j][k] * d1.shift[k][i];
@@ -3113,7 +3113,7 @@ GeometricQuantities_t::compute_dt_weyl_electric_part(
     FOR(i, j)
     {
         dt_E[i][j] = advec_Eij[i][j] + LieD_E[i][j] * vars.lapse;
-        FOR1(k)
+        FOR(k)
         {
             dt_E[i][j] +=
                 Eij[i][k] * d1.shift[k][j] + Eij[j][k] * d1.shift[k][i];
@@ -3138,7 +3138,7 @@ GeometricQuantities_t::compute_dt_weyl_magnetic_part(
     FOR(i, j)
     {
         dt_B[i][j] = advec_Bij[i][j] + LieD_B[i][j] * vars.lapse;
-        FOR1(k)
+        FOR(k)
         {
             dt_B[i][j] +=
                 Bij[i][k] * d1.shift[k][j] + Bij[j][k] * d1.shift[k][i];

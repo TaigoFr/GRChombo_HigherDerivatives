@@ -57,10 +57,10 @@ class SchwarzschildKS
         Tensor<2, data_t> Kij;
 
         vars.chi = 1. / pow(1. + f, 1. / 3.);
-        FOR1(i)
+        FOR(i)
         {
             vars.shift[i] = f * xyz[i] / (r * (1. + f));
-            FOR1(j)
+            FOR(j)
             {
                 vars.h[i][j] = f * xyz[i] * xyz[j] * vars.chi / (r_reg * r_reg);
                 Kij[i][j] = -f * (4. + f) * xyz[i] * xyz[j] /
@@ -76,7 +76,7 @@ class SchwarzschildKS
 
         auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
         vars.K = vars.chi * TensorAlgebra::compute_trace(Kij, h_UU);
-        FOR2(i, j)
+        FOR(i, j)
         {
             vars.A[i][j] =
                 vars.chi * Kij[i][j] - vars.K * vars.h[i][j] / GR_SPACEDIM;

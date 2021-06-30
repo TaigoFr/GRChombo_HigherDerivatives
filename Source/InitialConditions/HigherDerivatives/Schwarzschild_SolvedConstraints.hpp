@@ -31,7 +31,7 @@ class Schwarzschild_SolvedConstraints
   public:
     Schwarzschild_SolvedConstraints(params_t a_params, const double a_dx,
                                     const std::string &append = "")
-        : m_params(a_params), m_dx(a_dx),
+        : m_dx(a_dx), m_params(a_params),
           file_psi("Npoints" + append, "rs" + append, "psi" + append,
                    -1.), // negative such that we identify when there is no
                          // file and set the usual chi=(1+M/(2r))^4

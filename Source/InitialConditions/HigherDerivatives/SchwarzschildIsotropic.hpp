@@ -49,7 +49,7 @@ class SchwarzschildIsotropic
 
         data_t f = m_params.mass / (2. * r_reg);
 
-        FOR1(i) { vars.h[i][i] = 1.; }
+        FOR(i) { vars.h[i][i] = 1.; }
         vars.chi = 1. / pow(1. + f, 4.);
 
         // vars.lapse = sqrt(vars.chi);

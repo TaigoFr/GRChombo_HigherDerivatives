@@ -133,7 +133,7 @@ int runTest(int argc, char *argv[])
             if (ivar == d1_ivar)
             {
                 var = 0.;
-                FOR1(dir) { var += vars.shift[dir] * d1_var[dir]; }
+                FOR(dir) { var += vars.shift[dir] * d1_var[dir]; }
             }
         });
     });

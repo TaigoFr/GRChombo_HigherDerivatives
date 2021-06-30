@@ -23,7 +23,7 @@ void Schwarzschild_SolvedConstraints::compute(Cell<data_t> current_cell) const
     vars.lapse = 1;
 
     // conformal metric is flat
-    FOR1(i) vars.h[i][i] = 1.;
+    FOR(i) vars.h[i][i] = 1.;
 
     fill_from_files(vars.chi, vars.A, coords);
 
@@ -50,9 +50,9 @@ void Schwarzschild_SolvedConstraints::fill_from_files(
     data_t Arr = file_Krr.interpolate(r);
 
     Tensor<1, data_t> xyz = {coords.x / r, coords.y / r, coords.z / r};
-    FOR1(i)
+    FOR(i)
     {
-        FOR1(j) { A[i][j] = Arr * 1.5 * xyz[i] * xyz[j]; }
+        FOR(j) { A[i][j] = Arr * 1.5 * xyz[i] * xyz[j]; }
         A[i][i] += -0.5 * Arr;
     }
 }

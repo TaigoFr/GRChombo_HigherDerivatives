@@ -44,7 +44,7 @@ class MinkowskiPerturbed
         data_t f = 1. + m_params.amplitude * sin(pi2r) / pi2r;
 
         vars.lapse = 1. / sqrt(f);
-        FOR1(i) { vars.h[i][i] = 1.; }
+        FOR(i) { vars.h[i][i] = 1.; }
         vars.chi = 1. / f;
 
         current_cell.store_vars(vars);
