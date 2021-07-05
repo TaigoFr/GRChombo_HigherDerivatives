@@ -97,7 +97,14 @@ class SimulationParameters : public SimulationParametersBase
         if (system_params.use_only_time_derivatives)
             pp.load("rescale_tau_sigma_by_lapse",
                     system_params.rescale_tau_sigma_by_lapse);
+#else
+        pp.load("eb_version", system_params.version);
+        pout() << "Using EB system version " << system_params.version
+               << std::endl;
+        pp.load("rescale_tau_sigma_by_lapse",
+                system_params.rescale_tau_sigma_by_lapse);
 #endif
+        pp.load("add_advection", system_params.add_advection);
 
         /////////////
         // Diffusion parameters

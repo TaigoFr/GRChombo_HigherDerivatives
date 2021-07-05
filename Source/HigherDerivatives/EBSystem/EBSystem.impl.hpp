@@ -50,7 +50,7 @@ void EBSystem::compute_C(
 
     // 2nd mixed derivatives of shift needed for d2_h[i][j][0][0]
     Tensor<2, data_t> dtd1_shift; // mixed derivative
-    auto ccz4_params = gq.get_formulation_params();
+    auto &ccz4_params = gq.get_formulation_params();
 
     vars_t<data_t> rhs;
     add_matter_rhs(rhs, gq);
@@ -84,8 +84,8 @@ void EBSystem::compute_C(
                                       vars.chi;
 
             dtd1_shift[i][j] += ccz4_params.shift_advec_coeff *
-                                (vars.shift[k] * d2.shift[i][j][k] +
-                                 d1.shift[i][k] * d1.shift[k][j]);
+                                (vars.shift[k] * d2.shift[i][k][j] +
+                                 d1.shift[k][j] * d1.shift[i][k]);
         }
     }
 
@@ -152,11 +152,11 @@ void EBSystem::compute_C(
             // mixed ders
 
             d2_Eij[i][j][0][k + 1] =
-                -1. / m_params.tau * (d1.Eij[i][j][k] - d1.Ephys[i][j][k]);
+                -1. / m_params.tau * (d1.Eij[i][j][k] - d1.Eaux[i][j][k]);
             d2_Eij[i][j][k + 1][0] = d2_Eij[i][j][0][k + 1];
 
             d2_Bij[i][j][0][k + 1] =
-                -1. / m_params.tau * (d1.Bij[i][j][k] - d1.Bphys[i][j][k]);
+                -1. / m_params.tau * (d1.Bij[i][j][k] - d1.Baux[i][j][k]);
             d2_Bij[i][j][k + 1][0] = d2_Bij[i][j][0][k + 1];
 
             d2_h[i][j][0][k + 1] = -2. * vars.lapse * d1_Kij[i][j][k + 1] -
@@ -272,11 +272,11 @@ void EBSystem::add_matter_rhs(
     FOR(i, j)
     {
         total_rhs.Eij[i][j] =
-            -1. / m_params.tau * (vars.Eij[i][j] - vars.Ephys[i][j]);
+            -1. / m_params.tau * (vars.Eij[i][j] - vars.Eaux[i][j]);
         total_rhs.Bij[i][j] =
-            -1. / m_params.tau * (vars.Bij[i][j] - vars.Bphys[i][j]);
-        total_rhs.Ephys[i][j] = 0.;
-        total_rhs.Bphys[i][j] = 0.;
+            -1. / m_params.tau * (vars.Bij[i][j] - vars.Baux[i][j]);
+        total_rhs.Eaux[i][j] = 0.;
+        total_rhs.Baux[i][j] = 0.;
     }
 }
 

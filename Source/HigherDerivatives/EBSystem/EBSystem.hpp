@@ -18,6 +18,9 @@ class EBSystem
     struct params_t
     {
         double tau; // for the evolution equation of Eij and Bij
+        double version;
+        bool rescale_tau_sigma_by_lapse; // for when using only time derivatives
+        double add_advection;
     };
 
     //!  Constructor of class EBSystem, inputs are the matter parameters.
@@ -29,9 +32,10 @@ class EBSystem
         // adding 'ij' because B already exists from Gamma-driver
         Tensor<2, data_t> Eij;
         Tensor<2, data_t> Bij;
-        // need to store physical ones to get their spatial derivatives
-        Tensor<2, data_t> Ephys;
-        Tensor<2, data_t> Bphys;
+        // v1: need to store physical ones to get their spatial derivatives
+        // v2: need to store the first order variables for the 2nd order eq.
+        Tensor<2, data_t> Eaux;
+        Tensor<2, data_t> Baux;
 
         /// Defines the mapping between members of Vars and Chombo grid
         /// variables (enum in User_Variables)
@@ -45,9 +49,9 @@ class EBSystem
                 mapping_function, GRInterval<c_B11, c_B33>(), Bij);
 
             VarsTools::define_symmetric_enum_mapping(
-                mapping_function, GRInterval<c_Ephys11, c_Ephys33>(), Ephys);
+                mapping_function, GRInterval<c_Eaux11, c_Eaux33>(), Eaux);
             VarsTools::define_symmetric_enum_mapping(
-                mapping_function, GRInterval<c_Bphys11, c_Bphys33>(), Bphys);
+                mapping_function, GRInterval<c_Baux11, c_Baux33>(), Baux);
         }
     };
 

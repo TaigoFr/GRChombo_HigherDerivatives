@@ -30,19 +30,19 @@ enum
     c_B23,
     c_B33,
 
-    c_Ephys11,
-    c_Ephys12,
-    c_Ephys13,
-    c_Ephys22,
-    c_Ephys23,
-    c_Ephys33,
+    c_Eaux11,
+    c_Eaux12,
+    c_Eaux13,
+    c_Eaux22,
+    c_Eaux23,
+    c_Eaux33,
 
-    c_Bphys11,
-    c_Bphys12,
-    c_Bphys13,
-    c_Bphys22,
-    c_Bphys23,
-    c_Bphys33,
+    c_Baux11,
+    c_Baux12,
+    c_Baux13,
+    c_Baux22,
+    c_Baux23,
+    c_Baux33,
 
 #elif USE_CSYSTEM
     c_C = NUM_CCZ4_VARS,
@@ -59,13 +59,13 @@ namespace UserVariables
 #ifdef USE_EBSYSTEM
 static const std::array<std::string, NUM_VARS - NUM_CCZ4_VARS>
     user_variable_names = {
-        "E11",     "E12",     "E13",     "E22",     "E23",     "E33",
+        "E11",    "E12",    "E13",    "E22",    "E23",    "E33",
 
-        "B11",     "B12",     "B13",     "B22",     "B23",     "B33",
+        "B11",    "B12",    "B13",    "B22",    "B23",    "B33",
 
-        "Ephys11", "Ephys12", "Ephys13", "Ephys22", "Ephys23", "Ephys33",
+        "Eaux11", "Eaux12", "Eaux13", "Eaux22", "Eaux23", "Eaux33",
 
-        "Bphys11", "Bphys12", "Bphys13", "Bphys22", "Bphys23", "Bphys33"};
+        "Baux11", "Baux12", "Baux13", "Baux22", "Baux23", "Baux33"};
 
 #elif USE_CSYSTEM
 static const std::array<std::string, NUM_VARS - NUM_CCZ4_VARS>

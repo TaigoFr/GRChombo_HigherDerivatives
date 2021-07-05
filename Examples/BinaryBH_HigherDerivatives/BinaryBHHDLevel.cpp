@@ -77,17 +77,28 @@ void BinaryBHHDLevel::initialData()
 
     fillAllGhosts();
 
+    // 'GammaCalculator(m_dx)' not needed for binaries (conformally flag initial
 #ifdef USE_EBSYSTEM
     ComputeEB compute(m_dx, m_p.formulation, m_p.ccz4_params,
                       Interval(c_E11, c_E33), Interval(c_B11, c_B33));
+    if (m_p.system_params.version == 2)
+    {
+        bool compute_time_derivatives = true;
+        ComputeEB compute2(m_dx, m_p.formulation, m_p.ccz4_params,
+                           Interval(c_Eaux11, c_Eaux33),
+                           Interval(c_Baux11, c_Baux33),
+                           compute_time_derivatives);
+        BoxLoops::loop(make_compute_pack(compute, compute2), m_state_new,
+                       m_state_new, EXCLUDE_GHOST_CELLS);
+    }
+    else
+    {
+        BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    }
 #elif USE_CSYSTEM
     CDiagnostics compute(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
-#endif
-
-    // not needed for binaries (conformally flag initial metric)
-    // BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
-    //                m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+#endif
 
 #ifdef USE_AHFINDER
     // Diagnostics needed for AHFinder (calculate anyway as AHFinder not yet
@@ -122,7 +133,7 @@ void BinaryBHHDLevel::computeDiagnostics()
         Interval(c_Mom, c_Mom));
 
 #ifdef USE_EBSYSTEM
-    EBdiffDiagnostic diff(m_dx);
+    EBdiffDiagnostic diff(m_d, m_p.formulation, m_p.ccz4_params);
 #elif USE_CSYSTEM
     CDiagnostics diff(m_dx, m_p.formulation, m_p.ccz4_params, c_Cphys,
                       c_C_diff);
@@ -138,10 +149,13 @@ void BinaryBHHDLevel::computeDiagnostics()
     //     m_p.formulation, m_p.G_Newton, c_diffusion_h11, c_rhs_h11);
 
 #ifdef USE_EBSYSTEM
-    BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
-                             Interval(c_Ephys11, c_Ephys33),
-                             Interval(c_Bphys11, c_Bphys33)),
-                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    if (m_p.system_params.version == 1)
+    {
+        BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
+                                 Interval(c_Eaux11, c_Eaux33),
+                                 Interval(c_Baux11, c_Baux33)),
+                       m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    }
 #endif
 
     BoxLoops::loop(
@@ -160,14 +174,17 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
         a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
 #ifdef USE_EBSYSTEM
-    // don't include the above BoxLoops in this one because this one excludes
-    // ghost cells and the fillAllGhosts will not fill the outer boundaries for
-    // sommerfeld BC
-    BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
-                             Interval(c_Ephys11, c_Ephys33),
-                             Interval(c_Bphys11, c_Bphys33)),
-                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
-    fillAllGhosts();
+    if (m_p.system_params.version == 1)
+    {
+        // don't include the above BoxLoops in this one because this one
+        // excludes ghost cells and the fillAllGhosts will not fill the outer
+        // boundaries for sommerfeld BC
+        BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
+                                 Interval(c_Eaux11, c_Eaux33),
+                                 Interval(c_Baux11, c_Baux33)),
+                       m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+        fillAllGhosts();
+    }
 #endif
 
     double spin = 0.;

@@ -136,7 +136,7 @@ nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0
 # if you are using extrapolating BC:
 extrapolation_order = 1
 num_extrapolating_vars = 12
-extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33 
+extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33
                      Bphys11 Bphys12 Bphys13 Bphys22 Bphys23 Bphys33
 
 #################################################
@@ -186,8 +186,10 @@ calculate_constraint_norms = 1
 #################################################
 # Higher Derivatives Evolution parameters
 
-epsilon = 0.0001 # energy scale
-tau     = 0.1    # damping time scale for evolved Eij/Bij
+# epsilon = 0.0001             # energy scale
+tau     = 0.1                  # damping time scale for evolved Eij/Bij
+rescale_tau_sigma_by_lapse = 0 # rescale tau and sigma by lapse
+add_advection = 0
 
 # chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10

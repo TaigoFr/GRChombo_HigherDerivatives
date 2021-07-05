@@ -104,8 +104,8 @@ vars_parity_diagnostic = 0 0              #Ham and Mom
                          0 0              #C diff and C phys
                          0 0 0            #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC
                          0 0 0 0          #NCC x 4
-                         0 0 0			  #rhs chi and diffusion chi and det_h
-                         0 0			  #ADM M and J
+                         0 0 0            #rhs chi and diffusion chi and det_h
+                         0 0              #ADM M and J
 
 # if sommerfeld boundaries selected, must select
 # non zero asymptotic values
@@ -159,11 +159,12 @@ sigma = 1.0
 
 # provide INITIAL_DATA.dat with 'epsilon'
 
-# epsilon = 0.0001 # energy scale
-tau     = 0.05  # damping time scale for evolved C
-c_sigma = 1.0   # wave evolution scale for evolved C
-use_only_time_derivatives = 1 # replace laplacian by time derivatives
-rescale_tau_sigma_by_lapse = 0 # rescale tau and sigma by lapse
+# epsilon = 0.0001             # energy scale
+tau     = 0.05                 # damping time scale for evolved C
+c_sigma = 1.0                  # wave evolution scale for evolved C
+use_only_time_derivatives = 1  # replace laplacian by time derivatives
+rescale_tau_sigma_by_lapse = 0 # rescale tau and sigma by lapse, only if 'use_only_time_derivatives = 1'
+add_advection = 0              # only if 'use_only_time_derivatives = 1'
 
 #chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10

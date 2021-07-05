@@ -119,7 +119,7 @@ nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0
 # if you are using extrapolating BC:
 extrapolation_order = 1
 num_extrapolating_vars = 12
-extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33 
+extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33
                      Bphys11 Bphys12 Bphys13 Bphys22 Bphys23 Bphys33
 
 #################################################
@@ -163,8 +163,10 @@ sigma = 1.0
 
 # provide INITIAL_DATA.dat with 'epsilon'
 
-# epsilon = 0.0001 # energy scale
-tau     = 0.1    # damping time scale for evolved Eij/Bij
+# epsilon = 0.0001             # energy scale
+tau     = 0.1                  # damping time scale for evolved Eij/Bij
+rescale_tau_sigma_by_lapse = 0 # rescale tau and sigma by lapse
+add_advection = 0
 
 #chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10
@@ -206,7 +208,7 @@ extraction_extrapolation_radii = 0 1 2
 #################################################
 # Apparent Horizon Finder parameters
 
-AH_activate = 1 
+AH_activate = 1
 AH_num_ranks = 20
 AH_num_points_u = 49
 AH_num_points_v = 48
