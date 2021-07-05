@@ -125,9 +125,9 @@ void EBSystem::compute_C(
     Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_h;
 
     Tensor<2, data_t> dt_Eij = gq.compute_dt_weyl_electric_part(
-        d1.Eij, d1.Bij, vars.Eij, vars.Bij, advec.Eij, advec.Bij);
+        d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
     Tensor<2, data_t> dt_Bij = gq.compute_dt_weyl_magnetic_part(
-        d1.Eij, d1.Bij, vars.Eij, vars.Bij, advec.Eij, advec.Bij);
+        d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
 
     FOR(i, j)
     {
