@@ -9,6 +9,7 @@
 
 #ifndef EBSYSTEM_IMPL_HPP_
 #define EBSYSTEM_IMPL_HPP_
+
 #include "DimensionDefinitions.hpp"
 
 // Calculate the stress energy tensor elements
@@ -124,22 +125,16 @@ void EBSystem::compute_C(
     Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_Bij;
     Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_h;
 
-    Tensor<2, data_t> dt_Eij = gq.compute_dt_weyl_electric_part(
-        d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
-    Tensor<2, data_t> dt_Bij = gq.compute_dt_weyl_magnetic_part(
-        d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
+    compute_d2_Eij_and_Bij(d2_Eij, d2_Bij, gq, rhs);
 
     FOR(i, j)
     {
-
         FOR(k)
         {
             // need to fill in reverse order in order to re-use them!
 
             FOR(l) // 2nd spatial ders
             {
-                d2_Eij[i][j][k + 1][l + 1] = d2.Eij[i][j][k][l];
-                d2_Bij[i][j][k + 1][l + 1] = d2.Bij[i][j][k][l];
                 d2_h[i][j][k + 1][l + 1] =
                     d2.h[i][j][k][l] / vars.chi +
                     2. / (chi2 * vars.chi) * vars.h[i][j] * d1.chi[k] *
@@ -150,14 +145,6 @@ void EBSystem::compute_C(
             }
 
             // mixed ders
-
-            d2_Eij[i][j][0][k + 1] =
-                -1. / m_params.tau * (d1.Eij[i][j][k] - d1.Eaux[i][j][k]);
-            d2_Eij[i][j][k + 1][0] = d2_Eij[i][j][0][k + 1];
-
-            d2_Bij[i][j][0][k + 1] =
-                -1. / m_params.tau * (d1.Bij[i][j][k] - d1.Baux[i][j][k]);
-            d2_Bij[i][j][k + 1][0] = d2_Bij[i][j][0][k + 1];
 
             d2_h[i][j][0][k + 1] = -2. * vars.lapse * d1_Kij[i][j][k + 1] -
                                    2. * Kij[i][j] * d1.lapse[k];
@@ -176,11 +163,6 @@ void EBSystem::compute_C(
         }
 
         // 2nd time ders
-
-        d2_Eij[i][j][0][0] =
-            -1. / m_params.tau * (rhs.Eij[i][j] - dt_Eij[i][j]);
-        d2_Bij[i][j][0][0] =
-            -1. / m_params.tau * (rhs.Bij[i][j] - dt_Bij[i][j]);
 
         d2_h[i][j][0][0] =
             -2. * vars.lapse * d1_Kij[i][j][0] - 2. * Kij[i][j] * rhs.lapse;
@@ -269,14 +251,143 @@ void EBSystem::add_matter_rhs(
 {
     const auto &vars = gq.get_vars();
 
-    FOR(i, j)
+    data_t tau = m_params.tau;
+    data_t sigma = m_params.sigma;
+    if (m_params.rescale_tau_sigma_by_lapse)
     {
-        total_rhs.Eij[i][j] =
-            -1. / m_params.tau * (vars.Eij[i][j] - vars.Eaux[i][j]);
-        total_rhs.Bij[i][j] =
-            -1. / m_params.tau * (vars.Bij[i][j] - vars.Baux[i][j]);
-        total_rhs.Eaux[i][j] = 0.;
-        total_rhs.Baux[i][j] = 0.;
+        tau /= vars.lapse;
+        sigma /= (vars.lapse * vars.lapse);
+    }
+
+    if (m_params.version == 1)
+    {
+        FOR(i, j)
+        {
+            total_rhs.Eij[i][j] =
+                -1. / tau * (vars.Eij[i][j] - vars.Eaux[i][j]);
+            total_rhs.Bij[i][j] =
+                -1. / tau * (vars.Bij[i][j] - vars.Baux[i][j]);
+            total_rhs.Eaux[i][j] = 0.;
+            total_rhs.Baux[i][j] = 0.;
+        }
+    }
+    else if (m_params.version == 2)
+    {
+        const auto &advec = gq.get_advection();
+        const auto &Eij = gq.get_weyl_electric_part();
+        const auto &Bij = gq.get_weyl_magnetic_part();
+
+        FOR(i, j)
+        {
+            data_t Eaux_with_advec = vars.Eaux[i][j];
+            data_t Baux_with_advec = vars.Baux[i][j];
+
+            if (m_params.add_advection)
+            {
+                Eaux_with_advec -= advec.Eij[i][j];
+                Baux_with_advec -= advec.Bij[i][j];
+            }
+
+            total_rhs.Eij[i][j] = vars.Eaux[i][j];
+            total_rhs.Bij[i][j] = vars.Baux[i][j];
+            total_rhs.Eaux[i][j] =
+                (-tau * Eaux_with_advec + Eij[i][j] - vars.Eij[i][j]) / sigma;
+            total_rhs.Baux[i][j] =
+                (-tau * Baux_with_advec + Bij[i][j] - vars.Bij[i][j]) / sigma;
+        }
+    }
+    else
+    {
+        MayDay::Error("Version not implemented");
+    }
+}
+
+// Adds in the RHS for the matter vars
+template <class data_t, template <typename> class vars_t,
+          template <typename> class diff2_vars_t, class gauge_t,
+          template <typename> class rhs_vars_t>
+void EBSystem::compute_d2_Eij_and_Bij(
+    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Eij,
+    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Bij,
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    rhs_vars_t<data_t> &rhs) const
+{
+    if (m_params.version == 1)
+    {
+        const auto &vars = gq.get_vars();
+        const auto &d1 = gq.get_d1_vars();
+        const auto &d2 = gq.get_d2_vars();
+        const auto &advec = gq.get_advection();
+        const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
+        const auto &Kij = gq.get_extrinsic_curvature();
+
+        Tensor<2, data_t> dt_Eij = gq.compute_dt_weyl_electric_part(
+            d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
+        Tensor<2, data_t> dt_Bij = gq.compute_dt_weyl_magnetic_part(
+            d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
+
+        FOR(i, j)
+        {
+            FOR(k)
+            {
+                FOR(l) // 2nd spatial ders
+                {
+                    d2_Eij[i][j][k + 1][l + 1] = d2.Eij[i][j][k][l];
+                    d2_Bij[i][j][k + 1][l + 1] = d2.Bij[i][j][k][l];
+                }
+
+                // mixed ders
+
+                d2_Eij[i][j][0][k + 1] =
+                    -1. / m_params.tau * (d1.Eij[i][j][k] - d1.Eaux[i][j][k]);
+                d2_Eij[i][j][k + 1][0] = d2_Eij[i][j][0][k + 1];
+
+                d2_Bij[i][j][0][k + 1] =
+                    -1. / m_params.tau * (d1.Bij[i][j][k] - d1.Baux[i][j][k]);
+                d2_Bij[i][j][k + 1][0] = d2_Bij[i][j][0][k + 1];
+            }
+
+            // 2nd time ders
+
+            d2_Eij[i][j][0][0] =
+                -1. / m_params.tau * (rhs.Eij[i][j] - dt_Eij[i][j]);
+            d2_Bij[i][j][0][0] =
+                -1. / m_params.tau * (rhs.Bij[i][j] - dt_Bij[i][j]);
+        }
+    }
+    else if (m_params.version == 2)
+    {
+        const auto &d1 = gq.get_d1_vars();
+        const auto &d2 = gq.get_d2_vars();
+
+        FOR(i, j)
+        {
+            FOR(k)
+            {
+                FOR(l) // 2nd spatial ders
+                {
+                    d2_Eij[i][j][k + 1][l + 1] = d2.Eij[i][j][k][l];
+                    d2_Bij[i][j][k + 1][l + 1] = d2.Bij[i][j][k][l];
+                }
+
+                // mixed ders
+
+                d2_Eij[i][j][0][k + 1] = d1.Eaux[i][j][k];
+                d2_Eij[i][j][k + 1][0] = d2_Eij[i][j][0][k + 1];
+
+                d2_Bij[i][j][0][k + 1] = d1.Baux[i][j][k];
+                d2_Bij[i][j][k + 1][0] = d2_Bij[i][j][0][k + 1];
+            }
+
+            // 2nd time ders
+
+            d2_Eij[i][j][0][0] = rhs.Eaux[i][j];
+            d2_Bij[i][j][0][0] = rhs.Baux[i][j];
+        }
+    }
+    else
+    {
+        MayDay::Error("Version not implemented");
     }
 }
 

@@ -80,9 +80,9 @@ void CSystem::add_matter_rhs(
         if (m_params.add_advection)
         {
             const auto &advec = gq.get_advection();
-            FOR(i) { dCdt -= vars.shift[i] * advec.C[i]; }
+            dCdt -= advec.C;
         }
-        total_rhs.dCdt = (-tau * vars.dCdt + kretschmann - vars.C) / sigma;
+        total_rhs.dCdt = (-tau * dCdt + kretschmann - vars.C) / sigma;
     }
     else
     {

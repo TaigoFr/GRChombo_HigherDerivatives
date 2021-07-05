@@ -18,9 +18,10 @@ class EBSystem
     struct params_t
     {
         double tau; // for the evolution equation of Eij and Bij
-        double version;
-        bool rescale_tau_sigma_by_lapse; // for when using only time derivatives
-        double add_advection;
+        bool rescale_tau_sigma_by_lapse;
+        int version;
+        bool add_advection; // only for v2
+        double sigma;       // only for v2
     };
 
     //!  Constructor of class EBSystem, inputs are the matter parameters.
@@ -110,6 +111,15 @@ class EBSystem
 
   private:
     params_t m_params;
+
+    template <class data_t, template <typename> class vars_t,
+              template <typename> class diff2_vars_t, class gauge_t,
+              template <typename> class rhs_vars_t>
+    void compute_d2_Eij_and_Bij(
+        Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Eij,
+        Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Bij,
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+        rhs_vars_t<data_t> &rhs) const;
 };
 
 #include "EBSystem.impl.hpp"

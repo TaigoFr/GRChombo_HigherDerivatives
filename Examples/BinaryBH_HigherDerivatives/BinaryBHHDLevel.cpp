@@ -133,7 +133,7 @@ void BinaryBHHDLevel::computeDiagnostics()
         Interval(c_Mom, c_Mom));
 
 #ifdef USE_EBSYSTEM
-    EBdiffDiagnostic diff(m_d, m_p.formulation, m_p.ccz4_params);
+    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params);
 #elif USE_CSYSTEM
     CDiagnostics diff(m_dx, m_p.formulation, m_p.ccz4_params, c_Cphys,
                       c_C_diff);
