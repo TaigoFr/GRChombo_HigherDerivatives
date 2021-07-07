@@ -86,7 +86,8 @@ isPeriodic = 0 0 0
 # if not periodic, then specify the boundary type
 # 0 = static, 1 = sommerfeld, 2 = reflective
 # (see BoundaryConditions.hpp for details)
-hi_boundary = 4 4 4
+hi_boundary = 1 1 1 # for v1
+# hi_boundary = 4 4 4 # for v2
 lo_boundary = 2 2 2
 
 # if reflective boundaries selected, must set
@@ -101,8 +102,8 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 1 2 3 1 2 3    #lapse shift and B
                          0 4 6 0 5 0      #Eij
                          0 4 6 0 5 0      #Bij
-                         0 4 6 0 5 0      #Ephys
-                         0 4 6 0 5 0      #Bphys
+                         0 4 6 0 5 0      #Eaux
+                         0 4 6 0 5 0      #Baux
 vars_parity_diagnostic = 0 0              #Ham and Mom
                          0 0              #Eij and Bij diffs
                          0 0 0            #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC
@@ -116,11 +117,12 @@ num_nonzero_asymptotic_vars = 5
 nonzero_asymptotic_vars = chi h11 h22 h33 lapse
 nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0
 
+# turn on if version = 1 !!!!!!!!!!!!!!!!!!!!!!!
 # if you are using extrapolating BC:
-extrapolation_order = 1
-num_extrapolating_vars = 12
-extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33
-                     Bphys11 Bphys12 Bphys13 Bphys22 Bphys23 Bphys33
+# extrapolation_order = 1
+# num_extrapolating_vars = 12
+# extrapolating_vars = Eaux11 Eaux12 Eaux13 Eaux22 Eaux23 Eaux33
+#                      Baux11 Baux12 Baux13 Baux22 Baux23 Baux33
 
 #################################################
 # Evolution parameters
@@ -166,7 +168,7 @@ sigma = 1.0
 # epsilon = 0.0001             # energy scale
 tau       = 0.1                # damping time scale for evolved Eij/Bij
 rescale_tau_sigma_by_lapse = 0 # rescale tau and sigma by lapse
-eb_version                 = 1 # v1 or v2
+eb_version                 = 2 # v1 or v2 (change BC to extrapolating if using v1)
 add_advection              = 0 # only in v2
 eb_sigma  = 1.0                # only in v2
 
@@ -188,7 +190,7 @@ diffusion_chi_width = 0.05 # O(10^-2) at horizon, a bit big
 # Extraction parameters
 
 # extraction_center = 256 256 256 # defaults to center
-activate_extraction = 1
+activate_extraction = 0
 num_extraction_radii = 3
 extraction_radii = 30. 40. 50.
 extraction_levels = 2 1 0

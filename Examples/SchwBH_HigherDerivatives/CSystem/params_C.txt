@@ -184,7 +184,7 @@ diffusion_chi_width = 0.05 # O(10^-2) at horizon, a bit big
 # Extraction parameters
 
 # extraction_center = 256 256 256 # defaults to center
-activate_extraction = 1
+activate_extraction = 0
 num_extraction_radii = 3
 extraction_radii = 30. 40. 50.
 extraction_levels = 2 1 0
@@ -206,7 +206,7 @@ extraction_extrapolation_radii = 0 1 2
 #################################################
 # Apparent Horizon Finder parameters
 
-AH_activate = 1 
+AH_activate = 1
 AH_num_ranks = 20
 AH_num_points_u = 49
 AH_num_points_v = 48

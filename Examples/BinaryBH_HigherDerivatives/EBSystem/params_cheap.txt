@@ -92,8 +92,10 @@ isPeriodic = 0 0 0
 # if not periodic, then specify the boundary type
 # 0 = static, 1 = sommerfeld, 2 = reflective
 # (see BoundaryConditions.hpp for details)
-hi_boundary = 4 4 4
-lo_boundary = 4 4 2
+# hi_boundary = 4 4 4 # for v1
+# lo_boundary = 4 4 2 # for v1
+hi_boundary = 1 1 1 # for v2
+lo_boundary = 1 1 2 # for v2
 
 # if reflective boundaries selected, must set
 # parity of all vars (in order given by UserVariables.hpp)
@@ -107,8 +109,8 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 1 2 3 1 2 3    #lapse shift and B
                          0 4 6 0 5 0      #Eij
                          0 4 6 0 5 0      #Bij
-                         0 4 6 0 5 0      #Ephys
-                         0 4 6 0 5 0      #Bphys
+                         0 4 6 0 5 0      #Eaux
+                         0 4 6 0 5 0      #Baux
 vars_parity_diagnostic = 0 0              #Ham and Mom
                          0 0              #Eij and Bij diffs
                          0 0 0            #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC
@@ -122,10 +124,10 @@ nonzero_asymptotic_vars = chi h11 h22 h33 lapse
 nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0
 
 # if you are using extrapolating BC:
-extrapolation_order = 1
-num_extrapolating_vars = 12
-extrapolating_vars = Ephys11 Ephys12 Ephys13 Ephys22 Ephys23 Ephys33 
-                     Bphys11 Bphys12 Bphys13 Bphys22 Bphys23 Bphys33
+# extrapolation_order = 1
+# num_extrapolating_vars = 12
+# extrapolating_vars = Eaux11 Eaux12 Eaux13 Eaux22 Eaux23 Eaux33 
+#                      Baux11 Baux12 Baux13 Baux22 Baux23 Baux33
 
 #################################################
 # Evolution parameters
@@ -171,8 +173,12 @@ calculate_constraint_norms = 1
 #################################################
 # Higher Derivatives Evolution parameters
 
-epsilon = 0.0001 # energy scale
-tau     = 0.1    # damping time scale for evolved Eij/Bij
+epsilon   = 0.0001             # energy scale
+tau       = 0.1                # damping time scale for evolved Eij/Bij
+rescale_tau_sigma_by_lapse = 0 # rescale tau and sigma by lapse
+eb_version                 = 2 # v1 or v2 (change BC to extrapolating if using v1)
+add_advection              = 0 # only in v2
+eb_sigma  = 1.0                # only in v2
 
 # chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10
@@ -244,7 +250,7 @@ AH_write_vars = chi WeakFieldVar WeakFieldCondition
 
 AH_set_origins_to_punctures = 1
 
-# AH_coords_subpath = "data/coords"
+AH_coords_subpath = "data/coords"
 # AH_stats_prefix = "stats_AH"
 # AH_coords_prefix = "coords_AH"
 
