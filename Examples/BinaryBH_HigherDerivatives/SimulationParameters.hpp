@@ -114,16 +114,17 @@ class SimulationParameters : public SimulationParametersBase
                 system_params.use_only_time_derivatives);
         if (system_params.use_only_time_derivatives)
         {
-            pp.load("rescale_tau_sigma_by_lapse",
-                    system_params.rescale_tau_sigma_by_lapse);
+            pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
+            pp.load("rescale_sigma_by_lapse",
+                    system_params.rescale_sigma_by_lapse);
             pp.load("add_advection", system_params.add_advection);
         }
 #else
         pp.load("eb_version", system_params.version);
         pout() << "Using EB system version " << system_params.version
                << std::endl;
-        pp.load("rescale_tau_sigma_by_lapse",
-                system_params.rescale_tau_sigma_by_lapse);
+        pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
+        pp.load("rescale_sigma_by_lapse", system_params.rescale_sigma_by_lapse);
         if (system_params.version == 2)
         {
             pp.load("add_advection", system_params.add_advection);

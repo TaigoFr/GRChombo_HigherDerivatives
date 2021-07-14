@@ -18,7 +18,8 @@ class EBSystem
     struct params_t
     {
         double tau; // for the evolution equation of Eij and Bij
-        bool rescale_tau_sigma_by_lapse;
+        bool rescale_tau_by_lapse;
+        bool rescale_sigma_by_lapse;
         int version;
         bool add_advection; // only for v2
         double sigma;       // only for v2

@@ -20,8 +20,9 @@ class CSystem
         double tau;   // for the evolution equation of C
         double sigma; // for the wave operator in the evolution of C
         bool use_only_time_derivatives; // make the physical C a static solution
-        bool rescale_tau_sigma_by_lapse; // for when using only time derivatives
-        bool add_advection;              // for when using only time derivatives
+        bool rescale_tau_by_lapse;      // for when using only time derivatives
+        bool rescale_sigma_by_lapse;    // for when using only time derivatives
+        bool add_advection;             // for when using only time derivatives
     };
 
     //!  Constructor of class CSystem, inputs are the matter parameters.

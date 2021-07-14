@@ -253,11 +253,10 @@ void EBSystem::add_matter_rhs(
 
     data_t tau = m_params.tau;
     data_t sigma = m_params.sigma;
-    if (m_params.rescale_tau_sigma_by_lapse)
-    {
+    if (m_params.rescale_tau_by_lapse)
         tau /= vars.lapse;
+    if (m_params.rescale_sigma_by_lapse)
         sigma /= (vars.lapse * vars.lapse);
-    }
 
     if (m_params.version == 1)
     {

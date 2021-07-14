@@ -110,7 +110,9 @@ int runTest(int argc, char *argv[])
     c_params.tau = 0.1;
     c_params.sigma = 1.;
     c_params.use_only_time_derivatives = false;
-    // c_params.rescale_tau_sigma_by_lapse = true;
+    // c_params.rescale_tau_by_lapse = false;
+    // c_params.rescale_sigma_by_lapse = false;
+    // c_params.add_advection = false;
 
     int failed = 0;
 
