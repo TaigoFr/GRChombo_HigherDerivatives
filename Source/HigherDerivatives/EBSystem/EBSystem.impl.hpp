@@ -325,6 +325,10 @@ void EBSystem::compute_d2_Eij_and_Bij(
         Tensor<2, data_t> dt_Bij = gq.compute_dt_weyl_magnetic_part(
             d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
 
+        data_t tau = m_params.tau;
+        if (m_params.rescale_tau_by_lapse)
+            tau /= vars.lapse;
+
         FOR(i, j)
         {
             FOR(k)
@@ -338,20 +342,18 @@ void EBSystem::compute_d2_Eij_and_Bij(
                 // mixed ders
 
                 d2_Eij[i][j][0][k + 1] =
-                    -1. / m_params.tau * (d1.Eij[i][j][k] - d1.Eaux[i][j][k]);
+                    -1. / tau * (d1.Eij[i][j][k] - d1.Eaux[i][j][k]);
                 d2_Eij[i][j][k + 1][0] = d2_Eij[i][j][0][k + 1];
 
                 d2_Bij[i][j][0][k + 1] =
-                    -1. / m_params.tau * (d1.Bij[i][j][k] - d1.Baux[i][j][k]);
+                    -1. / tau * (d1.Bij[i][j][k] - d1.Baux[i][j][k]);
                 d2_Bij[i][j][k + 1][0] = d2_Bij[i][j][0][k + 1];
             }
 
             // 2nd time ders
 
-            d2_Eij[i][j][0][0] =
-                -1. / m_params.tau * (rhs.Eij[i][j] - dt_Eij[i][j]);
-            d2_Bij[i][j][0][0] =
-                -1. / m_params.tau * (rhs.Bij[i][j] - dt_Bij[i][j]);
+            d2_Eij[i][j][0][0] = -1. / tau * (rhs.Eij[i][j] - dt_Eij[i][j]);
+            d2_Bij[i][j][0][0] = -1. / tau * (rhs.Bij[i][j] - dt_Bij[i][j]);
         }
     }
     else if (m_params.version == 2)
