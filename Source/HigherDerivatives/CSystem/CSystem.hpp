@@ -21,7 +21,9 @@ class CSystem
         double sigma; // for the wave operator in the evolution of C
         bool use_only_time_derivatives; // make the physical C a static solution
         bool rescale_tau_by_lapse;      // for when using only time derivatives
-        bool rescale_sigma_by_lapse;    // for when using only time derivatives
+        int rescale_sigma_by_lapse;     // for when using only time derivatives
+                                        // (0, 1 or 2 for lapse or lapse^2
+                                        // rescaling)
         bool add_advection;             // for when using only time derivatives
     };
 

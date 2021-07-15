@@ -19,7 +19,8 @@ class EBSystem
     {
         double tau; // for the evolution equation of Eij and Bij
         bool rescale_tau_by_lapse;
-        bool rescale_sigma_by_lapse;
+        int rescale_sigma_by_lapse; // (0, 1 or 2 for lapse or lapse^2
+                                    // rescaling)
         int version;
         bool add_advection; // only for v2
         double sigma;       // only for v2

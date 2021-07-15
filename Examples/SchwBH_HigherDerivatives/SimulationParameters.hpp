@@ -99,6 +99,8 @@ class SimulationParameters : public SimulationParametersBase
             pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
             pp.load("rescale_sigma_by_lapse",
                     system_params.rescale_sigma_by_lapse);
+            CH_assert(system_params.rescale_sigma_by_lapse >= 0 &&
+                      system_params.rescale_sigma_by_lapse <= 2);
             pp.load("add_advection", system_params.add_advection);
         }
 #else
@@ -107,6 +109,8 @@ class SimulationParameters : public SimulationParametersBase
                << std::endl;
         pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
         pp.load("rescale_sigma_by_lapse", system_params.rescale_sigma_by_lapse);
+        CH_assert(system_params.rescale_sigma_by_lapse >= 0 &&
+                  system_params.rescale_sigma_by_lapse <= 2);
         if (system_params.version == 2)
         {
             pp.load("add_advection", system_params.add_advection);

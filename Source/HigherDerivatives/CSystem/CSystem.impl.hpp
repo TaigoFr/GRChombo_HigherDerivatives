@@ -72,10 +72,14 @@ void CSystem::add_matter_rhs(
         data_t tau = m_params.tau;
         data_t sigma = m_params.sigma;
         data_t dCdt = vars.dCdt;
+
         if (m_params.rescale_tau_by_lapse)
             tau /= vars.lapse;
-        if (m_params.rescale_sigma_by_lapse)
+        if (m_params.rescale_sigma_by_lapse == 2)
             sigma /= (vars.lapse * vars.lapse);
+        else if (m_params.rescale_sigma_by_lapse == 1)
+            sigma /= vars.lapse;
+
         if (m_params.add_advection)
         {
             const auto &advec = gq.get_advection();

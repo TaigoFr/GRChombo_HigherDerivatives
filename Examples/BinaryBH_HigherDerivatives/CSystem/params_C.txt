@@ -187,7 +187,7 @@ tau       = 0.05              # damping time scale for evolved C
 c_sigma   = 1.0               # wave evolution scale for evolved C
 use_only_time_derivatives = 1 # replace laplacian by time derivatives
 rescale_tau_by_lapse      = 0 # rescale tau by lapse, only if 'use_only_time_derivatives = 1'
-rescale_sigma_by_lapse    = 0 # rescale sigma by lapse^2, only if 'use_only_time_derivatives = 1'
+rescale_sigma_by_lapse    = 0 # rescale sigma by lapse (1) or lapse^2 (2), only if 'use_only_time_derivatives = 1'
 add_advection             = 0 # only if 'use_only_time_derivatives = 1'
 
 # chi_width     = 0.05 # automatic now
