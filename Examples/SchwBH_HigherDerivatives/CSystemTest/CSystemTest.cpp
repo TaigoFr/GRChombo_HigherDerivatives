@@ -109,10 +109,10 @@ int runTest(int argc, char *argv[])
     CSystem::params_t c_params;
     c_params.tau = 0.1;
     c_params.sigma = 1.;
-    c_params.use_only_time_derivatives = false;
-    // c_params.rescale_tau_by_lapse = false;
-    // c_params.rescale_sigma_by_lapse = false;
-    // c_params.add_advection = false;
+    c_params.version = 1;
+    // c_params.rescale_tau_by_lapse = false; // only for v2
+    // c_params.rescale_sigma_by_lapse = false; // only for v2
+    // c_params.add_advection = 0; // only for v2
 
     int failed = 0;
 

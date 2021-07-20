@@ -193,7 +193,7 @@ tau       = 0.1            # damping time scale for evolved Eij/Bij
 rescale_tau_by_lapse   = 0 # rescale tau by lapse
 rescale_sigma_by_lapse = 0 # rescale sigma by lapse (1) or lapse^2 (2)
 eb_version             = 2 # v1 or v2 (change BC to extrapolating if using v1)
-add_advection          = 0 # only in v2
+add_advection          = 0 # only in v2 (0, 1 for simple, 2 for Luis' proposal)
 eb_sigma  = 1.0            # only in v2
 
 # chi_width     = 0.05 # automatic now

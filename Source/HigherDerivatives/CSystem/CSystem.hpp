@@ -19,12 +19,18 @@ class CSystem
     {
         double tau;   // for the evolution equation of C
         double sigma; // for the wave operator in the evolution of C
-        bool use_only_time_derivatives; // make the physical C a static solution
-        bool rescale_tau_by_lapse;      // for when using only time derivatives
-        int rescale_sigma_by_lapse;     // for when using only time derivatives
-                                        // (0, 1 or 2 for lapse or lapse^2
-                                        // rescaling)
-        bool add_advection;             // for when using only time derivatives
+
+        int version; // v1 has the laplacian, v2 has only time derivatives (to
+                     // make C a static solution)
+
+        bool rescale_tau_by_lapse;  // only for v2
+        int rescale_sigma_by_lapse; // only for v2
+                                    // (0, 1 or 2 for lapse or lapse^2
+                                    // rescaling)
+
+        int add_advection; // only for v2
+                           // (0, 1 or 2 for simple advection or Luis' advection
+                           // proposal)
     };
 
     //!  Constructor of class CSystem, inputs are the matter parameters.

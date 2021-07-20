@@ -61,37 +61,17 @@ void CSystem::add_matter_rhs(
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     const auto &vars = gq.get_vars();
+    const auto &advec = gq.get_advection();
     const auto &kretschmann = gq.get_kretschmann();
 
     CH_assert(m_params.sigma != 0.);
 
     total_rhs.C = vars.dCdt;
 
-    if (m_params.use_only_time_derivatives)
-    {
-        data_t tau = m_params.tau;
-        data_t sigma = m_params.sigma;
-        data_t dCdt = vars.dCdt;
-
-        if (m_params.rescale_tau_by_lapse)
-            tau /= vars.lapse;
-        if (m_params.rescale_sigma_by_lapse == 2)
-            sigma /= (vars.lapse * vars.lapse);
-        else if (m_params.rescale_sigma_by_lapse == 1)
-            sigma /= vars.lapse;
-
-        if (m_params.add_advection)
-        {
-            const auto &advec = gq.get_advection();
-            dCdt -= advec.C;
-        }
-        total_rhs.dCdt = (-tau * dCdt + kretschmann - vars.C) / sigma;
-    }
-    else
+    if (m_params.version == 1)
     {
         const auto &d1 = gq.get_d1_vars();
         const auto &d2 = gq.get_d2_vars();
-        const auto &advec = gq.get_advection();
         const auto &g_UU = gq.get_metric_UU_ST();
         const auto &Gamma_ST = gq.get_Gamma_ST();
 
@@ -111,6 +91,41 @@ void CSystem::add_matter_rhs(
             }
         }
         total_rhs.dCdt /= (-m_params.sigma * g_UU[0][0]);
+    }
+    else if (m_params.version == 2)
+    {
+        data_t tau = m_params.tau;
+        data_t sigma = m_params.sigma;
+        data_t dCdt = vars.dCdt;
+
+        if (m_params.rescale_tau_by_lapse)
+            tau /= vars.lapse;
+        if (m_params.rescale_sigma_by_lapse == 2)
+            sigma /= (vars.lapse * vars.lapse);
+        else if (m_params.rescale_sigma_by_lapse == 1)
+            sigma /= vars.lapse;
+
+        if (m_params.add_advection == 1 || m_params.add_advection == 2)
+        {
+            dCdt -= advec.C;
+        }
+        total_rhs.dCdt = (-tau * dCdt + kretschmann - vars.C) / sigma;
+
+        if (m_params.add_advection == 2)
+        {
+            const auto &d2 = gq.get_d2_vars();
+
+            total_rhs.dCdt += 2. * advec.dCdt;
+
+            FOR(i, j)
+            {
+                total_rhs.dCdt += -vars.shift[i] * vars.shift[j] * d2.C[i][j];
+            }
+        }
+    }
+    else
+    {
+        MayDay::Error("Version not implemented");
     }
 }
 

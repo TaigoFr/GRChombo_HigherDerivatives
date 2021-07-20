@@ -111,7 +111,7 @@ int runTest(int argc, char *argv[])
     eb_params.rescale_tau_by_lapse = false;
     eb_params.rescale_sigma_by_lapse = false;
     eb_params.version = 1;
-    // eb_params.add_advection = false; // only for v2
+    // eb_params.add_advection = 0; // only for v2
     // eb_params.sigma = 1.; // only for v2
 
     int failed = 0;

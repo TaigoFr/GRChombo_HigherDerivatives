@@ -274,6 +274,7 @@ void EBSystem::add_matter_rhs(
     }
     else if (m_params.version == 2)
     {
+        const auto &d2 = gq.get_d2_vars();
         const auto &advec = gq.get_advection();
         const auto &Eij = gq.get_weyl_electric_part();
         const auto &Bij = gq.get_weyl_magnetic_part();
@@ -283,7 +284,7 @@ void EBSystem::add_matter_rhs(
             data_t Eaux_with_advec = vars.Eaux[i][j];
             data_t Baux_with_advec = vars.Baux[i][j];
 
-            if (m_params.add_advection)
+            if (m_params.add_advection == 1 || m_params.add_advection == 2)
             {
                 Eaux_with_advec -= advec.Eij[i][j];
                 Baux_with_advec -= advec.Bij[i][j];
@@ -295,6 +296,20 @@ void EBSystem::add_matter_rhs(
                 (-tau * Eaux_with_advec + Eij[i][j] - vars.Eij[i][j]) / sigma;
             total_rhs.Baux[i][j] =
                 (-tau * Baux_with_advec + Bij[i][j] - vars.Bij[i][j]) / sigma;
+
+            if (m_params.add_advection == 2)
+            {
+                total_rhs.Eaux[i][j] += 2. * advec.Eaux[i][j];
+                total_rhs.Baux[i][j] += 2. * advec.Baux[i][j];
+
+                FOR(k, l)
+                {
+                    total_rhs.Eaux[i][j] +=
+                        -vars.shift[k] * vars.shift[l] * d2.Eij[i][j][k][l];
+                    total_rhs.Baux[i][j] +=
+                        -vars.shift[k] * vars.shift[l] * d2.Bij[i][j][k][l];
+                }
+            }
         }
     }
     else

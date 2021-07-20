@@ -110,9 +110,12 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("c_sigma", system_params.sigma);
         pout() << "Using sigma = " << system_params.sigma << std::endl;
 
-        pp.load("use_only_time_derivatives",
-                system_params.use_only_time_derivatives);
-        if (system_params.use_only_time_derivatives)
+        pp.load("c_version", system_params.version);
+        pout() << "Using C system version " << system_params.version
+               << std::endl;
+        CH_assert(system_params.version >= 1 && system_params.version <= 2);
+
+        if (system_params.version == 2)
         {
             pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
             pp.load("rescale_sigma_by_lapse",
@@ -120,19 +123,35 @@ class SimulationParameters : public SimulationParametersBase
             CH_assert(system_params.rescale_sigma_by_lapse >= 0 &&
                       system_params.rescale_sigma_by_lapse <= 2);
             pp.load("add_advection", system_params.add_advection);
+
+            pout() << "Using rescale_tau_by_lapse = "
+                   << system_params.rescale_tau_by_lapse << std::endl;
+            pout() << "Using rescale_sigma_by_lapse = "
+                   << system_params.rescale_sigma_by_lapse << std::endl;
+            pout() << "Using add_advection = " << system_params.add_advection
+                   << std::endl;
         }
 #else
         pp.load("eb_version", system_params.version);
         pout() << "Using EB system version " << system_params.version
                << std::endl;
+        CH_assert(system_params.version >= 1 && system_params.version <= 2);
+
         pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
         pp.load("rescale_sigma_by_lapse", system_params.rescale_sigma_by_lapse);
         CH_assert(system_params.rescale_sigma_by_lapse >= 0 &&
                   system_params.rescale_sigma_by_lapse <= 2);
+        pout() << "Using rescale_tau_by_lapse = "
+               << system_params.rescale_tau_by_lapse << std::endl;
+        pout() << "Using rescale_sigma_by_lapse = "
+               << system_params.rescale_sigma_by_lapse << std::endl;
+
         if (system_params.version == 2)
         {
             pp.load("add_advection", system_params.add_advection);
             pp.load("eb_sigma", system_params.sigma);
+            pout() << "Using add_advection = " << system_params.add_advection
+                   << std::endl;
             pout() << "Using sigma = " << system_params.sigma << std::endl;
         }
 #endif
