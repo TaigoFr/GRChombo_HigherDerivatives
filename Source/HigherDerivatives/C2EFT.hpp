@@ -65,7 +65,8 @@ template <class System> class C2EFT
               template <typename> class diff2_vars_t, class gauge_t>
     static data_t weak_field_condition(
         const data_t &weak_field_var,
-        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq, const C2EFT<System>::params_t &pm);
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+        const C2EFT<System>::params_t &pm);
 
     template <class data_t, template <typename> class rhs_vars_t,
               template <typename> class vars_t,
@@ -75,11 +76,11 @@ template <class System> class C2EFT
                                  //! output right hand side is written
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
         data_t diffCoeffSafe) const;
-        
-    params_t m_params;    
+
+    params_t m_params;
 
   private:
-    System& m_system;
+    System &m_system;
     bool m_apply_weak_field;
 
     // output is <10^{-k} for x>t(1+k+w) and >1-10^{-k} for x<t(1-k*w)

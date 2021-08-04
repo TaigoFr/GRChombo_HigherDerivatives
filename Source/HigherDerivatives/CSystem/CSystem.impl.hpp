@@ -17,7 +17,8 @@ template <class data_t, template <typename> class vars_t,
 void CSystem::compute_C(
     data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
     Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq, const C2EFT<CSystem>::params_t &pm) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    const C2EFT<CSystem>::params_t &pm) const
 {
     const auto &vars = gq.get_vars();
     const auto &d1 = gq.get_d1_vars();
@@ -58,7 +59,8 @@ template <class data_t, template <typename> class vars_t,
           template <typename> class rhs_vars_t>
 void CSystem::add_matter_rhs(
     rhs_vars_t<data_t> &total_rhs,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq, const C2EFT<CSystem>::params_t &pm) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    const C2EFT<CSystem>::params_t &pm) const
 {
     const auto &vars = gq.get_vars();
     const auto &advec = gq.get_advection();
@@ -71,23 +73,25 @@ void CSystem::add_matter_rhs(
     if (m_params.version == 1)
     {
         data_t factor = 1.0;
-    	if (m_params.Box_transition)
-    	{
-    		factor = 0.0;
-    		if (simd_compare_lt_any(vars.chi, pm.chi_ignore_threshold))
-    		{    
-    			data_t weak_field_var = 10.0;
-    			factor= C2EFT<CSystem>::weak_field_condition(weak_field_var ,gq, pm);
-    		}
-    	}  
+        if (m_params.Box_transition)
+        {
+            factor = 0.0;
+            if (simd_compare_lt_any(vars.chi, pm.chi_ignore_threshold))
+            {
+                data_t weak_field_var = 10.0;
+                factor = C2EFT<CSystem>::weak_field_condition(weak_field_var,
+                                                              gq, pm);
+            }
+        }
         const auto &d1 = gq.get_d1_vars();
         const auto &d2 = gq.get_d2_vars();
         const auto &g_UU = gq.get_metric_UU_ST();
         const auto &Gamma_ST = gq.get_Gamma_ST();
 
-        total_rhs.dCdt = -m_params.tau / vars.lapse * (vars.dCdt - factor * advec.C) +
-                         kretschmann - vars.C -
-                         factor * m_params.sigma * Gamma_ST[0] * vars.dCdt;
+        total_rhs.dCdt =
+            -m_params.tau / vars.lapse * (vars.dCdt - factor * advec.C) +
+            kretschmann - vars.C -
+            factor * m_params.sigma * Gamma_ST[0] * vars.dCdt;
 
         FOR(i)
         {

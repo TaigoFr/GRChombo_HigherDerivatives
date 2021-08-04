@@ -6,10 +6,10 @@
 #ifndef CSYSTEM_HPP_
 #define CSYSTEM_HPP_
 
+#include "C2EFT.hpp" //added for Box_transition
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS, total num of components
 #include "VarsTools.hpp"
-#include "C2EFT.hpp" //added for Box_transition
 
 #include "GeometricQuantities.hpp"
 
@@ -33,7 +33,7 @@ class CSystem
                            // (0, 1 or 2 for simple advection or Luis' advection
                            // proposal)
         bool Box_transition; // for when transitioning from Box_driver
-        		      //to only time derivatives                             
+                             // to only time derivatives
     };
 
     //!  Constructor of class CSystem, inputs are the matter parameters.
@@ -72,10 +72,11 @@ class CSystem
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t, class gauge_t>
-    void compute_C(
-        data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
-        Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
-        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq, const C2EFT<CSystem>::params_t &pm) const;
+    void
+    compute_C(data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
+              Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
+              GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+              const C2EFT<CSystem>::params_t &pm) const;
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t, class gauge_t>
@@ -91,7 +92,8 @@ class CSystem
               template <typename> class rhs_vars_t>
     void add_matter_rhs(
         rhs_vars_t<data_t> &total_rhs, //!< value of the RHS for all vars
-        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq, const C2EFT<CSystem>::params_t &pm) const;
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+        const C2EFT<CSystem>::params_t &pm) const;
 
     template <class data_t, template <typename> class rhs_vars_t,
               template <typename> class vars_t,

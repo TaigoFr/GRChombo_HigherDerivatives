@@ -53,7 +53,8 @@ emtensor_t<data_t> C2EFT<System>::compute_emtensor(
         simd_compare_lt_any(vars.chi, m_params.chi_ignore_threshold))
     {
         data_t weak_field = weak_field_var(emtensor, gq);
-        data_t weak_field_damp = 1. - weak_field_condition(weak_field, gq, m_params);
+        data_t weak_field_damp =
+            1. - weak_field_condition(weak_field, gq, m_params);
         emtensor.rho *= weak_field_damp;
 
         FOR(i)
@@ -147,16 +148,16 @@ template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t, class gauge_t>
 data_t C2EFT<System>::weak_field_condition(
     const data_t &weak_field_var,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq, const C2EFT<System>::params_t &pm)
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    const C2EFT<System>::params_t &pm)
 {
     const auto &vars = gq.get_vars();
 
-    data_t condition_chi =
-        sigmoid(vars.chi, pm.chi_width, pm.chi_threshold);
+    data_t condition_chi = sigmoid(vars.chi, pm.chi_width, pm.chi_threshold);
 
     data_t weak_field_condition =
-        condition_chi * sigmoid(weak_field_var, -pm.weak_field_width,
-                                pm.weak_field_threshold);
+        condition_chi *
+        sigmoid(weak_field_var, -pm.weak_field_width, pm.weak_field_threshold);
 
     return weak_field_condition;
 }
