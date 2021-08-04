@@ -140,7 +140,7 @@ class SimulationParameters : public SimulationParametersBase
             pp.load("eb_sigma", system_params.sigma);
             pout() << "Using add_advection = " << system_params.add_advection
                    << std::endl;
-            pout() << "Using sigma = " << system_params.sigma << std::endl;            
+            pout() << "Using sigma = " << system_params.sigma << std::endl;
         }
 #endif
 
