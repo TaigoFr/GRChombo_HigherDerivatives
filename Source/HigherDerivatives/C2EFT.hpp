@@ -27,7 +27,7 @@ template <class System> class C2EFT
     using Diff2Vars = typename System::template Diff2Vars<data_t>;
 
     //!  Constructor of class C2EFT, inputs are the matter parameters.
-    C2EFT(System a_system, params_t a_params, bool apply_weak_field)
+    C2EFT(System &a_system, params_t a_params, bool apply_weak_field)
         : m_system(a_system), m_params(a_params),
           m_apply_weak_field(apply_weak_field)
     {
@@ -63,9 +63,9 @@ template <class System> class C2EFT
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t, class gauge_t>
-    data_t weak_field_condition(
-        const data_t &emtensor,
-        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
+    static data_t weak_field_condition(
+        const data_t &weak_field_var,
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq, const C2EFT<System>::params_t &pm);
 
     template <class data_t, template <typename> class rhs_vars_t,
               template <typename> class vars_t,
@@ -75,10 +75,11 @@ template <class System> class C2EFT
                                  //! output right hand side is written
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
         data_t diffCoeffSafe) const;
+        
+    params_t m_params;    
 
   private:
-    System m_system;
-    params_t m_params;
+    System& m_system;
     bool m_apply_weak_field;
 
     // output is <10^{-k} for x>t(1+k+w) and >1-10^{-k} for x<t(1-k*w)

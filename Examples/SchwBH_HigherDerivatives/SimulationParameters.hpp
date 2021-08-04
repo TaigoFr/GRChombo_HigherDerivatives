@@ -112,6 +112,9 @@ class SimulationParameters : public SimulationParametersBase
                    << system_params.rescale_sigma_by_lapse << std::endl;
             pout() << "Using add_advection = " << system_params.add_advection
                    << std::endl;
+            pp.load("Box_transition",system_params.Box_transition);
+            pout() << "Using Box_transition = " << system_params.Box_transition
+                   << std::endl;                               
         }
 #else
         pp.load("eb_version", system_params.version);
@@ -127,6 +130,9 @@ class SimulationParameters : public SimulationParametersBase
                << system_params.rescale_tau_by_lapse << std::endl;
         pout() << "Using rescale_sigma_by_lapse = "
                << system_params.rescale_sigma_by_lapse << std::endl;
+        pp.load("Box_transition",system_params.Box_transition);            
+        pout() << "Using Box_transition = " << system_params.Box_transition
+               << std::endl;                
 
         if (system_params.version == 2)
         {
@@ -134,7 +140,7 @@ class SimulationParameters : public SimulationParametersBase
             pp.load("eb_sigma", system_params.sigma);
             pout() << "Using add_advection = " << system_params.add_advection
                    << std::endl;
-            pout() << "Using sigma = " << system_params.sigma << std::endl;
+            pout() << "Using sigma = " << system_params.sigma << std::endl;            
         }
 #endif
 
