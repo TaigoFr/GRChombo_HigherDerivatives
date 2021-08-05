@@ -104,14 +104,22 @@ class SimulationParameters : public SimulationParametersBase
                     system_params.rescale_sigma_by_lapse);
             CH_assert(system_params.rescale_sigma_by_lapse >= 0 &&
                       system_params.rescale_sigma_by_lapse <= 2);
-            pp.load("add_advection", system_params.add_advection);
+            pp.load("advection_type", system_params.advection_type);
 
             pout() << "Using rescale_tau_by_lapse = "
                    << system_params.rescale_tau_by_lapse << std::endl;
             pout() << "Using rescale_sigma_by_lapse = "
                    << system_params.rescale_sigma_by_lapse << std::endl;
-            pout() << "Using add_advection = " << system_params.add_advection
+            pout() << "Using advection_type = " << system_params.advection_type
                    << std::endl;
+
+            if (system_params.advection_type == 1 ||
+                system_params.advection_type == 2)
+            {
+                pp.load("advection_coeff", system_params.advection_coeff);
+                pout() << "Using advection_coeff = "
+                       << system_params.advection_coeff << std::endl;
+            }
         }
 #else
         pp.load("eb_version", system_params.version);
@@ -130,11 +138,19 @@ class SimulationParameters : public SimulationParametersBase
 
         if (system_params.version == 2)
         {
-            pp.load("add_advection", system_params.add_advection);
+            pp.load("advection_type", system_params.advection_type);
             pp.load("eb_sigma", system_params.sigma);
-            pout() << "Using add_advection = " << system_params.add_advection
+            pout() << "Using advection_type = " << system_params.advection_type
                    << std::endl;
             pout() << "Using sigma = " << system_params.sigma << std::endl;
+
+            if (system_params.advection_type == 1 ||
+                system_params.advection_type == 2)
+            {
+                pp.load("advection_coeff", system_params.advection_coeff);
+                pout() << "Using advection_coeff = "
+                       << system_params.advection_coeff << std::endl;
+            }
         }
 #endif
 

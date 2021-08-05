@@ -105,21 +105,23 @@ void CSystem::add_matter_rhs(
         else if (m_params.rescale_sigma_by_lapse == 1)
             sigma /= vars.lapse;
 
-        if (m_params.add_advection == 1 || m_params.add_advection == 2)
+        if (m_params.advection_type == 1 || m_params.advection_type == 2)
         {
-            dCdt -= advec.C;
+            dCdt -= m_params.advection_coeff * advec.C;
         }
         total_rhs.dCdt = (-tau * dCdt + kretschmann - vars.C) / sigma;
 
-        if (m_params.add_advection == 2)
+        if (m_params.advection_type == 2)
         {
             const auto &d2 = gq.get_d2_vars();
 
-            total_rhs.dCdt += 2. * advec.dCdt;
+            total_rhs.dCdt += 2. * m_params.advection_coeff * advec.dCdt;
 
             FOR(i, j)
             {
-                total_rhs.dCdt += -vars.shift[i] * vars.shift[j] * d2.C[i][j];
+                total_rhs.dCdt += -m_params.advection_coeff *
+                                  m_params.advection_coeff * vars.shift[i] *
+                                  vars.shift[j] * d2.C[i][j];
             }
         }
     }

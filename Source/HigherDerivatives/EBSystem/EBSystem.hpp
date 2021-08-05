@@ -24,10 +24,11 @@ class EBSystem
 
         int version; // v1 is the 1st order eq, v2 is the 2nd order eq.
 
-        int add_advection; // only for v2
-                           // (0, 1 or 2 for simple advection or Luis' advection
-                           // proposal)
-        double sigma;      // only for v2
+        double sigma;           // only for v2
+        int advection_type;     // only for v2
+                                // (0, 1 or 2 for simple advection or Luis'
+                                // advection proposal)
+        double advection_coeff; // for advection_type 1 and 2
     };
 
     //!  Constructor of class EBSystem, inputs are the matter parameters.

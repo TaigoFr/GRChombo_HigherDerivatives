@@ -284,10 +284,10 @@ void EBSystem::add_matter_rhs(
             data_t Eaux_with_advec = vars.Eaux[i][j];
             data_t Baux_with_advec = vars.Baux[i][j];
 
-            if (m_params.add_advection == 1 || m_params.add_advection == 2)
+            if (m_params.advection_type == 1 || m_params.advection_type == 2)
             {
-                Eaux_with_advec -= advec.Eij[i][j];
-                Baux_with_advec -= advec.Bij[i][j];
+                Eaux_with_advec -= m_params.advection_coeff * advec.Eij[i][j];
+                Baux_with_advec -= m_params.advection_coeff * advec.Bij[i][j];
             }
 
             total_rhs.Eij[i][j] = vars.Eaux[i][j];
@@ -297,17 +297,21 @@ void EBSystem::add_matter_rhs(
             total_rhs.Baux[i][j] =
                 (-tau * Baux_with_advec + Bij[i][j] - vars.Bij[i][j]) / sigma;
 
-            if (m_params.add_advection == 2)
+            if (m_params.advection_type == 2)
             {
-                total_rhs.Eaux[i][j] += 2. * advec.Eaux[i][j];
-                total_rhs.Baux[i][j] += 2. * advec.Baux[i][j];
+                total_rhs.Eaux[i][j] +=
+                    2. * m_params.advection_coeff * advec.Eaux[i][j];
+                total_rhs.Baux[i][j] +=
+                    2. * m_params.advection_coeff * advec.Baux[i][j];
 
                 FOR(k, l)
                 {
                     total_rhs.Eaux[i][j] +=
-                        -vars.shift[k] * vars.shift[l] * d2.Eij[i][j][k][l];
+                        -m_params.advection_coeff * m_params.advection_coeff *
+                        vars.shift[k] * vars.shift[l] * d2.Eij[i][j][k][l];
                     total_rhs.Baux[i][j] +=
-                        -vars.shift[k] * vars.shift[l] * d2.Bij[i][j][k][l];
+                        -m_params.advection_coeff * m_params.advection_coeff *
+                        vars.shift[k] * vars.shift[l] * d2.Bij[i][j][k][l];
                 }
             }
         }

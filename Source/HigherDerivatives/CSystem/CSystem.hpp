@@ -28,9 +28,10 @@ class CSystem
                                     // (0, 1 or 2 for lapse or lapse^2
                                     // rescaling)
 
-        int add_advection; // only for v2
-                           // (0, 1 or 2 for simple advection or Luis' advection
-                           // proposal)
+        int advection_type;     // only for v2
+                                // (0, 1 or 2 for simple advection or Luis'
+                                // advection proposal)
+        double advection_coeff; // for advection_type 1 and 2
     };
 
     //!  Constructor of class CSystem, inputs are the matter parameters.
