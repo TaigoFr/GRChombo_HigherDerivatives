@@ -627,9 +627,9 @@ compute_trace(const Tensor<rank1, Tensor<rank2, data_t, size>, size> &tensor,
 /// a metric.
 template <class data_t, int size>
 ALWAYS_INLINE void
-    make_trace_free(Tensor<2, data_t, size> &tensor_LL,
-                    const Tensor<2, data_t, size> &metric,
-                    const Tensor<2, data_t, size> &inverse_metric)
+make_trace_free(Tensor<2, data_t, size> &tensor_LL,
+                const Tensor<2, data_t, size> &metric,
+                const Tensor<2, data_t, size> &inverse_metric)
 {
     auto trace = compute_trace(tensor_LL, inverse_metric);
     for (int i = 0; i < size; ++i)

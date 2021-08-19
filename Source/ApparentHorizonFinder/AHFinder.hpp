@@ -139,7 +139,7 @@ class AHFinder
                //!< to be calculated
 
     ALWAYS_INLINE void
-        set_interpolator(AMRInterpolator<Lagrange<4>> *a_interpolator)
+    set_interpolator(AMRInterpolator<Lagrange<4>> *a_interpolator)
     {
         m_interpolator = a_interpolator;
     }

@@ -110,10 +110,11 @@ template <class System> class NCCDiagnostic
     // compute null radial vector by summing the timelike normal (usual n^a)
     // to a radial spacelike vector
     template <class data_t>
-    void get_null_radial_vector(
-        Tensor<1, data_t, GR_SPACEDIM + 1> &null_vec_plus,
-        Tensor<1, data_t, GR_SPACEDIM + 1> &null_vec_minus,
-        const Vars<data_t> &vars, const Coordinates<data_t> &coords) const
+    void
+    get_null_radial_vector(Tensor<1, data_t, GR_SPACEDIM + 1> &null_vec_plus,
+                           Tensor<1, data_t, GR_SPACEDIM + 1> &null_vec_minus,
+                           const Vars<data_t> &vars,
+                           const Coordinates<data_t> &coords) const
     {
         // add normal vector first
         data_t lapse = vars.lapse;
