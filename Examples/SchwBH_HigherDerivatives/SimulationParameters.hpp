@@ -96,6 +96,10 @@ class SimulationParameters : public SimulationParametersBase
         pout() << "Using C system version " << system_params.version
                << std::endl;
         CH_assert(system_params.version >= 1 && system_params.version <= 2);
+	pp.load("Box_transition", system_params.Box_transition);
+        pout() << "Using Box_transition = " << system_params.Box_transition
+               << std::endl;
+
 
         if (system_params.version == 2)
         {
@@ -111,9 +115,6 @@ class SimulationParameters : public SimulationParametersBase
             pout() << "Using rescale_sigma_by_lapse = "
                    << system_params.rescale_sigma_by_lapse << std::endl;
             pout() << "Using add_advection = " << system_params.add_advection
-                   << std::endl;
-            pp.load("Box_transition", system_params.Box_transition);
-            pout() << "Using Box_transition = " << system_params.Box_transition
                    << std::endl;
         }
 #else
