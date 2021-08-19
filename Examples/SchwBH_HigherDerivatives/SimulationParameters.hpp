@@ -96,10 +96,9 @@ class SimulationParameters : public SimulationParametersBase
         pout() << "Using C system version " << system_params.version
                << std::endl;
         CH_assert(system_params.version >= 1 && system_params.version <= 2);
-	pp.load("Box_transition", system_params.Box_transition);
+        pp.load("Box_transition", system_params.Box_transition);
         pout() << "Using Box_transition = " << system_params.Box_transition
                << std::endl;
-
 
         if (system_params.version == 2)
         {

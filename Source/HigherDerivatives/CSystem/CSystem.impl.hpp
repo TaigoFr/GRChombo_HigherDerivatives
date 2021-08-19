@@ -76,11 +76,11 @@ void CSystem::add_matter_rhs(
         if (m_params.Box_transition)
         {
             factor = 0.0;
-           /*if (simd_compare_lt_any(vars.chi, pm.chi_ignore_threshold))
-            {*/
-                data_t weak_field_var = 10.0;
-                factor = C2EFT<CSystem>::weak_field_condition(weak_field_var,
-                                                              gq, pm);
+            /*if (simd_compare_lt_any(vars.chi, pm.chi_ignore_threshold))
+             {*/
+            data_t weak_field_var = 10.0;
+            factor =
+                C2EFT<CSystem>::weak_field_condition(weak_field_var, gq, pm);
             //}
         }
         const auto &d1 = gq.get_d1_vars();

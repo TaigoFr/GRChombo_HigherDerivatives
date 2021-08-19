@@ -103,6 +103,6 @@ class CCZ4RHS
 // Supress the warning with this pragma
 #pragma warning(disable : 2651)
 #endif
-using CCZ4 [[deprecated("Use CCZ4RHS instead")]] = CCZ4RHS<>;
+using CCZ4[[deprecated("Use CCZ4RHS instead")]] = CCZ4RHS<>;
 
 #endif /* CCZ4RHS_HPP_ */
