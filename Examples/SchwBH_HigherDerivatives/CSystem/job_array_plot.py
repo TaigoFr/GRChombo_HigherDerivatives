@@ -51,9 +51,9 @@ if len(sys.argv)>1:
     ax.set_ylabel("log2(" + params_to_vary[1] + ")")
     ax.set_zlabel("Duration of run (M)")
 
-    # plt.draw()
-    # out_name = 'job_duration.pdf'
-    # plt.savefig(out_name, bbox_inches = 'tight')
+    plt.draw()
+    out_name = 'job_duration.png'
+    plt.savefig(out_name, bbox_inches = 'tight')
 
     plt.show()
     plt.close()
@@ -76,9 +76,9 @@ if len(sys.argv)>1:
             ax.set_zlabel("AH final mass (M)")
 
             fig.tight_layout()
-            # plt.draw()
-            # out_name = 'AH_final_mass.pdf'
-            # plt.savefig(out_name, bbox_inches = 'tight')
+            plt.draw()
+            out_name = 'AH_final_mass.png'
+            plt.savefig(out_name, bbox_inches = 'tight')
 
             plt.show()
             plt.close()
