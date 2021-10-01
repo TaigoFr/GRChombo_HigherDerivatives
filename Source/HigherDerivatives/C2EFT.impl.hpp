@@ -53,7 +53,8 @@ emtensor_t<data_t> C2EFT<System>::compute_emtensor(
         simd_compare_lt_any(vars.chi, m_params.chi_ignore_threshold))
     {
         data_t weak_field = weak_field_var(emtensor, gq);
-        data_t weak_field_damp = 1. - weak_field_condition(weak_field, gq);
+        data_t weak_field_damp =
+            1. - weak_field_condition(weak_field, gq, m_params);
         emtensor.rho *= weak_field_damp;
 
         FOR(i)
@@ -82,7 +83,7 @@ void C2EFT<System>::compute_emtensor_4D(
     data_t C;
     Tensor<1, data_t, CH_SPACEDIM + 1> d1_C_4D;
     Tensor<2, data_t, CH_SPACEDIM + 1> d2_C_4D;
-    m_system.compute_C(C, d1_C_4D, d2_C_4D, gq);
+    m_system.compute_C(C, d1_C_4D, d2_C_4D, gq, m_params);
 
     // compute Riemann
     // Can either be from evolved variables (if evolving
@@ -121,7 +122,7 @@ void C2EFT<System>::add_matter_rhs(
     rhs_vars_t<data_t> &total_rhs,
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
-    m_system.add_matter_rhs(total_rhs, gq);
+    m_system.add_matter_rhs(total_rhs, gq, m_params);
 }
 
 template <class System>
@@ -147,16 +148,16 @@ template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t, class gauge_t>
 data_t C2EFT<System>::weak_field_condition(
     const data_t &weak_field_var,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    const C2EFT<System>::params_t &pm)
 {
     const auto &vars = gq.get_vars();
 
-    data_t condition_chi =
-        sigmoid(vars.chi, m_params.chi_width, m_params.chi_threshold);
+    data_t condition_chi = sigmoid(vars.chi, pm.chi_width, pm.chi_threshold);
 
     data_t weak_field_condition =
-        condition_chi * sigmoid(weak_field_var, -m_params.weak_field_width,
-                                m_params.weak_field_threshold);
+        condition_chi *
+        sigmoid(weak_field_var, -pm.weak_field_width, pm.weak_field_threshold);
 
     return weak_field_condition;
 }

@@ -18,7 +18,8 @@ template <class data_t, template <typename> class vars_t,
 void EBSystem::compute_C(
     data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
     Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    const C2EFT<EBSystem>::params_t &pm) const
 {
     const auto &vars = gq.get_vars();
     const auto &d1 = gq.get_d1_vars();
@@ -54,7 +55,7 @@ void EBSystem::compute_C(
     auto &ccz4_params = gq.get_formulation_params();
 
     vars_t<data_t> rhs;
-    add_matter_rhs(rhs, gq);
+    add_matter_rhs(rhs, gq, pm);
     gq.compute_rhs_equations(rhs);
 
     data_t chi2 = vars.chi * vars.chi;
@@ -247,7 +248,8 @@ template <class data_t, template <typename> class vars_t,
           template <typename> class rhs_vars_t>
 void EBSystem::add_matter_rhs(
     rhs_vars_t<data_t> &total_rhs,
-    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
+    const C2EFT<EBSystem>::params_t &pm) const
 {
     const auto &vars = gq.get_vars();
 

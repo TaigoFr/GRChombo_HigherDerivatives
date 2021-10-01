@@ -51,7 +51,7 @@ template <class System> class WeakFieldConditionDiagnostic
         const auto emtensor = my_matter.compute_emtensor(gq);
         data_t weak_field = my_matter.weak_field_var(emtensor, gq);
         data_t weak_field_condition =
-            my_matter.weak_field_condition(weak_field, gq);
+            my_matter.weak_field_condition(weak_field, gq, my_matter.m_params);
 
         data_t weak_field_after_WFC = weak_field * (1. - weak_field_condition);
 

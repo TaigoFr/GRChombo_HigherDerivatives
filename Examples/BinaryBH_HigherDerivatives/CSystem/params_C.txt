@@ -190,6 +190,7 @@ rescale_tau_by_lapse   = 0 # rescale tau by lapse, only if 'use_only_time_deriva
 rescale_sigma_by_lapse = 0 # rescale sigma by lapse (1) or lapse^2 (2), only if 'use_only_time_derivatives = 1'
 advection_type         = 0 # only in v2 (0, 1 for simple, 2 for Luis' proposal)
 advection_coeff        = 0 # only for advection type 1 and 2
+Box_transition         = 1 # only if 'c_version= 1' transition from laplacian to only time derivatives
 
 # chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10
