@@ -34,6 +34,8 @@ class EBSystem
 
         bool Box_transition; // Could be use to active a transition for the
                              // advection velocities
+
+        bool use_last_index_raised;
     };
 
     //!  Constructor of class EBSystem, inputs are the matter parameters.
@@ -133,7 +135,8 @@ class EBSystem
         Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Eij,
         Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Bij,
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
-        rhs_vars_t<data_t> &rhs) const;
+        rhs_vars_t<data_t> &rhs,
+        Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> &d1_h) const;
 };
 
 #include "EBSystem.impl.hpp"

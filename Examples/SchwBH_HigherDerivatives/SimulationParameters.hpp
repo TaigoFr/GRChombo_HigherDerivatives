@@ -142,6 +142,10 @@ class SimulationParameters : public SimulationParametersBase
         pout() << "Using Box_transition = " << system_params.Box_transition
                << std::endl;
 
+        pp.load("use_last_index_raised", system_params.use_last_index_raised);
+        pout() << "Using use_last_index_raised = "
+               << system_params.use_last_index_raised << std::endl;
+
         if (system_params.version == 2)
         {
             pp.load("advection_type", system_params.advection_type);

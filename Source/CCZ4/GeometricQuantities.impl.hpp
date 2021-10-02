@@ -2091,18 +2091,56 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations()
 }
 template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
 {
+    CH_TIME("GeometricQuantities::compute_rhs_equations");
+
+    compute_rhs_equations_no_gauge(rhs);
+
+    // Gauge evolution equations
+    const auto &gauge = get_gauge();
     const auto &vars = get_vars();
     const auto &d1 = get_d1_vars();
     const auto &d2 = get_d2_vars();
     const auto &advec = get_advection();
+    {
+        CH_TIME("GeometricQuantities::compute_rhs_equations::GAUGE");
+        gauge.rhs_gauge(rhs, vars, d1, d2, advec);
+    }
+
+    /*
+    // Gauge evolution equations
+    rhs.lapse = m_ccz4_params->lapse_advec_coeff * advec.lapse -
+                m_ccz4_params->lapse_coeff *
+                    pow(vars.lapse, m_ccz4_params->lapse_power) *
+                    (vars.K - 2 * vars.Theta);
+
+    FOR(i)
+    {
+        rhs.shift[i] = m_ccz4_params->shift_advec_coeff * advec.shift[i] +
+                       m_ccz4_params->shift_Gamma_coeff * vars.B[i];
+        rhs.B[i] =
+            rhs.Gamma[i] +
+            m_ccz4_params->shift_advec_coeff * (advec.B[i] - advec.Gamma[i]) -
+            m_ccz4_params->eta * vars.B[i];
+    }
+    // rhs.lapse = 0.;
+    // rhs.shift = 0.;
+    // rhs.B = 0.;
+    */
+}
+
+template_GQ void
+GeometricQuantities_t::compute_rhs_equations_no_gauge(Vars &rhs)
+{
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &advec = get_advection();
     const auto &LIE = get_lie_derivatives();
     const auto &chris = get_chris();
-    const auto &gauge = get_gauge();
 
     const data_t &div_shift = get_div_shift();
 
     {
-        CH_TIME("GeometricQuantities::compute_rhs_equations::RHS");
+        CH_TIME("GeometricQuantities::compute_rhs_equations_no_gauge::RHS");
 
         rhs.chi = vars.lapse * LIE.chi + advec.chi -
                   2. / GR_SPACEDIM * vars.chi * div_shift;
@@ -2146,9 +2184,6 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
             }
         }
 
-        // Gauge evolution equations
-        gauge.rhs_gauge(rhs, vars, d1, d2, advec);
-
         /*
         // Alternative using TensorAlgebra::lie_derivative (is correct, but
         slower)
@@ -2186,27 +2221,6 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
             (m_formulation == CCZ4RHS<>::USE_CCZ4 ? vars.Gamma :
         chris.contracted), d1.shift, vars.shift, div_shift, 2. / GR_SPACEDIM,
         {true}); FOR(i) { rhs.Gamma[i] += LIE.Gamma[i] * vars.lapse; }
-
-        // Gauge evolution equations
-        rhs.lapse =
-            m_ccz4_params->lapse_advec_coeff * advec.lapse -
-            m_ccz4_params->lapse_coeff *
-                pow(vars.lapse, m_ccz4_params->lapse_power) *
-                (vars.K - 2 * vars.Theta);
-
-        FOR(i)
-        {
-            rhs.shift[i] =
-                m_ccz4_params->shift_advec_coeff * advec.shift[i] +
-                m_ccz4_params->shift_Gamma_coeff * vars.B[i];
-            rhs.B[i] = rhs.Gamma[i] +
-                                    m_ccz4_params->shift_advec_coeff *
-                                        (advec.B[i] - advec.Gamma[i]) -
-                                    m_ccz4_params->eta * vars.B[i];
-        }
-        // rhs.lapse = 0.;
-        // rhs.shift = 0.;
-        // rhs.B = 0.;
 
         */
     }

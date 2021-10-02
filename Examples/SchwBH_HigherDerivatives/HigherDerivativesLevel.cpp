@@ -76,22 +76,21 @@ void HigherDerivativesLevel::initialData()
 
 #ifdef USE_EBSYSTEM
     ComputeEB compute(m_dx, m_p.formulation, m_p.ccz4_params,
-                      Interval(c_E11, c_E33), Interval(c_B11, c_B33));
+                      Interval(c_E11, c_E33), Interval(c_B11, c_B33),
+                      m_p.system_params.use_last_index_raised);
+    BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+
     if (m_p.system_params.version == 2)
     {
         bool compute_time_derivatives = true;
-        ComputeEB compute2(m_dx, m_p.formulation, m_p.ccz4_params,
-                           Interval(c_Eaux11, c_Eaux33),
-                           Interval(c_Baux11, c_Baux33),
-                           compute_time_derivatives);
-        BoxLoops::loop(
-            make_compute_pack(GammaCalculator(m_dx), compute, compute2),
-            m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
-    }
-    else
-    {
-        BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
-                       m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+        ComputeEB compute2(
+            m_dx, m_p.formulation, m_p.ccz4_params,
+            Interval(c_Eaux11, c_Eaux33), Interval(c_Baux11, c_Baux33),
+            m_p.system_params.use_last_index_raised, compute_time_derivatives);
+
+        BoxLoops::loop(make_compute_pack(compute2), m_state_new, m_state_new,
+                       EXCLUDE_GHOST_CELLS);
     }
 #elif USE_CSYSTEM
     CDiagnostics compute(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
@@ -132,7 +131,8 @@ void HigherDerivativesLevel::computeDiagnostics()
         Interval(c_Mom, c_Mom));
 
 #ifdef USE_EBSYSTEM
-    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params);
+    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params,
+                          m_p.system_params.use_last_index_raised);
 #elif USE_CSYSTEM
     CDiagnostics diff(m_dx, m_p.formulation, m_p.ccz4_params, c_Cphys,
                       c_C_diff);
@@ -152,7 +152,8 @@ void HigherDerivativesLevel::computeDiagnostics()
     {
         BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
                                  Interval(c_Eaux11, c_Eaux33),
-                                 Interval(c_Baux11, c_Baux33)),
+                                 Interval(c_Baux11, c_Baux33),
+                                 m_p.system_params.use_last_index_raised),
                        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     }
 #endif
@@ -181,7 +182,8 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
         // boundaries for sommerfeld BC
         BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
                                  Interval(c_Eaux11, c_Eaux33),
-                                 Interval(c_Baux11, c_Baux33)),
+                                 Interval(c_Baux11, c_Baux33),
+                                 m_p.system_params.use_last_index_raised),
                        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
         fillAllGhosts();
     }

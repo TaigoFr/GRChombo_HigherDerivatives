@@ -31,9 +31,11 @@ class EBdiffDiagnostic
 
   public:
     EBdiffDiagnostic(double m_dx, int a_formulation,
-                     const CCZ4_params_t<> &a_ccz4_params)
+                     const CCZ4_params_t<> &a_ccz4_params,
+                     bool use_last_index_raised)
         : m_deriv(m_dx), m_formulation(a_formulation),
-          m_ccz4_params(a_ccz4_params)
+          m_ccz4_params(a_ccz4_params),
+          m_use_last_index_raised(use_last_index_raised)
     {
     }
 
@@ -46,8 +48,15 @@ class EBdiffDiagnostic
         GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
         gq.set_formulation(m_formulation, m_ccz4_params);
 
-        const auto &Eij = gq.get_weyl_electric_part();
-        const auto &Bij = gq.get_weyl_magnetic_part();
+        Tensor<2, data_t> Eij = gq.get_weyl_electric_part();
+        Tensor<2, data_t> Bij = gq.get_weyl_magnetic_part();
+
+        if (m_use_last_index_raised)
+        {
+            const auto &h_UU = gq.get_metric_UU_spatial();
+            Eij = TensorAlgebra::compute_dot_product(Eij, h_UU);
+            Bij = TensorAlgebra::compute_dot_product(Bij, h_UU);
+        }
 
         data_t E_diff_squared = 0.;
         data_t B_diff_squared = 0.;
@@ -67,6 +76,7 @@ class EBdiffDiagnostic
     FourthOrderDerivatives m_deriv;
     int m_formulation;
     const CCZ4_params_t<> &m_ccz4_params;
+    bool m_use_last_index_raised;
 };
 
 #endif /* EBDIFFDIAGNOSTIC */

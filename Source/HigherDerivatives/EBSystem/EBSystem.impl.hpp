@@ -24,46 +24,49 @@ void EBSystem::compute_C(
     const auto &vars = gq.get_vars();
     const auto &d1 = gq.get_d1_vars();
     const auto &d2 = gq.get_d2_vars();
-    const auto &advec = gq.get_advection();
-    const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
     const auto &Kij = gq.get_extrinsic_curvature();
+    // needed if 'use_last_index_raised' = false
+    const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // C is easy
+    // 0th order first
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    C = 0.;
-    FOR(i, j, k, l)
+    Tensor<2, data_t> Eij_LU, Bij_LU;
+
+    if (m_params.use_last_index_raised)
     {
-        C +=
-            8. * metric_UU_spatial[i][k] * metric_UU_spatial[j][l] *
-            (vars.Eij[i][j] * vars.Eij[k][l] - vars.Bij[i][j] * vars.Bij[k][l]);
+        Eij_LU = vars.Eij;
+        Bij_LU = vars.Bij;
+    }
+    else
+    {
+        Eij_LU =
+            TensorAlgebra::compute_dot_product(vars.Eij, metric_UU_spatial);
+        Bij_LU =
+            TensorAlgebra::compute_dot_product(vars.Bij, metric_UU_spatial);
     }
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // d1_C is ok
+    // Now 1st order
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // indices are only spatial, derivatives are 4D
-    Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Eij;
-    Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Bij;
-    Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_h;
+    Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Eij, d1_Bij, d1_Eij_LU,
+        d1_Bij_LU, d1_h, d1_h_dot_hUU;
     Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Kij; // needed for d2_h
-
     // 2nd mixed derivatives of shift needed for d2_h[i][j][0][0]
     Tensor<2, data_t> dtd1_shift; // mixed derivative
-    auto &ccz4_params = gq.get_formulation_params();
 
     vars_t<data_t> rhs;
     add_matter_rhs(rhs, gq, pm);
     gq.compute_rhs_equations(rhs);
 
+    // first compute d1_h and d1_Kij
+    auto &ccz4_params = gq.get_formulation_params();
     data_t chi2 = vars.chi * vars.chi;
-
     FOR(i, j)
     {
-        d1_Eij[i][j][0] = rhs.Eij[i][j];
-        d1_Bij[i][j][0] = rhs.Bij[i][j];
         d1_h[i][j][0] = rhs.h[i][j] / vars.chi - rhs.chi * vars.h[i][j] / chi2;
         d1_Kij[i][j][0] =
             -Kij[i][j] * rhs.chi / vars.chi +
@@ -75,8 +78,6 @@ void EBSystem::compute_C(
 
         FOR(k)
         {
-            d1_Eij[i][j][k + 1] = d1.Eij[i][j][k];
-            d1_Bij[i][j][k + 1] = d1.Bij[i][j][k];
             d1_h[i][j][k + 1] =
                 d1.h[i][j][k] / vars.chi - d1.chi[k] * vars.h[i][j] / chi2;
             d1_Kij[i][j][k + 1] = -Kij[i][j] * d1.chi[k] / vars.chi +
@@ -91,42 +92,68 @@ void EBSystem::compute_C(
         }
     }
 
-    Tensor<2, data_t> Eij_LU =
-        TensorAlgebra::compute_dot_product(vars.Eij, metric_UU_spatial);
-    Tensor<2, data_t> Eij_UU =
-        TensorAlgebra::compute_dot_product(metric_UU_spatial, Eij_LU, 0, 0);
-    Tensor<2, data_t> Eij_dot_Eij_UU =
-        TensorAlgebra::compute_dot_product(Eij_UU, Eij_LU, 0, 0);
-
-    Tensor<2, data_t> Bij_LU =
-        TensorAlgebra::compute_dot_product(vars.Bij, metric_UU_spatial);
-    Tensor<2, data_t> Bij_UU =
-        TensorAlgebra::compute_dot_product(metric_UU_spatial, Bij_LU, 0, 0);
-    Tensor<2, data_t> Bij_dot_Bij_UU =
-        TensorAlgebra::compute_dot_product(Bij_UU, Bij_LU, 0, 0);
-
-    FOR_ST(a)
+    // compute d1_h_dot_hUU
+    FOR(i, j)
     {
-        d1_C[a] = 0.;
-        FOR(i, j)
+        FOR_ST(a)
         {
-            d1_C[a] += 16. * (Eij_UU[i][j] * d1_Eij[i][j][a] -
-                              Eij_dot_Eij_UU[i][j] * d1_h[i][j][a]) -
-                       16. * (Bij_UU[i][j] * d1_Bij[i][j][a] -
-                              Bij_dot_Bij_UU[i][j] * d1_h[i][j][a]);
+            d1_h_dot_hUU[i][j][a] = 0.;
+            FOR(k)
+            {
+                d1_h_dot_hUU[i][j][a] +=
+                    d1_h[i][k][a] * metric_UU_spatial[k][j];
+            }
+        }
+    }
+
+    FOR(i, j)
+    {
+        d1_Eij[i][j][0] = rhs.Eij[i][j];
+        d1_Bij[i][j][0] = rhs.Bij[i][j];
+
+        FOR(k)
+        {
+            d1_Eij[i][j][k + 1] = d1.Eij[i][j][k];
+            d1_Bij[i][j][k + 1] = d1.Bij[i][j][k];
+        }
+    }
+
+    // now d1_Eij_LU and d1_Bij_LU
+    if (m_params.use_last_index_raised)
+    {
+        d1_Eij_LU = d1_Eij;
+        d1_Bij_LU = d1_Bij;
+    }
+    else
+    {
+        FOR_ST(a)
+        {
+            FOR(i, j)
+            {
+                d1_Eij_LU[i][j][a] = 0.;
+                d1_Bij_LU[i][j][a] = 0.;
+
+                FOR(k)
+                {
+                    d1_Eij_LU[i][j][a] +=
+                        d1_Eij[i][k][a] * metric_UU_spatial[k][j] -
+                        Eij_LU[i][k] * d1_h_dot_hUU[k][j][a];
+                    d1_Bij_LU[i][j][a] +=
+                        d1_Bij[i][k][a] * metric_UU_spatial[k][j] -
+                        Bij_LU[i][k] * d1_h_dot_hUU[k][j][a];
+                }
+            }
         }
     }
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // d2_C is bad
+    // Finally 2nd order
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // indices are only spatial, derivatives are 4D
-    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_Eij;
-    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_Bij;
-    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_h;
-
-    compute_d2_Eij_and_Bij(d2_Eij, d2_Bij, gq, rhs);
+    // d2_Eij will be 'LU' if 'use_last_index_raised' = true
+    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_Eij, d2_Bij, d2_h;
+    Tensor<2, data_t, CH_SPACEDIM + 1> Eij_dot_d2_Eij, Bij_dot_d2_Bij;
 
     FOR(i, j)
     {
@@ -178,40 +205,101 @@ void EBSystem::compute_C(
         }
     }
 
-    FOR_ST(a, b)
+    compute_d2_Eij_and_Bij(d2_Eij, d2_Bij, gq, rhs, d1_h);
+
+    // now compute Eij_dot_d2_Eij, Bij_dot_d2_Bij
+    if (m_params.use_last_index_raised)
     {
-        d2_C[a][b] = 0.;
+        FOR_ST(a, b)
+        {
+            Eij_dot_d2_Eij[a][b] = 0.;
+            Bij_dot_d2_Bij[a][b] = 0.;
+            FOR(i, j)
+            {
+                Eij_dot_d2_Eij[a][b] += Eij_LU[i][j] * d2_Eij[j][i][a][b];
+                Bij_dot_d2_Bij[a][b] += Bij_LU[i][j] * d2_Bij[j][i][a][b];
+            }
+        }
+    }
+    else
+    {
+        Tensor<2, data_t> Eij_UU =
+            TensorAlgebra::compute_dot_product(metric_UU_spatial, Eij_LU, 0, 0);
+        Tensor<2, data_t> Bij_UU =
+            TensorAlgebra::compute_dot_product(metric_UU_spatial, Bij_LU, 0, 0);
+
+        Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Eij_LL, d1_Bij_LL;
+        Tensor<2, data_t> Eij_dot_Eij_UU, Bij_dot_Bij_UU;
+
         FOR(i, j)
         {
-            d2_C[a][b] += 16. * (Eij_UU[i][j] * d2_Eij[i][j][a][b] -
-                                 Eij_dot_Eij_UU[i][j] * d2_h[i][j][a][b]) -
-                          16. * (Bij_UU[i][j] * d2_Bij[i][j][a][b] -
-                                 Bij_dot_Bij_UU[i][j] * d2_h[i][j][a][b]);
-            FOR(k, l)
+            d1_Eij_LL[i][j][0] = rhs.Eij[i][j];
+            d1_Bij_LL[i][j][0] = rhs.Bij[i][j];
+
+            Eij_dot_Eij_UU[i][j] = 0.;
+            Bij_dot_Bij_UU[i][j] = 0.;
+
+            FOR(k)
             {
-                d2_C[a][b] +=
-                    16. *
-                        (-2. * d1_Eij[i][j][a] * d1_h[k][l][b] *
-                             metric_UU_spatial[i][k] * Eij_UU[j][l] -
-                         2. * d1_Eij[i][j][b] * d1_h[k][l][a] *
-                             metric_UU_spatial[i][k] * Eij_UU[j][l] +
-                         d1_Eij[i][j][a] * d1_Eij[k][l][b] *
-                             metric_UU_spatial[i][k] * metric_UU_spatial[j][l] +
-                         d1_h[i][j][a] * d1_h[k][l][b] * Eij_UU[i][k] *
-                             Eij_UU[j][l] +
-                         2. * d1_h[i][j][a] * d1_h[k][l][b] *
-                             metric_UU_spatial[i][k] * Eij_dot_Eij_UU[j][l]) -
-                    16. *
-                        (-2. * d1_Bij[i][j][a] * d1_h[k][l][b] *
-                             metric_UU_spatial[i][k] * Bij_UU[j][l] -
-                         2. * d1_Bij[i][j][b] * d1_h[k][l][a] *
-                             metric_UU_spatial[i][k] * Bij_UU[j][l] +
-                         d1_Bij[i][j][a] * d1_Bij[k][l][b] *
-                             metric_UU_spatial[i][k] * metric_UU_spatial[j][l] +
-                         d1_h[i][j][a] * d1_h[k][l][b] * Bij_UU[i][k] *
-                             Bij_UU[j][l] +
-                         2. * d1_h[i][j][a] * d1_h[k][l][b] *
-                             metric_UU_spatial[i][k] * Bij_dot_Bij_UU[j][l]);
+                d1_Eij_LL[i][j][k + 1] = d1.Eij[i][j][k];
+                d1_Bij_LL[i][j][k + 1] = d1.Bij[i][j][k];
+
+                Eij_dot_Eij_UU[i][j] += Eij_UU[i][k] * Eij_LU[k][j];
+                Bij_dot_Bij_UU[i][j] += Bij_UU[i][k] * Bij_LU[k][j];
+            }
+        }
+
+        FOR_ST(a, b)
+        {
+            Eij_dot_d2_Eij[a][b] = 0.;
+            Bij_dot_d2_Bij[a][b] = 0.;
+            FOR(i, j)
+            {
+                Eij_dot_d2_Eij[a][b] += Eij_UU[i][j] * d2_Eij[i][j][a][b] -
+                                        Eij_dot_Eij_UU[i][j] * d2_h[i][j][a][b];
+                Bij_dot_d2_Bij[a][b] += Bij_UU[i][j] * d2_Bij[i][j][a][b] -
+                                        Bij_dot_Bij_UU[i][j] * d2_h[i][j][a][b];
+
+                FOR(k)
+                {
+                    Eij_dot_d2_Eij[a][b] +=
+                        -Eij_UU[k][j] * d1_Eij_LU[j][i][b] * d1_h[k][i][a] -
+                        Eij_UU[k][j] * d1_Eij_LU[j][i][a] * d1_h[k][i][b];
+                    Bij_dot_d2_Bij[a][b] +=
+                        -Bij_UU[k][j] * d1_Bij_LU[j][i][b] * d1_h[k][i][a] -
+                        Bij_UU[k][j] * d1_Bij_LU[j][i][a] * d1_h[k][i][b];
+                }
+            }
+        }
+    }
+
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Now make C, d1_C, d2_C
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    C = 0.;
+    FOR_ST(a)
+    {
+        d1_C[a] = 0.;
+        FOR_ST(b)
+        {
+            d2_C[a][b] = 16. * (Eij_dot_d2_Eij[a][b] - Bij_dot_d2_Bij[a][b]);
+        }
+    }
+
+    FOR(i, j)
+    {
+        C += 8. * (Eij_LU[i][j] * Eij_LU[j][i] - Bij_LU[i][j] * Bij_LU[j][i]);
+
+        FOR_ST(a)
+        {
+            d1_C[a] += 16. * (Eij_LU[i][j] * d1_Eij_LU[j][i][a] -
+                              Bij_LU[i][j] * d1_Bij_LU[j][i][a]);
+
+            FOR_ST(b)
+            {
+                d2_C[a][b] += 16. * (d1_Eij_LU[i][j][b] * d1_Eij_LU[j][i][a] -
+                                     d1_Bij_LU[i][j][b] * d1_Bij_LU[j][i][a]);
             }
         }
     }
@@ -227,9 +315,24 @@ void EBSystem::compute_Riemann(
     const auto &vars = gq.get_vars();
     const auto &g_UU = gq.get_metric_UU_ST();
 
+    Tensor<2, data_t> Eij_LL;
+    Tensor<2, data_t> Bij_LL;
+
+    if (m_params.use_last_index_raised)
+    {
+        const auto &metric_spatial = gq.get_metric_spatial();
+        Eij_LL = TensorAlgebra::compute_dot_product(vars.Eij, metric_spatial);
+        Bij_LL = TensorAlgebra::compute_dot_product(vars.Bij, metric_spatial);
+    }
+    else
+    {
+        Eij_LL = vars.Eij;
+        Bij_LL = vars.Bij;
+    }
+
     // valid in vacuum!
     Tensor<4, data_t, CH_SPACEDIM + 1> riemann_LLLL =
-        gq.compute_weyl_tensor_LLLL(vars.Eij, vars.Bij);
+        gq.compute_weyl_tensor_LLLL(Eij_LL, Bij_LL);
 
     FOR_ST(a, b, c, d, e)
     {
@@ -278,8 +381,16 @@ void EBSystem::add_matter_rhs(
     {
         const auto &d2 = gq.get_d2_vars();
         const auto &advec = gq.get_advection();
-        const auto &Eij = gq.get_weyl_electric_part();
-        const auto &Bij = gq.get_weyl_magnetic_part();
+
+        Tensor<2, data_t> Eij = gq.get_weyl_electric_part();
+        Tensor<2, data_t> Bij = gq.get_weyl_magnetic_part();
+
+        if (m_params.use_last_index_raised)
+        {
+            const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
+            Eij = TensorAlgebra::compute_dot_product(Eij, metric_UU_spatial);
+            Bij = TensorAlgebra::compute_dot_product(Bij, metric_UU_spatial);
+        }
 
         FOR(i, j)
         {
@@ -332,7 +443,8 @@ void EBSystem::compute_d2_Eij_and_Bij(
     Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Eij,
     Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Bij,
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
-    rhs_vars_t<data_t> &rhs) const
+    rhs_vars_t<data_t> &rhs,
+    Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> &d1_h) const
 {
     if (m_params.version == 1)
     {
@@ -343,10 +455,102 @@ void EBSystem::compute_d2_Eij_and_Bij(
         const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
         const auto &Kij = gq.get_extrinsic_curvature();
 
+        Tensor<2, Tensor<1, data_t>> d1_Eaux_LL, d1_Baux_LL;
+        Tensor<2, data_t> Eaux_LL, Baux_LL, advec_Eaux_LL, advec_Baux_LL;
+
+        if (m_params.use_last_index_raised)
+        {
+            const auto &metric_spatial = gq.get_metric_spatial();
+
+            Tensor<2, data_t> advec_h;
+            data_t chi2 = vars.chi * vars.chi;
+            FOR(i, j)
+            {
+                advec_h[i][j] =
+                    advec.h[i][j] / vars.chi - advec.chi * vars.h[i][j] / chi2;
+            }
+
+            FOR(i, j)
+            {
+                advec_Eaux_LL[i][j] = 0.;
+                advec_Baux_LL[i][j] = 0.;
+
+                FOR(k)
+                {
+                    advec_Eaux_LL[i][j] +=
+                        advec.Eaux[i][k] * metric_spatial[k][j] +
+                        vars.Eaux[i][k] * advec_h[k][j];
+                    advec_Baux_LL[i][j] +=
+                        advec.Baux[i][k] * metric_spatial[k][j] +
+                        vars.Baux[i][k] * advec_h[k][j];
+
+                    d1_Eaux_LL[i][j][k] = 0.;
+                    d1_Baux_LL[i][j][k] = 0.;
+                    FOR(l)
+                    {
+                        d1_Eaux_LL[i][j][k] +=
+                            d1.Eaux[i][l][k] * metric_spatial[l][j] +
+                            vars.Eaux[i][l] * d1_h[l][j][k + 1];
+                        d1_Baux_LL[i][j][k] +=
+                            d1.Baux[i][l][k] * metric_spatial[l][j] +
+                            vars.Baux[i][l] * d1_h[l][j][k + 1];
+                    }
+                }
+            }
+            Eaux_LL =
+                TensorAlgebra::compute_dot_product(vars.Eaux, metric_spatial);
+            Baux_LL =
+                TensorAlgebra::compute_dot_product(vars.Baux, metric_spatial);
+        }
+        else
+        {
+            d1_Eaux_LL = d1.Eaux;
+            d1_Baux_LL = d1.Baux;
+            Eaux_LL = vars.Eaux;
+            Baux_LL = vars.Baux;
+            advec_Eaux_LL = advec.Eaux;
+            advec_Baux_LL = advec.Baux;
+        }
+
         Tensor<2, data_t> dt_Eij = gq.compute_dt_weyl_electric_part(
-            d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
+            d1_Eaux_LL, d1_Baux_LL, Eaux_LL, Baux_LL, advec_Eaux_LL,
+            advec_Baux_LL);
         Tensor<2, data_t> dt_Bij = gq.compute_dt_weyl_magnetic_part(
-            d1.Eaux, d1.Baux, vars.Eaux, vars.Baux, advec.Eaux, advec.Baux);
+            d1_Eaux_LL, d1_Baux_LL, Eaux_LL, Baux_LL, advec_Eaux_LL,
+            advec_Baux_LL);
+
+        if (m_params.use_last_index_raised)
+        {
+            Tensor<2, data_t> dt_Eij_LU, dt_Bij_LU;
+
+            Tensor<2, data_t> Eij_LU = TensorAlgebra::compute_dot_product(
+                gq.get_weyl_electric_part(), metric_UU_spatial);
+            Tensor<2, data_t> Bij_LU = TensorAlgebra::compute_dot_product(
+                gq.get_weyl_magnetic_part(), metric_UU_spatial);
+
+            FOR(i, j)
+            {
+                dt_Eij_LU[i][j] = 0.;
+                dt_Bij_LU[i][j] = 0.;
+
+                FOR(k)
+                {
+                    dt_Eij_LU[i][j] += dt_Eij[i][k] * metric_UU_spatial[k][j];
+                    dt_Bij_LU[i][j] += dt_Bij[i][k] * metric_UU_spatial[k][j];
+
+                    FOR(l)
+                    {
+                        dt_Eij_LU[i][j] += -Eij_LU[i][k] * d1_h[l][k][0] *
+                                           metric_UU_spatial[j][l];
+                        dt_Bij_LU[i][j] += -Bij_LU[i][k] * d1_h[l][k][0] *
+                                           metric_UU_spatial[j][l];
+                    }
+                }
+            }
+            // replace old
+            dt_Eij = dt_Eij_LU;
+            dt_Bij = dt_Bij_LU;
+        }
 
         data_t tau = m_params.tau;
         if (m_params.rescale_tau_by_lapse)
@@ -439,20 +643,43 @@ void EBSystem::add_diffusion_terms(
 
     data_t tr_space_laplace_Eij = 0.;
     data_t tr_space_laplace_Bij = 0.;
-    FOR(i, j)
+    if (m_params.use_last_index_raised)
     {
-        tr_space_laplace_Eij += h_UU[i][j] * space_laplace_Eij[i][j];
-        tr_space_laplace_Bij += h_UU[i][j] * space_laplace_Bij[i][j];
-    }
+        FOR(i)
+        {
+            tr_space_laplace_Eij += space_laplace_Eij[i][i];
+            tr_space_laplace_Bij += space_laplace_Bij[i][i];
+        }
 
-    FOR(i, j)
+        FOR(i, j)
+        {
+            rhs.Eij[i][j] +=
+                diffCoeffSafe * (space_laplace_Eij[i][j] -
+                                 tr_space_laplace_Eij *
+                                     TensorAlgebra::delta(i, j) / GR_SPACEDIM);
+            rhs.Bij[i][j] +=
+                diffCoeffSafe * (space_laplace_Bij[i][j] -
+                                 tr_space_laplace_Bij *
+                                     TensorAlgebra::delta(i, j) / GR_SPACEDIM);
+        }
+    }
+    else
     {
-        rhs.Eij[i][j] +=
-            diffCoeffSafe * (space_laplace_Eij[i][j] -
-                             tr_space_laplace_Eij * vars.h[i][j] / GR_SPACEDIM);
-        rhs.Bij[i][j] +=
-            diffCoeffSafe * (space_laplace_Bij[i][j] -
-                             tr_space_laplace_Bij * vars.h[i][j] / GR_SPACEDIM);
+        FOR(i, j)
+        {
+            tr_space_laplace_Eij += h_UU[i][j] * space_laplace_Eij[i][j];
+            tr_space_laplace_Bij += h_UU[i][j] * space_laplace_Bij[i][j];
+        }
+
+        FOR(i, j)
+        {
+            rhs.Eij[i][j] += diffCoeffSafe * (space_laplace_Eij[i][j] -
+                                              tr_space_laplace_Eij *
+                                                  vars.h[i][j] / GR_SPACEDIM);
+            rhs.Bij[i][j] += diffCoeffSafe * (space_laplace_Bij[i][j] -
+                                              tr_space_laplace_Bij *
+                                                  vars.h[i][j] / GR_SPACEDIM);
+        }
     }
 }
 

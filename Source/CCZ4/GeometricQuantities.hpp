@@ -209,6 +209,7 @@ class GeometricQuantities
     //////// EXTRA ////////
     ricci_t<data_t> compute_ricci_qDZ(int q); // computes Rij + q * DiZj
     void compute_rhs_equations(Vars &);
+    void compute_rhs_equations_no_gauge(Vars &);
     Tensor<4, data_t, CH_SPACEDIM + 1>
     compute_weyl_tensor_LLLL(const Tensor<2, data_t> &Eij,
                              const Tensor<2, data_t> &Bij);
