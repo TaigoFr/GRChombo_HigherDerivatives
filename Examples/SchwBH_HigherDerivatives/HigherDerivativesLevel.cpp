@@ -150,6 +150,7 @@ void HigherDerivativesLevel::computeDiagnostics()
 #ifdef USE_EBSYSTEM
     if (m_p.system_params.version == 1)
     {
+        // need to first store Eaux and Baux on the grid with the physical E & B
         BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
                                  Interval(c_Eaux11, c_Eaux33),
                                  Interval(c_Baux11, c_Baux33),
@@ -177,6 +178,7 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
 #ifdef USE_EBSYSTEM
     if (m_p.system_params.version == 1)
     {
+        // need to first store Eaux and Baux on the grid with the physical E & B
         // don't include the above BoxLoops in this one because this one
         // excludes ghost cells and the fillAllGhosts will not fill the outer
         // boundaries for sommerfeld BC

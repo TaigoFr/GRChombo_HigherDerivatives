@@ -36,11 +36,13 @@ void EBSystem::compute_C(
 
     if (m_params.use_last_index_raised)
     {
+        // the evolved variables are already LU
         Eij_LU = vars.Eij;
         Bij_LU = vars.Bij;
     }
     else
     {
+        // raise the last index
         Eij_LU =
             TensorAlgebra::compute_dot_product(vars.Eij, metric_UU_spatial);
         Bij_LU =
@@ -63,6 +65,7 @@ void EBSystem::compute_C(
     gq.compute_rhs_equations(rhs);
 
     // first compute d1_h and d1_Kij
+    // here 'h' is the spatial metric, not the conformal one
     auto &ccz4_params = gq.get_formulation_params();
     data_t chi2 = vars.chi * vars.chi;
     FOR(i, j)
@@ -106,6 +109,8 @@ void EBSystem::compute_C(
         }
     }
 
+    // d1_Eij, d1_Bij refer to the evolved ones (could be raised or lowered
+    // depending on the option)
     FOR(i, j)
     {
         d1_Eij[i][j][0] = rhs.Eij[i][j];
@@ -121,11 +126,13 @@ void EBSystem::compute_C(
     // now d1_Eij_LU and d1_Bij_LU
     if (m_params.use_last_index_raised)
     {
+        // already LU
         d1_Eij_LU = d1_Eij;
         d1_Bij_LU = d1_Bij;
     }
     else
     {
+        // raise last index, that needs 'd1_h_dot_hUU'
         FOR_ST(a)
         {
             FOR(i, j)
@@ -155,6 +162,7 @@ void EBSystem::compute_C(
     Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_Eij, d2_Bij, d2_h;
     Tensor<2, data_t, CH_SPACEDIM + 1> Eij_dot_d2_Eij, Bij_dot_d2_Bij;
 
+    // compute d2_h
     FOR(i, j)
     {
         FOR(k)
@@ -205,9 +213,11 @@ void EBSystem::compute_C(
         }
     }
 
+    // compute d2_Eij, d2_Bij (raised or lowered depending on what we are
+    // evolving)
     compute_d2_Eij_and_Bij(d2_Eij, d2_Bij, gq, rhs, d1_h);
 
-    // now compute Eij_dot_d2_Eij, Bij_dot_d2_Bij
+    // now compute E_i^{~j} d_m d_n E_j^{~i}, B_i^{~j} d_m d_n B_j^{~i}
     if (m_params.use_last_index_raised)
     {
         FOR_ST(a, b)
@@ -223,11 +233,15 @@ void EBSystem::compute_C(
     }
     else
     {
+        // recast 'E_i^{~j} d_m d_n E_j^{~i}' to some expression that instead
+        // uses d_m d_n E_{ij}
+        // (see overleaf notes for this formula, it looks worse than it is)
         Tensor<2, data_t> Eij_UU =
             TensorAlgebra::compute_dot_product(metric_UU_spatial, Eij_LU, 0, 0);
         Tensor<2, data_t> Bij_UU =
             TensorAlgebra::compute_dot_product(metric_UU_spatial, Bij_LU, 0, 0);
 
+        // computing some helping variables
         Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Eij_LL, d1_Bij_LL;
         Tensor<2, data_t> Eij_dot_Eij_UU, Bij_dot_Bij_UU;
 
@@ -249,6 +263,7 @@ void EBSystem::compute_C(
             }
         }
 
+        // now the real deal
         FOR_ST(a, b)
         {
             Eij_dot_d2_Eij[a][b] = 0.;
@@ -277,6 +292,7 @@ void EBSystem::compute_C(
     // Now make C, d1_C, d2_C
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+    // with all the above C, d1_C, d2_C are pretty straightforward
     C = 0.;
     FOR_ST(a)
     {
@@ -320,12 +336,14 @@ void EBSystem::compute_Riemann(
 
     if (m_params.use_last_index_raised)
     {
+        // evolved is LU, need to lower last index
         const auto &metric_spatial = gq.get_metric_spatial();
         Eij_LL = TensorAlgebra::compute_dot_product(vars.Eij, metric_spatial);
         Bij_LL = TensorAlgebra::compute_dot_product(vars.Bij, metric_spatial);
     }
     else
     {
+        // evolved is already LL
         Eij_LL = vars.Eij;
         Bij_LL = vars.Bij;
     }
@@ -367,6 +385,8 @@ void EBSystem::add_matter_rhs(
 
     if (m_params.version == 1)
     {
+        // recall: Eaux is the physical E, Baux the physical B
+        // (computed numerically from the metric on each cell)
         FOR(i, j)
         {
             total_rhs.Eij[i][j] =
@@ -379,14 +399,19 @@ void EBSystem::add_matter_rhs(
     }
     else if (m_params.version == 2)
     {
+        // recall: Eaux and Baux are the 1st time derivative of E and B
+
         const auto &d2 = gq.get_d2_vars();
         const auto &advec = gq.get_advection();
 
+        // first compute the LL ones, but when evolving the raised E and B
+        // these need to be raised
         Tensor<2, data_t> Eij = gq.get_weyl_electric_part();
         Tensor<2, data_t> Bij = gq.get_weyl_magnetic_part();
 
         if (m_params.use_last_index_raised)
         {
+            // raising them here
             const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
             Eij = TensorAlgebra::compute_dot_product(Eij, metric_UU_spatial);
             Bij = TensorAlgebra::compute_dot_product(Bij, metric_UU_spatial);
@@ -460,6 +485,12 @@ void EBSystem::compute_d2_Eij_and_Bij(
 
         if (m_params.use_last_index_raised)
         {
+            // this is a pain
+            // to compute the time derivative of LL via
+            // GeometricQuantities::compute_dt_weyl_electric_part, so all
+            // vars.E, d1.E, advec.E (same for B) that have one index raised
+            // need to be lowered to have the right input (and raised
+            // afterwards)
             const auto &metric_spatial = gq.get_metric_spatial();
 
             Tensor<2, data_t> advec_h;
@@ -504,6 +535,7 @@ void EBSystem::compute_d2_Eij_and_Bij(
         }
         else
         {
+            // all good in this case, we have what we need
             d1_Eaux_LL = d1.Eaux;
             d1_Baux_LL = d1.Baux;
             Eaux_LL = vars.Eaux;
@@ -512,6 +544,7 @@ void EBSystem::compute_d2_Eij_and_Bij(
             advec_Baux_LL = advec.Baux;
         }
 
+        // compute time derivatives
         Tensor<2, data_t> dt_Eij = gq.compute_dt_weyl_electric_part(
             d1_Eaux_LL, d1_Baux_LL, Eaux_LL, Baux_LL, advec_Eaux_LL,
             advec_Baux_LL);
@@ -521,6 +554,8 @@ void EBSystem::compute_d2_Eij_and_Bij(
 
         if (m_params.use_last_index_raised)
         {
+            // now need to raise them back to get the time derivative LU
+            // this needs the rhs of 'h', so d1_h[i][j][0]
             Tensor<2, data_t> dt_Eij_LU, dt_Bij_LU;
 
             Tensor<2, data_t> Eij_LU = TensorAlgebra::compute_dot_product(
@@ -645,6 +680,9 @@ void EBSystem::add_diffusion_terms(
     data_t tr_space_laplace_Bij = 0.;
     if (m_params.use_last_index_raised)
     {
+        // this is all very non-covariant, but for consistency I replaced the
+        // metric by a delta function, since one of the indexes is already
+        // raised
         FOR(i)
         {
             tr_space_laplace_Eij += space_laplace_Eij[i][i];

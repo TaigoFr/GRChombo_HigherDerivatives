@@ -49,12 +49,22 @@ class ComputeEB
         GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
         gq.set_formulation(m_formulation, m_ccz4_params);
 
+        // Eij and Bij are a bit everything here
+        // they will be LL or LU depending on 'm_use_last_index_raised'
+        // they will be the actual tensors OR THEIR TIME DERIVATIVE if
+        // 'm_compute_time_derivatives == true'
         Tensor<2, data_t> Eij = {0.};
         Tensor<2, data_t> Bij = {0.};
         const auto &h_UU = gq.get_metric_UU_spatial();
 
         if (m_compute_time_derivatives)
         {
+            // this is a pain
+            // to compute the time derivative of LL via
+            // GeometricQuantities::compute_dt_weyl_electric_part, so all
+            // vars.E, d1.E, advec.E (same for B) that have one index raised
+            // need to be lowered to have the right input (and raised
+            // afterwards)
             const auto advec =
                 m_deriv.template advection<Vars>(current_cell, vars.shift);
 
@@ -130,6 +140,9 @@ class ComputeEB
 
             if (m_use_last_index_raised)
             {
+                // now need to raise them back to get the time derivative LU
+                // this needs the rhs of 'h', dt_h
+
                 // gauge does not matter as we only compute
                 // 'compute_rhs_equations_no_gauge' (we don't use the full RHS
                 // equations)
@@ -140,14 +153,8 @@ class ComputeEB
 
                 Tensor<2, data_t> Eij_no_time_der_LU =
                     TensorAlgebra::compute_dot_product(Eij_no_time_der, h_UU);
-                Tensor<2, data_t> Eij_no_time_der_UU =
-                    TensorAlgebra::compute_dot_product(Eij_no_time_der_LU, h_UU,
-                                                       0, 0);
                 Tensor<2, data_t> Bij_no_time_der_LU =
                     TensorAlgebra::compute_dot_product(Bij_no_time_der, h_UU);
-                Tensor<2, data_t> Bij_no_time_der_UU =
-                    TensorAlgebra::compute_dot_product(Bij_no_time_der_LU, h_UU,
-                                                       0, 0);
 
                 Vars<data_t> rhs;
                 gq.compute_rhs_equations_no_gauge(rhs);
@@ -160,6 +167,8 @@ class ComputeEB
                         rhs.h[i][j] / vars.chi - rhs.chi * vars.h[i][j] / chi2;
                 }
 
+                // (recall Eij and Bij are used to store the time derivatives LU
+                // when 'm_compute_time_derivatives == true')
                 FOR(i, j, k)
                 {
                     Eij[i][j] += dt_Eij[i][k] * h_UU[k][j];
@@ -176,6 +185,8 @@ class ComputeEB
             else
             {
                 // replace tensors
+                // (recall Eij and Bij are used to store the time derivatives
+                // when 'm_compute_time_derivatives == true')
                 Eij = dt_Eij;
                 Bij = dt_Bij;
             }
@@ -187,6 +198,7 @@ class ComputeEB
 
             if (m_use_last_index_raised)
             {
+                // raise last index
                 Eij = TensorAlgebra::compute_dot_product(Eij, h_UU);
                 Bij = TensorAlgebra::compute_dot_product(Bij, h_UU);
             }

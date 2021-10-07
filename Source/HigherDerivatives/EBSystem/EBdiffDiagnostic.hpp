@@ -48,6 +48,7 @@ class EBdiffDiagnostic
         GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
         gq.set_formulation(m_formulation, m_ccz4_params);
 
+        // get the LL E and B, but raise to LU if using the raised system
         Tensor<2, data_t> Eij = gq.get_weyl_electric_part();
         Tensor<2, data_t> Bij = gq.get_weyl_magnetic_part();
 
