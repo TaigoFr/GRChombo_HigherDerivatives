@@ -101,8 +101,7 @@ class SimulationParameters : public SimulationParametersBase
                << std::endl;
         pp.load("advection_type", system_params.advection_type);
         pout() << "Using advection_type = " << system_params.advection_type
-               << std::endl;               
-               
+               << std::endl;
 
         if (system_params.version == 2)
         {
@@ -112,12 +111,10 @@ class SimulationParameters : public SimulationParametersBase
             CH_assert(system_params.rescale_sigma_by_lapse >= 0 &&
                       system_params.rescale_sigma_by_lapse <= 2);
 
-
             pout() << "Using rescale_tau_by_lapse = "
                    << system_params.rescale_tau_by_lapse << std::endl;
             pout() << "Using rescale_sigma_by_lapse = "
                    << system_params.rescale_sigma_by_lapse << std::endl;
-
 
             if (system_params.advection_type == 1 ||
                 system_params.advection_type == 2)
