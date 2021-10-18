@@ -99,6 +99,10 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("Box_transition", system_params.Box_transition);
         pout() << "Using Box_transition = " << system_params.Box_transition
                << std::endl;
+        pp.load("advection_type", system_params.advection_type);
+        pout() << "Using advection_type = " << system_params.advection_type
+               << std::endl;               
+               
 
         if (system_params.version == 2)
         {
@@ -107,14 +111,13 @@ class SimulationParameters : public SimulationParametersBase
                     system_params.rescale_sigma_by_lapse);
             CH_assert(system_params.rescale_sigma_by_lapse >= 0 &&
                       system_params.rescale_sigma_by_lapse <= 2);
-            pp.load("advection_type", system_params.advection_type);
+
 
             pout() << "Using rescale_tau_by_lapse = "
                    << system_params.rescale_tau_by_lapse << std::endl;
             pout() << "Using rescale_sigma_by_lapse = "
                    << system_params.rescale_sigma_by_lapse << std::endl;
-            pout() << "Using advection_type = " << system_params.advection_type
-                   << std::endl;
+
 
             if (system_params.advection_type == 1 ||
                 system_params.advection_type == 2)
@@ -146,7 +149,7 @@ class SimulationParameters : public SimulationParametersBase
         pout() << "Using use_last_index_raised = "
                << system_params.use_last_index_raised << std::endl;
 
-        if (system_params.version == 2)
+        if (system_params.version == 2 || system_params.version == 3)
         {
             pp.load("advection_type", system_params.advection_type);
             pp.load("eb_sigma", system_params.sigma);

@@ -32,7 +32,7 @@ class CSystem
         int advection_type;     // only for v2
                                 // (0, 1 or 2 for simple advection or Luis'
                                 // advection proposal)
-        double advection_coeff; // for advection_type 1 and 2
+        double advection_coeff; // for advection_type 1 and 2, or 0 and 1 for no advction or advection in system v1
 
         bool Box_transition; // for when transitioning from Box_driver
                              // to only time derivatives

@@ -401,8 +401,10 @@ void EBSystem::add_matter_rhs(
     {
         // recall: Eaux and Baux are the 1st time derivative of E and B
 
+
         const auto &d2 = gq.get_d2_vars();
         const auto &advec = gq.get_advection();
+      
 
         // first compute the LL ones, but when evolving the raised E and B
         // these need to be raised
@@ -453,6 +455,72 @@ void EBSystem::add_matter_rhs(
                 }
             }
         }
+    }
+    else if (m_params.version == 3)
+    {
+    // recall: Eaux and Baux are the 1st time derivative of E and B
+        const auto &d1 = gq.get_d1_vars();
+        const auto &d2 = gq.get_d2_vars();
+        const auto &advec = gq.get_advection();
+        const auto &g_UU = gq.get_metric_UU_ST();
+        const auto &Gamma_ST = gq.get_Gamma_ST();          
+        
+        // first compute the LL ones, but when evolving the raised E and B
+        // these need to be raised
+        Tensor<2, data_t> Eij = gq.get_weyl_electric_part();
+        Tensor<2, data_t> Bij = gq.get_weyl_magnetic_part();
+
+        if (m_params.use_last_index_raised)
+        {
+            // raising them here
+            const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
+            Eij = TensorAlgebra::compute_dot_product(Eij, metric_UU_spatial);
+            Bij = TensorAlgebra::compute_dot_product(Bij, metric_UU_spatial);
+        }
+        
+	data_t advfac = 1.0;
+        if (m_params.advection_type == 0)
+    	{
+		advfac = 0.0;
+    	}
+    	
+    	else if (m_params.advection_type == 1)
+    	{
+		advfac = 1.0;
+    	}
+        
+        FOR(i, j)  
+        {      
+
+            total_rhs.Eij[i][j] = vars.Eaux[i][j];
+            total_rhs.Bij[i][j] = vars.Baux[i][j];
+            
+            total_rhs.Eaux[i][j] = -m_params.tau / vars.lapse * (vars.Eaux[i][j] - advfac* advec.Eij[i][j]) +
+            Eij[i][j] -  vars.Eij[i][j] - m_params.sigma * Gamma_ST[0] * vars.Eaux[i][j] ;
+            
+            total_rhs.Baux[i][j] = -m_params.tau / vars.lapse * (vars.Baux[i][j] - advfac* advec.Bij[i][j]) +
+            Bij[i][j] -  vars.Bij[i][j] - m_params.sigma * Gamma_ST[0] * vars.Baux[i][j] ;            
+                
+        	FOR(k)
+        	{
+            		total_rhs.Eaux[i][j] +=
+                	m_params.sigma *
+                	(2. * g_UU[0][k + 1] * d1.Eaux[i][j][k] - Gamma_ST[k + 1] * d1.Eij[i][j][k]);
+                	
+            		total_rhs.Baux[i][j] +=
+                	m_params.sigma *
+                	(2. * g_UU[0][k + 1] * d1.Baux[i][j][k] - Gamma_ST[k + 1] * d1.Bij[i][j][k]);
+            		FOR(l)
+            		{
+            			total_rhs.Eaux[i][j] +=
+                    		m_params.sigma * g_UU[k + 1][l + 1] * d2.Eij[i][j][k][l];
+            			total_rhs.Baux[i][j] +=
+                    		m_params.sigma * g_UU[k + 1][l + 1] * d2.Bij[i][j][k][l];
+            		}
+        	}
+            	total_rhs.Eaux[i][j] /= (-m_params.sigma * g_UU[0][0]);
+            	total_rhs.Baux[i][j] /= (-m_params.sigma * g_UU[0][0]);         	        
+	}      
     }
     else
     {
