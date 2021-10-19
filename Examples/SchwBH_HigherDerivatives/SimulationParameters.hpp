@@ -128,7 +128,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("eb_version", system_params.version);
         pout() << "Using EB system version " << system_params.version
                << std::endl;
-        CH_assert(system_params.version >= 1 && system_params.version <= 2);
+        CH_assert(system_params.version >= 1 && system_params.version <= 3);
 
         pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
         pp.load("rescale_sigma_by_lapse", system_params.rescale_sigma_by_lapse);
