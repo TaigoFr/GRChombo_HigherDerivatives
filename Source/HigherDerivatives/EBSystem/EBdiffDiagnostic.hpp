@@ -63,11 +63,12 @@ class EBdiffDiagnostic
         data_t B_diff_squared = 0.;
         FOR(i, j)
         {
-            E_diff_squared +=
-                (vars.Eij[i][j] - Eij[i][j]) * (vars.Eij[i][j] - Eij[i][j]);
+            //E_diff_squared +=
+            //    (vars.Eij[i][j] - Eij[i][j]) * (vars.Eij[i][j] - Eij[i][j]); Will bring this back later
             B_diff_squared +=
                 (vars.Bij[i][j] - Bij[i][j]) * (vars.Bij[i][j] - Bij[i][j]);
         }
+        E_diff_squared = Eij[1][1];
 
         current_cell.store_vars(sqrt(E_diff_squared), c_E_diff);
         current_cell.store_vars(sqrt(B_diff_squared), c_B_diff);
