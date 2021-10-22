@@ -692,7 +692,7 @@ void EBSystem::compute_d2_Eij_and_Bij(
             d2_Bij[i][j][0][0] = -1. / tau * (rhs.Bij[i][j] - dt_Bij[i][j]);
         }
     }
-    else if (m_params.version == 2 || m_params.version == 3 )
+    else if (m_params.version == 2 || m_params.version == 3)
     {
         const auto &d1 = gq.get_d1_vars();
         const auto &d2 = gq.get_d2_vars();
