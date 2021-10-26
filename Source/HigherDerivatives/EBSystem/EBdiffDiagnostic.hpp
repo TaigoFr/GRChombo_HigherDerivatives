@@ -69,7 +69,7 @@ class EBdiffDiagnostic
             B_diff_squared +=
                 (vars.Bij[i][j] - Bij[i][j]) * (vars.Bij[i][j] - Bij[i][j]);
         }
-        E_diff_squared = Eij[1][1];
+        E_diff_squared = Eij[0][0];
 
         // current_cell.store_vars(sqrt(E_diff_squared), c_E_diff);
         current_cell.store_vars(E_diff_squared, c_E_diff);
