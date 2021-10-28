@@ -15,6 +15,20 @@ enum
 #ifdef USE_EBSYSTEM
     c_E_diff,
     c_B_diff,
+
+    c_Ephys11,
+    c_Ephys12,
+    c_Ephys13,
+    c_Ephys22,
+    c_Ephys23,
+    c_Ephys33,
+
+    c_Bphys11,
+    c_Bphys12,
+    c_Bphys13,
+    c_Bphys22,
+    c_Bphys23,
+    c_Bphys33,
 #elif USE_CSYSTEM
     c_C_diff,
     c_Cphys,
@@ -44,6 +58,20 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 #ifdef USE_EBSYSTEM
     "E_diff",
     "B_diff",
+
+    "Ephys11",
+    "Ephys12",
+    "Ephys13",
+    "Ephys22",
+    "Ephys23",
+    "Ephys33",
+
+    "Bphys11",
+    "Bphys12",
+    "Bphys13",
+    "Bphys22",
+    "Bphys23",
+    "Bphys33",
 #elif USE_CSYSTEM
     "C_diff",
     "Cphys",

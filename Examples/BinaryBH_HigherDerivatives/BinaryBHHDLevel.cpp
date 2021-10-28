@@ -130,14 +130,6 @@ void BinaryBHHDLevel::computeDiagnostics()
         c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
         Interval(c_Mom, c_Mom));
 
-#ifdef USE_EBSYSTEM
-    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params,
-                          m_p.system_params.use_last_index_raised);
-#elif USE_CSYSTEM
-    CDiagnostics diff(m_dx, m_p.formulation, m_p.ccz4_params, c_Cphys,
-                      c_C_diff);
-#endif
-
     WeakFieldConditionDiagnostic<System> weakField(c2eft, m_dx, m_p.formulation,
                                                    m_p.ccz4_params);
     NCCDiagnostic<System> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
@@ -148,19 +140,34 @@ void BinaryBHHDLevel::computeDiagnostics()
     //     m_p.formulation, m_p.G_Newton, c_diffusion_h11, c_rhs_h11);
 
 #ifdef USE_EBSYSTEM
+    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params,
+                          m_p.system_params.use_last_index_raised);
+    ComputeEB computeEB(m_dx, m_p.formulation, m_p.ccz4_params,
+                        Interval(c_Ephys11, c_Ephys33),
+                        Interval(c_Bphys11, c_Bphys33),
+                        m_p.system_params.use_last_index_raised);
+
     if (m_p.system_params.version == 1)
     {
+        // need to first store Eaux and Baux on the grid with the physical E & B
         BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
                                  Interval(c_Eaux11, c_Eaux33),
                                  Interval(c_Baux11, c_Baux33),
                                  m_p.system_params.use_last_index_raised),
                        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     }
-#endif
+
+    BoxLoops::loop(make_compute_pack(weakField, ncc /*, diffusion */,
+                                     constraints, diff, computeEB),
+                   m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+#elif USE_CSYSTEM
+    CDiagnostics diff(m_dx, m_p.formulation, m_p.ccz4_params, c_Cphys,
+                      c_C_diff);
 
     BoxLoops::loop(
-        make_compute_pack(constraints, diff, weakField, ncc /*, diffusion*/),
+        make_compute_pack(weakField, ncc /*, diffusion*/, constraints, diff),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+#endif
 }
 
 // Things to do in RHS update, at each RK4 step
