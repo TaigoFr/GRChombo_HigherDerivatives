@@ -19,8 +19,8 @@ plot_prefix = HigherDerivativesp_
 # set to 0 to turn off plot files (except at t=0 and t=stop_time)
 # set to -1 to never ever print plotfiles
 # plot_interval = 10
-num_plot_vars = 16
-plot_vars = chi lapse shift1 Ham Mom E_diff B_diff WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus Weyl4_Re Weyl4_Im
+num_plot_vars = 20
+plot_vars = chi lapse shift1 Ham Mom E_diff B_diff E11 B11 Ephys11 Bphys11 WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus Weyl4_Re Weyl4_Im
 
 # for head-ons:
 checkpoint_interval = 50
@@ -125,6 +125,8 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 4 6 0 5 0      #Baux
 vars_parity_diagnostic = 0 0              #Ham and Mom
                          0 0              #Eij and Bij diffs
+                         0 4 6 0 5 0      #Eij
+                         0 4 6 0 5 0      #Bij
                          0 0 0            #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC
                          0 0 0 0          #NCC x 4
                          0 7              #Weyl4
