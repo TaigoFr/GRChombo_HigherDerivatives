@@ -72,6 +72,8 @@ void CSystem::add_matter_rhs(
 
     if (m_params.version == 1)
     {
+        data_t advfac = m_params.advection_type ? 1.0 : 0.0;
+
         data_t factor = 1.0;
         if (m_params.Box_transition)
         {
@@ -85,10 +87,10 @@ void CSystem::add_matter_rhs(
         const auto &g_UU = gq.get_metric_UU_ST();
         const auto &Gamma_ST = gq.get_Gamma_ST();
 
-        total_rhs.dCdt =
-            -m_params.tau / vars.lapse * (vars.dCdt - factor * advec.C) +
-            kretschmann - vars.C -
-            factor * m_params.sigma * Gamma_ST[0] * vars.dCdt;
+        total_rhs.dCdt = -m_params.tau / vars.lapse *
+                             (vars.dCdt - advfac * factor * advec.C) +
+                         kretschmann - vars.C -
+                         factor * m_params.sigma * Gamma_ST[0] * vars.dCdt;
 
         FOR(i)
         {

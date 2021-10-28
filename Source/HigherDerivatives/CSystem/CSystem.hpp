@@ -32,10 +32,11 @@ class CSystem
         int advection_type;     // only for v2
                                 // (0, 1 or 2 for simple advection or Luis'
                                 // advection proposal)
-        double advection_coeff; // for advection_type 1 and 2
+                                // or in system v1 (1 or 0 for on / off)
+        double advection_coeff; // for advection_type 1 and 2 in v2
 
         bool Box_transition; // for when transitioning from Box_driver
-                             // to only time derivatives
+                             // to only time derivatives in v1
     };
 
     //!  Constructor of class CSystem, inputs are the matter parameters.

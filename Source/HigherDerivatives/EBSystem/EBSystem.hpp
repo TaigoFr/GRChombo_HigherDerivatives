@@ -30,7 +30,8 @@ class EBSystem
         int advection_type;     // only for v2
                                 // (0, 1 or 2 for simple advection or Luis'
                                 // advection proposal)
-        double advection_coeff; // for advection_type 1 and 2
+                                // or in system v3 (1 or 0 for on / off)
+        double advection_coeff; // for advection_type 1 and 2 in v2
 
         bool Box_transition; // Could be use to active a transition for the
                              // advection velocities
