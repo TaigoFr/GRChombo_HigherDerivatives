@@ -476,17 +476,7 @@ void EBSystem::add_matter_rhs(
             Bij = TensorAlgebra::compute_dot_product(Bij, metric_UU_spatial);
         }
 
-        data_t advfac = 1.0;
-        if (m_params.advection_type == 0)
-        {
-            advfac = 0.0;
-        }
-
-        else if (m_params.advection_type == 1)
-        {
-            advfac = 1.0;
-        }
-
+        data_t advfac = m_params.advection_type;
         FOR(i, j)
         {
 
