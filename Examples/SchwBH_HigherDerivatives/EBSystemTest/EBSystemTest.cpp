@@ -111,10 +111,10 @@ int runTest(int argc, char *argv[])
     eb_params.rescale_tau_by_lapse = false;
     eb_params.rescale_sigma_by_lapse = false;
     eb_params.version = 1;
-    // eb_params.advection_type = 0; // only for v2
-    // eb_params.advection_coeff = 0.; // only for v2
     // eb_params.sigma = 1.; // only for v2
-    eb_params.Box_transition = false;
+    // eb_params.advection_type = 0; // only for v2 || v3
+    // eb_params.advection_coeff = 0.; // only for v2
+    // eb_params.Box_transition = false; // not in use
     eb_params.use_last_index_raised = false;
 
     int failed = 0;

@@ -112,7 +112,9 @@ int runTest(int argc, char *argv[])
     c_params.version = 1;
     // c_params.rescale_tau_by_lapse = false; // only for v2
     // c_params.rescale_sigma_by_lapse = false; // only for v2
-    // c_params.add_advection = 0; // only for v2
+    c_params.advection_type = 1;
+    // c_params.advection_coeff = 0.; // only for v2
+    c_params.Box_transition = 0;
 
     int failed = 0;
 

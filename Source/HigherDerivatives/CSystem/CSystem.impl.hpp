@@ -72,7 +72,7 @@ void CSystem::add_matter_rhs(
 
     if (m_params.version == 1)
     {
-        data_t advfac = m_params.advection_type;
+        data_t advfac = m_params.advection_type ? 1.0 : 0.0;
 
         data_t factor = 1.0;
         if (m_params.Box_transition)
