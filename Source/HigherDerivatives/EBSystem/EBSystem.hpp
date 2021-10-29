@@ -24,7 +24,8 @@ class EBSystem
         int rescale_sigma_by_lapse; // (0, 1 or 2 for lapse or lapse^2
                                     // rescaling)
 
-        int version; // v1 is the 1st order eq, v2 is the 2nd order eq.
+        int version; // v1 is the 1st order eq, v2 is the 2nd order eq.,
+                     // v3 is laplacian based equation
 
         double sigma;           // only for v2
         int advection_type;     // only for v2
