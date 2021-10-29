@@ -27,7 +27,7 @@ class EBSystem
         int version; // v1 is the 1st order eq, v2 is the 2nd order eq.,
                      // v3 is laplacian based equation
 
-        double sigma;           // only for v2
+        double sigma;           // only for v2 or v3
         int advection_type;     // only for v2
                                 // (0, 1 or 2 for simple advection or Luis'
                                 // advection proposal)
