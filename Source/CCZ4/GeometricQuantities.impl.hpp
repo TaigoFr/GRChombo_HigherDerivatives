@@ -41,6 +41,7 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_advection = nullptr;
     m_gauge = nullptr;
     m_em_tensor = nullptr;
+    m_coords = nullptr;
 
     m_h_UU = nullptr;
     m_chris = nullptr;
@@ -572,6 +573,11 @@ GeometricQuantities_t::set_cosmological_constant(double cosmological_constant)
     m_cosmological_constant = cosmological_constant;
     clean_eom_dependent();
 }
+template_GQ void
+GeometricQuantities_t::set_coordinates(const Coordinates<data_t> &a_coords)
+{
+    m_coords = &a_coords;
+}
 
 template_GQ void GeometricQuantities_t::set_all_vars(const Vars &a_vars,
                                                      const Diff1Vars &a_d1_vars,
@@ -634,6 +640,12 @@ GeometricQuantities_t::get_em_tensor() const
 {
     CH_assert(m_em_tensor != nullptr);
     return *m_em_tensor;
+}
+template_GQ const Coordinates<data_t> &
+GeometricQuantities_t::get_coordinates() const
+{
+    CH_assert(m_coords != nullptr);
+    return *m_coords;
 }
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_h_UU()

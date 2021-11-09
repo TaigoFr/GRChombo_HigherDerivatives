@@ -8,6 +8,8 @@
 #ifndef GEOMETRICQUANTITIES_HPP_
 #define GEOMETRICQUANTITIES_HPP_
 
+#include "Coordinates.hpp"
+
 // auxiliary class as default template for when GeometricQuantities doesn't need
 // a gauge
 class EmptyGauge
@@ -82,6 +84,7 @@ class GeometricQuantities
     void set_formulation(int formulation, const CCZ4_params_t<> &a_ccz4_params);
     void set_em_tensor(const emtensor_t<data_t> &a_em_tensor, double G_Newton);
     void set_cosmological_constant(double cosmological_constant);
+    void set_coordinates(const Coordinates<data_t> &a_coords);
     /*
     Cheat sheet (L is \Lambda):
      k T_mn -> -2 L g_mn
@@ -106,6 +109,7 @@ class GeometricQuantities
     const Vars &get_advection() const;
     const gauge_t &get_gauge() const;
     const emtensor_t<data_t> &get_em_tensor() const;
+    const Coordinates<data_t> &get_coordinates() const;
 
     //////// spatial ////////
     // spatial conformal
@@ -259,6 +263,7 @@ class GeometricQuantities
     const Vars *m_advection;
     const gauge_t *m_gauge;
     const emtensor_t<data_t> *m_em_tensor;
+    const Coordinates<data_t> *m_coords;
 
     //////// spatial ////////
     // spatial conformal
