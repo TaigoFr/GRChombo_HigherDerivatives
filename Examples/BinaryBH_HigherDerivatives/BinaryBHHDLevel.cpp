@@ -309,8 +309,8 @@ void BinaryBHHDLevel::specificPostTimeStep()
         System EBsystem(m_p.system_params);
         C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
         MatterConstraints<C2EFT<System>> constraints(
-            c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
-            Interval(c_Mom, c_Mom));
+            c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params,
+            m_p.center, c_Ham, Interval(c_Mom, c_Mom));
 
         BoxLoops::loop(constraints, m_state_new, m_state_diagnostics,
                        EXCLUDE_GHOST_CELLS);
