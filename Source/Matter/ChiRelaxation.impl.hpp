@@ -30,7 +30,9 @@ void ChiRelaxation<matter_t>::compute(Cell<data_t> current_cell) const
     const auto advec =
         m_deriv.template advection<Vars>(current_cell, vars.shift);
 
-    GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
+    GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2,
+                                                    "ChiRelaxation::compute");
+
     gq.set_advection(advec);
     // never needed so far, but should be included
     // gq.set_cosmological_constant(m_cosmological_constant);

@@ -47,19 +47,21 @@ template <class System> class NCCDiagnostic
         const auto advec =
             m_deriv.template advection<Vars>(current_cell, vars.shift);
 
+        Coordinates<data_t> coords(current_cell, m_deriv.m_dx, m_center);
+
         // make gauge
         MovingPunctureGauge gauge(m_ccz4_params);
 
         GeometricQuantities<data_t, Vars, Diff2Vars, MovingPunctureGauge> gq(
-            vars, d1, d2);
+            vars, d1, d2, "NCCDiagnostic::compute");
+
         gq.set_formulation(m_formulation, m_ccz4_params);
         gq.set_advection_and_gauge(advec,
                                    gauge); // needed for 'compute_emtensor'
+        gq.set_coordinates(coords);
 
         const auto emtensor = m_matter.compute_emtensor(gq);
         gq.set_em_tensor(emtensor, m_G_Newton);
-
-        Coordinates<data_t> coords(current_cell, m_deriv.m_dx, m_center);
 
         Tensor<1, data_t, GR_SPACEDIM + 1> null_vec_plus, null_vec_minus;
         get_null_radial_vector(null_vec_plus, null_vec_minus, vars, coords);

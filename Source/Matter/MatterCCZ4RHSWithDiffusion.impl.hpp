@@ -16,10 +16,11 @@ inline MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::
     MatterCCZ4RHSWithDiffusion(matter_t a_matter, params_t a_params,
                                diffusion_params_t a_diffusion_params,
                                double a_dx, double a_dt, double a_sigma,
+                               const std::array<double, CH_SPACEDIM> a_center,
                                int a_formulation, double a_G_Newton)
     : MatterCCZ4RHS<matter_t, gauge_t, deriv_t>(
           a_matter, a_params, a_dx, a_sigma, a_formulation, a_G_Newton),
-      m_diffusion_params(a_diffusion_params), m_dt(a_dt)
+      m_diffusion_params(a_diffusion_params), m_dt(a_dt), m_center(a_center)
 {
 }
 
@@ -38,11 +39,16 @@ void MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::compute(
     const auto advec =
         this->m_deriv.template advection<Vars>(current_cell, matter_vars.shift);
 
-    GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(matter_vars, d1,
-                                                             d2);
+    const Coordinates<data_t> coords(current_cell, this->m_deriv.m_dx,
+                                     m_center);
+
+    GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
+        matter_vars, d1, d2, "MatterCCZ4RHSWithDiffusion::compute");
+
     gq.set_advection_and_gauge(advec, this->m_gauge);
     gq.set_formulation(this->m_formulation, this->m_params);
     gq.set_cosmological_constant(this->m_cosmological_constant);
+    gq.set_coordinates(coords);
 
     // add evolution of matter fields themselves
     // done before to avoid getting contributions from the EM-tensor

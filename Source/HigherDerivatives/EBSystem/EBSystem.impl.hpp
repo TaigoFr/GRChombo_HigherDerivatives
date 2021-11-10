@@ -376,12 +376,21 @@ void EBSystem::add_matter_rhs(
 
     data_t tau = m_params.tau;
     data_t sigma = m_params.sigma;
+
+    if (m_params.use_dynamic_tau)
+    {
+        const Coordinates<data_t> &coords = gq.get_coordinates();
+        tau = tau_from_radius(coords.get_radius());
+    }
+
+    data_t tau_rescaled = tau;
+    data_t sigma_rescaled = sigma;
     if (m_params.rescale_tau_by_lapse)
-        tau /= vars.lapse;
+        tau_rescaled /= vars.lapse;
     if (m_params.rescale_sigma_by_lapse == 2)
-        sigma /= (vars.lapse * vars.lapse);
+        sigma_rescaled /= (vars.lapse * vars.lapse);
     else if (m_params.rescale_sigma_by_lapse == 1)
-        sigma /= vars.lapse;
+        sigma_rescaled /= vars.lapse;
 
     if (m_params.version == 1)
     {
@@ -390,9 +399,9 @@ void EBSystem::add_matter_rhs(
         FOR(i, j)
         {
             total_rhs.Eij[i][j] =
-                -1. / tau * (vars.Eij[i][j] - vars.Eaux[i][j]);
+                -1. / tau_rescaled * (vars.Eij[i][j] - vars.Eaux[i][j]);
             total_rhs.Bij[i][j] =
-                -1. / tau * (vars.Bij[i][j] - vars.Baux[i][j]);
+                -1. / tau_rescaled * (vars.Bij[i][j] - vars.Baux[i][j]);
             total_rhs.Eaux[i][j] = 0.;
             total_rhs.Baux[i][j] = 0.;
         }
@@ -431,9 +440,11 @@ void EBSystem::add_matter_rhs(
             total_rhs.Eij[i][j] = vars.Eaux[i][j];
             total_rhs.Bij[i][j] = vars.Baux[i][j];
             total_rhs.Eaux[i][j] =
-                (-tau * Eaux_with_advec + Eij[i][j] - vars.Eij[i][j]) / sigma;
+                (-tau_rescaled * Eaux_with_advec + Eij[i][j] - vars.Eij[i][j]) /
+                sigma_rescaled;
             total_rhs.Baux[i][j] =
-                (-tau * Baux_with_advec + Bij[i][j] - vars.Bij[i][j]) / sigma;
+                (-tau_rescaled * Baux_with_advec + Bij[i][j] - vars.Bij[i][j]) /
+                sigma_rescaled;
 
             if (m_params.advection_type == 2)
             {
@@ -484,38 +495,36 @@ void EBSystem::add_matter_rhs(
             total_rhs.Bij[i][j] = vars.Baux[i][j];
 
             total_rhs.Eaux[i][j] =
-                -m_params.tau / vars.lapse *
+                -tau / vars.lapse *
                     (vars.Eaux[i][j] - advfac * advec.Eij[i][j]) +
                 Eij[i][j] - vars.Eij[i][j] -
-                m_params.sigma * Gamma_ST[0] * vars.Eaux[i][j];
+                sigma * Gamma_ST[0] * vars.Eaux[i][j];
 
             total_rhs.Baux[i][j] =
-                -m_params.tau / vars.lapse *
+                -tau / vars.lapse *
                     (vars.Baux[i][j] - advfac * advec.Bij[i][j]) +
                 Bij[i][j] - vars.Bij[i][j] -
-                m_params.sigma * Gamma_ST[0] * vars.Baux[i][j];
+                sigma * Gamma_ST[0] * vars.Baux[i][j];
 
             FOR(k)
             {
                 total_rhs.Eaux[i][j] +=
-                    m_params.sigma * (2. * g_UU[0][k + 1] * d1.Eaux[i][j][k] -
-                                      Gamma_ST[k + 1] * d1.Eij[i][j][k]);
+                    sigma * (2. * g_UU[0][k + 1] * d1.Eaux[i][j][k] -
+                             Gamma_ST[k + 1] * d1.Eij[i][j][k]);
 
                 total_rhs.Baux[i][j] +=
-                    m_params.sigma * (2. * g_UU[0][k + 1] * d1.Baux[i][j][k] -
-                                      Gamma_ST[k + 1] * d1.Bij[i][j][k]);
+                    sigma * (2. * g_UU[0][k + 1] * d1.Baux[i][j][k] -
+                             Gamma_ST[k + 1] * d1.Bij[i][j][k]);
                 FOR(l)
                 {
-                    total_rhs.Eaux[i][j] += m_params.sigma *
-                                            g_UU[k + 1][l + 1] *
-                                            d2.Eij[i][j][k][l];
-                    total_rhs.Baux[i][j] += m_params.sigma *
-                                            g_UU[k + 1][l + 1] *
-                                            d2.Bij[i][j][k][l];
+                    total_rhs.Eaux[i][j] +=
+                        sigma * g_UU[k + 1][l + 1] * d2.Eij[i][j][k][l];
+                    total_rhs.Baux[i][j] +=
+                        sigma * g_UU[k + 1][l + 1] * d2.Bij[i][j][k][l];
                 }
             }
-            total_rhs.Eaux[i][j] /= (-m_params.sigma * g_UU[0][0]);
-            total_rhs.Baux[i][j] /= (-m_params.sigma * g_UU[0][0]);
+            total_rhs.Eaux[i][j] /= (-sigma * g_UU[0][0]);
+            total_rhs.Baux[i][j] /= (-sigma * g_UU[0][0]);
         }
     }
     else
@@ -652,6 +661,12 @@ void EBSystem::compute_d2_Eij_and_Bij(
         }
 
         data_t tau = m_params.tau;
+
+        if (m_params.use_dynamic_tau)
+        {
+            const Coordinates<data_t> &coords = gq.get_coordinates();
+            tau = tau_from_radius(coords.get_radius());
+        }
         if (m_params.rescale_tau_by_lapse)
             tau /= vars.lapse;
 

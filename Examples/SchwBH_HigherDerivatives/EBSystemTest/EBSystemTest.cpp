@@ -116,6 +116,9 @@ int runTest(int argc, char *argv[])
     // eb_params.advection_coeff = 0.; // only for v2
     // eb_params.Box_transition = false; // not in use
     eb_params.use_last_index_raised = false;
+    eb_params.use_dynamic_tau = false;
+    // eb_params.tau_asymptotic = 1.;   // if 'use_dynamic_tau'
+    // eb_params.tau_decay_length = 1.; // if 'use_dynamic_tau'
 
     int failed = 0;
 

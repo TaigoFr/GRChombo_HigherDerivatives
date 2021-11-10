@@ -88,6 +88,24 @@ class SimulationParameters : public SimulationParametersBase
 
         pp.load("tau", system_params.tau);
         pout() << "Using tau = " << system_params.tau << std::endl;
+
+        pp.load("Box_transition", system_params.Box_transition);
+        pout() << "Using Box_transition = " << system_params.Box_transition
+               << std::endl;
+
+        pp.load("use_dynamic_tau", system_params.use_dynamic_tau);
+        pout() << "Using use_dynamic_tau = " << system_params.use_dynamic_tau
+               << std::endl;
+        if (system_params.use_dynamic_tau)
+        {
+            pp.load("tau_asymptotic", system_params.tau_asymptotic);
+            pout() << "Using tau_asymptotic = " << system_params.tau_asymptotic
+                   << std::endl;
+            pp.load("tau_decay_length", system_params.tau_decay_length);
+            pout() << "Using tau_decay_length = "
+                   << system_params.tau_decay_length << std::endl;
+        }
+
 #ifdef USE_CSYSTEM
         pp.load("c_sigma", system_params.sigma);
         pout() << "Using sigma = " << system_params.sigma << std::endl;
@@ -96,9 +114,6 @@ class SimulationParameters : public SimulationParametersBase
         pout() << "Using C system version " << system_params.version
                << std::endl;
         CH_assert(system_params.version >= 1 && system_params.version <= 2);
-        pp.load("Box_transition", system_params.Box_transition);
-        pout() << "Using Box_transition = " << system_params.Box_transition
-               << std::endl;
         pp.load("advection_type", system_params.advection_type);
         pout() << "Using advection_type = " << system_params.advection_type
                << std::endl;
@@ -138,9 +153,6 @@ class SimulationParameters : public SimulationParametersBase
                << system_params.rescale_tau_by_lapse << std::endl;
         pout() << "Using rescale_sigma_by_lapse = "
                << system_params.rescale_sigma_by_lapse << std::endl;
-        pp.load("Box_transition", system_params.Box_transition);
-        pout() << "Using Box_transition = " << system_params.Box_transition
-               << std::endl;
 
         pp.load("use_last_index_raised", system_params.use_last_index_raised);
         pout() << "Using use_last_index_raised = "

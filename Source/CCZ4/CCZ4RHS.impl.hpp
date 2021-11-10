@@ -51,7 +51,9 @@ void CCZ4RHS<gauge_t, deriv_t>::compute(Cell<data_t> current_cell) const
     const auto advec =
         m_deriv.template advection<Vars>(current_cell, vars.shift);
 
-    GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(vars, d1, d2);
+    GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
+        vars, d1, d2, "CCZ4RHS::compute");
+
     gq.set_advection_and_gauge(advec, m_gauge);
     gq.set_formulation(m_formulation, m_params);
     gq.set_cosmological_constant(m_cosmological_constant);

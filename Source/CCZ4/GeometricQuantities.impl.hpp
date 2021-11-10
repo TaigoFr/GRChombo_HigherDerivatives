@@ -17,16 +17,18 @@
 #define GeometricQuantities_t                                                  \
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t>
 
-template_GQ GeometricQuantities_t::GeometricQuantities()
-    : m_formulation(-1), m_ccz4_params(nullptr), m_16_pi_G_Newton(0.),
-      m_cosmological_constant(0.)
+template_GQ
+GeometricQuantities_t::GeometricQuantities(const std::string &a_label)
+    : m_label(a_label), m_formulation(-1), m_ccz4_params(nullptr),
+      m_16_pi_G_Newton(0.), m_cosmological_constant(0.)
 {
     set_all_to_null();
 }
 
 template_GQ GeometricQuantities_t::GeometricQuantities(
-    const Vars &a_vars, const Diff1Vars &a_d1_vars, const Diff2Vars &a_d2_vars)
-    : GeometricQuantities()
+    const Vars &a_vars, const Diff1Vars &a_d1_vars, const Diff2Vars &a_d2_vars,
+    const std::string &a_label)
+    : GeometricQuantities(a_label)
 {
     m_vars = &a_vars;
     m_d1_vars = &a_d1_vars;
@@ -609,42 +611,42 @@ template_GQ double GeometricQuantities_t::get_cosmological_constant() const
 template_GQ const typename GeometricQuantities_t::Vars &
 GeometricQuantities_t::get_vars() const
 {
-    CH_assert(m_vars != nullptr); // CH_assert of MayDay::Error ?
+    assert_with_label(m_vars != nullptr, m_label);
     return *m_vars;
 }
 template_GQ const typename GeometricQuantities_t::Diff1Vars &
 GeometricQuantities_t::get_d1_vars() const
 {
-    CH_assert(m_d1_vars != nullptr);
+    assert_with_label(m_d1_vars != nullptr, m_label);
     return *m_d1_vars;
 }
 template_GQ const typename GeometricQuantities_t::Diff2Vars &
 GeometricQuantities_t::get_d2_vars() const
 {
-    CH_assert(m_d2_vars != nullptr);
+    assert_with_label(m_d2_vars != nullptr, m_label);
     return *m_d2_vars;
 }
 template_GQ const typename GeometricQuantities_t::Vars &
 GeometricQuantities_t::get_advection() const
 {
-    CH_assert(m_advection != nullptr);
+    assert_with_label(m_advection != nullptr, m_label);
     return *m_advection;
 }
 template_GQ const gauge_t &GeometricQuantities_t::get_gauge() const
 {
-    CH_assert(m_gauge != nullptr);
+    assert_with_label(m_gauge != nullptr, m_label);
     return *m_gauge;
 }
 template_GQ const emtensor_t<data_t> &
 GeometricQuantities_t::get_em_tensor() const
 {
-    CH_assert(m_em_tensor != nullptr);
+    assert_with_label(m_em_tensor != nullptr, m_label);
     return *m_em_tensor;
 }
 template_GQ const Coordinates<data_t> &
 GeometricQuantities_t::get_coordinates() const
 {
-    CH_assert(m_coords != nullptr);
+    assert_with_label(m_coords != nullptr, m_label);
     return *m_coords;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -662,7 +664,7 @@ template_GQ const chris_t<data_t> &GeometricQuantities_t::get_chris()
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z_U_conformal()
 {
-    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
+    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
     if (m_Z_U_conformal == nullptr)
         compute_Z_U_conformal();
     return *m_Z_U_conformal;
@@ -677,7 +679,7 @@ GeometricQuantities_t::get_d1_chris_contracted()
 template_GQ const Tensor<2, data_t> &
 GeometricQuantities_t::get_covd_chi_conformal()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_covd_chi_conformal == nullptr)
         compute_covd_chi_conformal();
     return *m_covd_chi_conformal;
@@ -754,21 +756,21 @@ template_GQ const Tensor<3, data_t> &GeometricQuantities_t::get_chris_spatial()
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z_U()
 {
-    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
+    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
     if (m_Z_U == nullptr)
         compute_Z_U();
     return *m_Z_U;
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z()
 {
-    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
+    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
     if (m_Z == nullptr)
         compute_Z();
     return *m_Z;
 }
 template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_covd_Z()
 {
-    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
+    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
     if (m_covd_Z == nullptr)
         compute_covd_Z();
     return *m_covd_Z;
@@ -790,7 +792,7 @@ GeometricQuantities_t::get_covd_extrinsic_curvature()
 template_GQ const Tensor<3, data_t> &
 GeometricQuantities_t::get_levi_civita_spatial()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_levi_civita_spatial == nullptr)
         compute_levi_civita_spatial();
     return *m_levi_civita_spatial;
@@ -798,14 +800,14 @@ GeometricQuantities_t::get_levi_civita_spatial()
 template_GQ const Tensor<3, data_t> &
 GeometricQuantities_t::get_levi_civita_spatial_LUU()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_levi_civita_spatial_LUU == nullptr)
         compute_levi_civita_spatial_LUU();
     return *m_levi_civita_spatial_LUU;
 }
 template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_covd_lapse()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_covd_lapse == nullptr)
         compute_covd_lapse();
     return *m_covd_lapse;
@@ -813,7 +815,7 @@ template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_covd_lapse()
 template_GQ const Tensor<2, data_t> &
 GeometricQuantities_t::get_weyl_magnetic_part()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_weyl_magnetic_part == nullptr)
         compute_weyl_magnetic_part();
     return *m_weyl_magnetic_part;
@@ -821,14 +823,14 @@ GeometricQuantities_t::get_weyl_magnetic_part()
 template_GQ const Tensor<4, data_t> &
 GeometricQuantities_t::get_riemann_spatial_LLLL()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_riemann_spatial_LLLL == nullptr)
         compute_riemann_spatial_LLLL();
     return *m_riemann_spatial_LLLL;
 }
 template_GQ const Tensor<4, data_t> &GeometricQuantities_t::get_gauss_codazzi()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_gauss_codazzi == nullptr)
         compute_gauss_codazzi();
     return *m_gauss_codazzi;
@@ -836,7 +838,7 @@ template_GQ const Tensor<4, data_t> &GeometricQuantities_t::get_gauss_codazzi()
 template_GQ const Tensor<3, data_t> &
 GeometricQuantities_t::get_codazzi_mainardi()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_codazzi_mainardi == nullptr)
         compute_codazzi_mainardi();
     return *m_codazzi_mainardi;
@@ -871,7 +873,7 @@ GeometricQuantities_t::get_momentum_constraints()
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_lie_Z()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_lie_Z == nullptr)
         compute_lie_Z();
     return *m_lie_Z;
@@ -882,7 +884,7 @@ template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_qDZ(int q)
     // either q==0 to get the pure Ricci, set BSSN or CCZ4 (for
     // example for q=2 one will get the Ricci with calculated Gammas
     // replaced by evolved Gammas, and extra Z terms for CCZ4)
-    CH_assert(q == 0 || m_formulation >= 0);
+    assert_with_label(q == 0 || m_formulation >= 0, m_label);
     switch (q)
     {
     case 0:
@@ -903,7 +905,7 @@ template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci()
 }
 template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_1DZ()
 {
-    CH_assert(m_formulation >= 0);
+    assert_with_label(m_formulation >= 0, m_label);
     if (m_ricci_1DZ == nullptr)
         compute_ricci_1DZ();
     return *m_ricci_1DZ;
@@ -912,7 +914,7 @@ template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_2DZ()
 {
     // will give the Ricci with calculated Gammas
     // replaced by evolved Gammas, and extra Z terms for CCZ4
-    CH_assert(m_formulation >= 0);
+    assert_with_label(m_formulation >= 0, m_label);
     if (m_ricci_2DZ == nullptr)
         compute_ricci_2DZ();
     return *m_ricci_2DZ;
@@ -920,8 +922,8 @@ template_GQ const ricci_t<data_t> &GeometricQuantities_t::get_ricci_2DZ()
 template_GQ const Tensor<2, data_t> &
 GeometricQuantities_t::get_weyl_electric_part()
 {
-    CH_assert(GR_SPACEDIM == 3);
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_weyl_electric_part == nullptr)
         compute_weyl_electric_part();
     return *m_weyl_electric_part;
@@ -935,7 +937,7 @@ template_GQ const data_t &GeometricQuantities_t::get_hamiltonian_constraint()
 }
 template_GQ const vars_t<data_t> &GeometricQuantities_t::get_lie_derivatives()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_lie_derivatives == nullptr)
         compute_lie_derivatives();
     return *m_lie_derivatives;
@@ -943,7 +945,7 @@ template_GQ const vars_t<data_t> &GeometricQuantities_t::get_lie_derivatives()
 template_GQ const Tensor<2, data_t> &
 GeometricQuantities_t::get_lie_extrinsic_curvature()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_lie_extrinsic_curvature == nullptr)
         compute_lie_extrinsic_curvature();
     return *m_lie_extrinsic_curvature;
@@ -951,7 +953,7 @@ GeometricQuantities_t::get_lie_extrinsic_curvature()
 template_GQ const Tensor<2, data_t> &
 GeometricQuantities_t::get_eom_double_normal_projection()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_eom_double_normal_projection == nullptr)
         compute_eom_double_normal_projection();
     return *m_eom_double_normal_projection;
@@ -959,7 +961,7 @@ GeometricQuantities_t::get_eom_double_normal_projection()
 //////////////////////////////////////////////////////////////////////////
 template_GQ const vars_t<data_t> &GeometricQuantities_t::get_rhs_equations()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_rhs_equations == nullptr)
         compute_rhs_equations();
     return *m_rhs_equations;
@@ -1026,7 +1028,7 @@ GeometricQuantities_t::get_shift_ST()
 template_GQ const Tensor<3, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_levi_civita_spatial_ST()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_levi_civita_spatial_ST == nullptr)
         compute_levi_civita_spatial_ST();
     return *m_levi_civita_spatial_ST;
@@ -1034,7 +1036,7 @@ GeometricQuantities_t::get_levi_civita_spatial_ST()
 template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_levi_civita_ST()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_levi_civita_ST == nullptr)
         compute_levi_civita_ST();
     return *m_levi_civita_ST;
@@ -1042,7 +1044,7 @@ GeometricQuantities_t::get_levi_civita_ST()
 template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_Z_L_ST()
 {
-    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
+    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
     if (m_Z_L_ST == nullptr)
         compute_Z_L_ST();
     return *m_Z_L_ST;
@@ -1050,7 +1052,7 @@ GeometricQuantities_t::get_Z_L_ST()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_grad_normal_LL()
 {
-    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
+    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
     if (m_grad_normal_LL == nullptr)
         compute_grad_normal_LL();
     return *m_grad_normal_LL;
@@ -1058,7 +1060,7 @@ GeometricQuantities_t::get_grad_normal_LL()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_covd_Z_L_ST()
 {
-    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
+    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
     if (m_covd_Z_L_ST == nullptr)
         compute_covd_Z_L_ST();
     return *m_covd_Z_L_ST;
@@ -1087,14 +1089,14 @@ template_GQ const data_t &GeometricQuantities_t::get_em_tensor_trace_ST()
 template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_weyl_tensor_LLLL()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_weyl_tensor_LLLL == nullptr)
         compute_weyl_tensor_LLLL();
     return *m_weyl_tensor_LLLL;
 }
 template_GQ const data_t &GeometricQuantities_t::get_weyl_squared()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_weyl_squared == nullptr)
         compute_weyl_squared();
     return *m_weyl_squared;
@@ -1103,8 +1105,8 @@ template_GQ const data_t &GeometricQuantities_t::get_weyl_squared()
 template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_riemann_LLLL_ST()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_riemann_LLLL_ST == nullptr)
         compute_riemann_LLLL_ST();
     return *m_riemann_LLLL_ST;
@@ -1112,7 +1114,7 @@ GeometricQuantities_t::get_riemann_LLLL_ST()
 template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_riemann_LLLL_ST_v2()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_riemann_LLLL_ST_v2 == nullptr)
         compute_riemann_LLLL_ST_v2();
     return *m_riemann_LLLL_ST_v2;
@@ -1120,37 +1122,37 @@ GeometricQuantities_t::get_riemann_LLLL_ST_v2()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_ricci_ST()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_ricci_ST == nullptr)
         compute_ricci_ST();
     return *m_ricci_ST;
 }
 template_GQ const data_t &GeometricQuantities_t::get_ricci_scalar_ST()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
     if (m_ricci_scalar_ST == nullptr)
         compute_ricci_scalar_ST();
     return *m_ricci_scalar_ST;
 }
 template_GQ const data_t &GeometricQuantities_t::get_ricci_squared()
 {
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_ricci_squared == nullptr)
         compute_ricci_squared();
     return *m_ricci_squared;
 }
 template_GQ const data_t &GeometricQuantities_t::get_kretschmann()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_kretschmann == nullptr)
         compute_kretschmann();
     return *m_kretschmann;
 }
 template_GQ const data_t &GeometricQuantities_t::get_riemann_squared()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_riemann_squared == nullptr)
         compute_riemann_squared();
     return *m_riemann_squared;
@@ -1158,8 +1160,8 @@ template_GQ const data_t &GeometricQuantities_t::get_riemann_squared()
 template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_riemann_LLLU_ST()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_riemann_LLLU_ST == nullptr)
         compute_riemann_LLLU_ST();
     return *m_riemann_LLLU_ST;
@@ -1167,8 +1169,8 @@ GeometricQuantities_t::get_riemann_LLLU_ST()
 template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_riemann_LULU_ST()
 {
-    CH_assert(m_formulation >= 0); // formulation is set
-    CH_assert(GR_SPACEDIM == 3);
+    assert_with_label(m_formulation >= 0, m_label); // formulation is set
+    assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_riemann_LULU_ST == nullptr)
         compute_riemann_LULU_ST();
     return *m_riemann_LULU_ST;
@@ -1199,7 +1201,7 @@ GeometricQuantities_t::get_Gamma_L_ST()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_d1_Z_L_ST()
 {
-    CH_assert(m_formulation == CCZ4RHS<>::USE_CCZ4);
+    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
     if (m_d1_Z_L_ST == nullptr)
         compute_d1_Z_L_ST();
     return *m_d1_Z_L_ST;
@@ -1715,7 +1717,7 @@ template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
 {
     CH_TIME("GeometricQuantities_t::compute_ricci_qDZ");
 
-    CH_assert(q == 0 || m_formulation >= 0);
+    assert_with_label(q == 0 || m_formulation >= 0, m_label);
     // either q==0 to get the pure Ricci, set BSSN or CCZ4 (for
     // example for q=2 one will get the Ricci with calculated Gammas
     // replaced by evolved Gammas, and extra Z terms for CCZ4)

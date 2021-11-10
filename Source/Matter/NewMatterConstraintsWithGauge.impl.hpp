@@ -15,13 +15,13 @@
 template <class matter_t>
 MatterConstraints<matter_t>::MatterConstraints(
     const matter_t a_matter, double dx, double G_Newton, int formulation,
-    CCZ4::params_t a_params, int a_c_Ham, const Interval &a_c_Moms,
-    int a_c_Ham_abs_terms /* defaulted*/,
+    CCZ4::params_t a_params, const std::array<double, CH_SPACEDIM> &a_center,
+    int a_c_Ham, const Interval &a_c_Moms, int a_c_Ham_abs_terms /* defaulted*/,
     const Interval &a_c_Moms_abs_terms /*defaulted*/)
     : Constraints(dx, a_c_Ham, a_c_Moms, a_c_Ham_abs_terms, a_c_Moms_abs_terms,
                   0.0 /*No cosmological constant*/),
       my_matter(a_matter), m_G_Newton(G_Newton), m_formulation(formulation),
-      m_params(a_params)
+      m_params(a_params), m_center(a_center)
 {
 }
 
@@ -39,16 +39,20 @@ void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
     const auto advec = m_deriv.template advection<MatterMetricVarsWithGauge>(
         current_cell, vars.shift);
 
+    const Coordinates<data_t> coords(current_cell, this->m_deriv.m_dx,
+                                     m_center);
+
     // make gauge
     MovingPunctureGauge gauge(m_params);
 
     GeometricQuantities<data_t, MatterMetricVarsWithGauge,
                         MatterDiff2MetricVarsWithGauge, MovingPunctureGauge>
-        gq(vars, d1, d2);
+        gq(vars, d1, d2, "MatterConstraints::compute");
 
     gq.set_cosmological_constant(m_cosmological_constant);
     gq.set_formulation(m_formulation, m_params);
     gq.set_advection_and_gauge(advec, gauge);
+    gq.set_coordinates(coords);
     // why need advection to calculate the constraints?
     // the EM-tensor needs it in the C^2 EFT, because to calculate the
     // derivatives of 'C' it needs its time derivative, but the time derivative

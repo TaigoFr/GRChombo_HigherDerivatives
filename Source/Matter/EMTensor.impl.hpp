@@ -38,7 +38,7 @@ void EMTensor<matter_t>::compute(Cell<data_t> current_cell) const
     const auto vars = current_cell.template load_vars<Vars>();
     const auto d1 = m_deriv.template diff1<Vars>(current_cell);
 
-    GeometricQuantities<data_t, Vars, Vars> gq;
+    GeometricQuantities<data_t, Vars, Vars> gq("EMTensor::compute");
     gq.set_vars(vars);
     gq.set_d1_vars(d1);
     const auto emtensor = m_matter.compute_emtensor(gq);
