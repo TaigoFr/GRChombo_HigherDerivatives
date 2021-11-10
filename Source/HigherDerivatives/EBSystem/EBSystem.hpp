@@ -38,6 +38,10 @@ class EBSystem
                              // advection velocities
 
         bool use_last_index_raised;
+
+        bool use_tau_radial_decay;
+        double tau_asymptotic;   // if 'use_tau_radial_decay'
+        double tau_decay_length; // if 'use_tau_radial_decay'
     };
 
     //!  Constructor of class EBSystem, inputs are the matter parameters.
@@ -139,6 +143,14 @@ class EBSystem
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
         rhs_vars_t<data_t> &rhs,
         Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> &d1_h) const;
+
+    template <class data_t> data_t tau_from_radius(const data_t &radius) const
+    {
+        return simd_min((data_t)m_params.tau,
+                        (m_params.tau - m_params.tau_asymptotic) *
+                                m_params.tau_decay_length / radius +
+                            m_params.tau_asymptotic);
+    }
 };
 
 #include "EBSystem.impl.hpp"

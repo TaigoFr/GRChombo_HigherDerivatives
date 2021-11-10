@@ -70,6 +70,24 @@ void CSystem::add_matter_rhs(
 
     total_rhs.C = vars.dCdt;
 
+    data_t tau = m_params.tau;
+    data_t sigma = m_params.sigma;
+
+    if (m_params.use_tau_radial_decay)
+    {
+        const Coordinates<data_t> &coords = gq.get_coordinates();
+        tau = tau_from_radius(coords.get_radius());
+    }
+
+    data_t tau_rescaled = tau;
+    data_t sigma_rescaled = sigma;
+    if (m_params.rescale_tau_by_lapse)
+        tau_rescaled /= vars.lapse;
+    if (m_params.rescale_sigma_by_lapse == 2)
+        sigma_rescaled /= (vars.lapse * vars.lapse);
+    else if (m_params.rescale_sigma_by_lapse == 1)
+        sigma_rescaled /= vars.lapse;
+
     if (m_params.version == 1)
     {
         data_t advfac = m_params.advection_type ? 1.0 : 0.0;
@@ -87,42 +105,33 @@ void CSystem::add_matter_rhs(
         const auto &g_UU = gq.get_metric_UU_ST();
         const auto &Gamma_ST = gq.get_Gamma_ST();
 
-        total_rhs.dCdt = -m_params.tau / vars.lapse *
-                             (vars.dCdt - advfac * factor * advec.C) +
-                         kretschmann - vars.C -
-                         factor * m_params.sigma * Gamma_ST[0] * vars.dCdt;
+        total_rhs.dCdt =
+            -tau / vars.lapse * (vars.dCdt - advfac * factor * advec.C) +
+            kretschmann - vars.C - factor * sigma * Gamma_ST[0] * vars.dCdt;
 
         FOR(i)
         {
             total_rhs.dCdt +=
-                factor * m_params.sigma *
+                factor * sigma *
                 (2. * g_UU[0][i + 1] * d1.dCdt[i] - Gamma_ST[i + 1] * d1.C[i]);
             FOR(j)
             {
                 total_rhs.dCdt +=
-                    factor * m_params.sigma * g_UU[i + 1][j + 1] * d2.C[i][j];
+                    factor * sigma * g_UU[i + 1][j + 1] * d2.C[i][j];
             }
         }
-        total_rhs.dCdt /= (-m_params.sigma * g_UU[0][0]);
+        total_rhs.dCdt /= (-sigma * g_UU[0][0]);
     }
     else if (m_params.version == 2)
     {
-        data_t tau = m_params.tau;
-        data_t sigma = m_params.sigma;
         data_t dCdt = vars.dCdt;
-
-        if (m_params.rescale_tau_by_lapse)
-            tau /= vars.lapse;
-        if (m_params.rescale_sigma_by_lapse == 2)
-            sigma /= (vars.lapse * vars.lapse);
-        else if (m_params.rescale_sigma_by_lapse == 1)
-            sigma /= vars.lapse;
 
         if (m_params.advection_type == 1 || m_params.advection_type == 2)
         {
             dCdt -= m_params.advection_coeff * advec.C;
         }
-        total_rhs.dCdt = (-tau * dCdt + kretschmann - vars.C) / sigma;
+        total_rhs.dCdt =
+            (-tau_rescaled * dCdt + kretschmann - vars.C) / sigma_rescaled;
 
         if (m_params.advection_type == 2)
         {

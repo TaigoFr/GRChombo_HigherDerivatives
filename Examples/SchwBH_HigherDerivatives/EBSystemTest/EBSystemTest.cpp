@@ -116,6 +116,9 @@ int runTest(int argc, char *argv[])
     // eb_params.advection_coeff = 0.; // only for v2
     // eb_params.Box_transition = false; // not in use
     eb_params.use_last_index_raised = false;
+    eb_params.use_tau_radial_decay = false;
+    // eb_params.tau_asymptotic = 1.;   // if 'use_tau_radial_decay'
+    // eb_params.tau_decay_length = 1.; // if 'use_tau_radial_decay'
 
     int failed = 0;
 
@@ -147,7 +150,8 @@ int runTest(int argc, char *argv[])
     MovingPunctureGauge gauge(ccz4_params);
 
     GeometricQuantities<double, Vars, Diff2Vars, MovingPunctureGauge> gq(
-        vars, d1, d2);
+        vars, d1, d2, "EBSystemTest::runTest");
+
     gq.set_formulation(formulation, ccz4_params);
     gq.set_advection_and_gauge(advec, gauge);
 

@@ -41,7 +41,9 @@ class CDiagnostics
         const auto d1 = m_deriv.template diff1<Vars>(current_cell);
         const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
+        GeometricQuantities<data_t, Vars, Diff2Vars> gq(
+            vars, d1, d2, "CDiagnostics::compute");
+
         gq.set_formulation(m_formulation, m_ccz4_params);
 
         data_t C = gq.get_kretschmann();

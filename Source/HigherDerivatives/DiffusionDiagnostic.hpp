@@ -33,14 +33,15 @@ class DiffusionDiagnostic
   public:
     DiffusionDiagnostic(matter_t &a_matter, params_t a_params,
                         diffusion_params_t a_diffusion_params, double a_dx,
-                        double a_dt, double a_sigma, int a_formulation,
-                        double a_G_Newton, int a_diffusion_var,
-                        int a_diffusion_rhs_var,
+                        double a_dt, double a_sigma,
+                        const std::array<double, CH_SPACEDIM> &a_center,
+                        int a_formulation, double a_G_Newton,
+                        int a_diffusion_var, int a_diffusion_rhs_var,
                         int a_det_conformal_metric = -1)
         : MatterCCZ4RHSWithDiffusion<matter_t, MovingPunctureGauge,
                                      FourthOrderDerivatives>(
               a_matter, a_params, a_diffusion_params, a_dx, a_dt, a_sigma,
-              a_formulation, a_G_Newton),
+              a_center, a_formulation, a_G_Newton),
           m_diffusion_var(a_diffusion_var),
           m_diffusion_rhs_var(a_diffusion_rhs_var),
           m_det_conformal_metric(a_det_conformal_metric)
@@ -56,7 +57,8 @@ class DiffusionDiagnostic
             this->m_deriv.template advection<Vars>(current_cell, vars.shift);
 
         GeometricQuantities<data_t, Vars, Diff2Vars, MovingPunctureGauge> gq(
-            vars, d1, d2);
+            vars, d1, d2, "DiffusionDiagnostic::compute");
+
         gq.set_advection_and_gauge(advec, this->m_gauge);
         gq.set_formulation(this->m_formulation, this->m_params);
 

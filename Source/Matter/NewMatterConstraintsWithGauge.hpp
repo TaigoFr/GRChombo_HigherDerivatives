@@ -67,8 +67,10 @@ template <class matter_t> class MatterConstraints : public Constraints
         hardcoded ones.
     */
     MatterConstraints(const matter_t a_matter, double dx, double G_Newton,
-                      int formulation, CCZ4::params_t a_params, int a_c_Ham,
-                      const Interval &a_c_Moms, int a_c_Ham_abs_terms = -1,
+                      int formulation, CCZ4::params_t a_params,
+                      const std::array<double, CH_SPACEDIM> &a_center,
+                      int a_c_Ham, const Interval &a_c_Moms,
+                      int a_c_Ham_abs_terms = -1,
                       const Interval &a_c_Moms_abs_terms = Interval());
 
     //! The compute member which calculates the constraints at each point in the
@@ -80,6 +82,7 @@ template <class matter_t> class MatterConstraints : public Constraints
     double m_G_Newton;  //!< Newton's constant, set to one by default.
     int m_formulation;
     CCZ4::params_t m_params;
+    const std::array<double, CH_SPACEDIM> m_center;
 };
 
 #include "NewMatterConstraintsWithGauge.impl.hpp"

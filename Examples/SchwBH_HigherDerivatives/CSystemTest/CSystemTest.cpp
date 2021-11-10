@@ -115,6 +115,9 @@ int runTest(int argc, char *argv[])
     c_params.advection_type = 1;
     // c_params.advection_coeff = 0.; // only for v2
     c_params.Box_transition = 0;
+    c_params.use_tau_radial_decay = false;
+    // c_params.tau_asymptotic = 1.;   // if 'use_tau_radial_decay'
+    // c_params.tau_decay_length = 1.; // if 'use_tau_radial_decay'
 
     int failed = 0;
 
@@ -146,7 +149,8 @@ int runTest(int argc, char *argv[])
     MovingPunctureGauge gauge(ccz4_params);
 
     GeometricQuantities<double, Vars, Diff2Vars, MovingPunctureGauge> gq(
-        vars, d1, d2);
+        vars, d1, d2, "CSystemTest::runTest");
+
     gq.set_formulation(formulation, ccz4_params);
     gq.set_advection_and_gauge(advec, gauge);
 

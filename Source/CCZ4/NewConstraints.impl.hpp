@@ -33,7 +33,9 @@ void Constraints::compute(Cell<data_t> current_cell) const
     const auto d1 = m_deriv.template diff1<MetricVars>(current_cell);
     const auto d2 = m_deriv.template diff2<Diff2MetricVars>(current_cell);
 
-    GeometricQuantities<data_t, MetricVars, Diff2MetricVars> gq(vars, d1, d2);
+    GeometricQuantities<data_t, MetricVars, Diff2MetricVars> gq(
+        vars, d1, d2, "Constraints::compute");
+
     gq.set_cosmological_constant(m_cosmological_constant);
 
     Vars<data_t> out = constraint_equations(gq);

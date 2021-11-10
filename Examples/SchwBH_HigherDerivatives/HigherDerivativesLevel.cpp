@@ -127,17 +127,18 @@ void HigherDerivativesLevel::computeDiagnostics()
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
 
     MatterConstraints<C2EFT<System>> constraints(
-        c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, c_Ham,
-        Interval(c_Mom, c_Mom));
+        c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, m_p.center,
+        c_Ham, Interval(c_Mom, c_Mom));
 
     WeakFieldConditionDiagnostic<System> weakField(c2eft, m_dx, m_p.formulation,
-                                                   m_p.ccz4_params);
+                                                   m_p.ccz4_params, m_p.center);
     NCCDiagnostic<System> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
                               m_p.center, m_p.G_Newton, c_NCC_plus, c_NCC_minus,
                               c_NCC_Z4_plus, c_NCC_Z4_minus);
     DiffusionDiagnostic<C2EFT<System>> diffusion(
         c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, m_p.sigma,
-        m_p.formulation, m_p.G_Newton, c_diffusion_chi, c_rhs_chi, c_det_h);
+        m_p.center, m_p.formulation, m_p.G_Newton, c_diffusion_chi, c_rhs_chi,
+        c_det_h);
 
 #ifdef USE_EBSYSTEM
     EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params,
@@ -208,7 +209,7 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
     MatterCCZ4RHSWithDiffusion<C2EFT<System>> my_ccz4_matter(
         c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, m_p.sigma,
-        m_p.formulation, m_p.G_Newton);
+        m_p.center, m_p.formulation, m_p.G_Newton);
     BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 

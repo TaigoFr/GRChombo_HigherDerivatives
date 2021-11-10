@@ -32,7 +32,8 @@ void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
     const auto d2 = m_deriv.template diff2<MatterDiff2MetricVars>(current_cell);
 
     GeometricQuantities<data_t, MatterMetricVars, MatterDiff2MetricVars> gq(
-        vars, d1, d2);
+        vars, d1, d2, "MatterConstraints::compute");
+
     gq.set_cosmological_constant(m_cosmological_constant);
 
     const auto emtensor = my_matter.compute_emtensor(gq);

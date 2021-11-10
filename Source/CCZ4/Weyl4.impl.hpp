@@ -18,7 +18,9 @@ template <class data_t> void Weyl4::compute(Cell<data_t> current_cell) const
     const auto d1 = m_deriv.template diff1<Vars>(current_cell);
     const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-    GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2);
+    GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2,
+                                                    "Weyl4::compute");
+
     gq.set_formulation(m_formulation,
                        CCZ4::params_t() /*params don't matter here*/);
 

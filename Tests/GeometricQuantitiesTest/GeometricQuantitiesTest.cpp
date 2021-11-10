@@ -154,7 +154,7 @@ int runTest(int argc, char *argv[])
     MovingPunctureGauge gauge(ccz4_params);
 
     GeometricQuantities<double, Vars, Diff2Vars, MovingPunctureGauge> gq(
-        vars, d1, d2);
+        vars, d1, d2, "GeometricQuantitiesTest::runTest");
     gq.set_formulation(formulation, ccz4_params);
     gq.set_advection_and_gauge(advec, gauge);
     gq.set_cosmological_constant(cosmological_constant);
