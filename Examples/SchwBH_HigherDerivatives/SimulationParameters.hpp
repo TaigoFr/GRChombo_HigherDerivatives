@@ -93,10 +93,10 @@ class SimulationParameters : public SimulationParametersBase
         pout() << "Using Box_transition = " << system_params.Box_transition
                << std::endl;
 
-        pp.load("use_dynamic_tau", system_params.use_dynamic_tau);
-        pout() << "Using use_dynamic_tau = " << system_params.use_dynamic_tau
-               << std::endl;
-        if (system_params.use_dynamic_tau)
+        pp.load("use_tau_radial_decay", system_params.use_tau_radial_decay);
+        pout() << "Using use_tau_radial_decay = "
+               << system_params.use_tau_radial_decay << std::endl;
+        if (system_params.use_tau_radial_decay)
         {
             pp.load("tau_asymptotic", system_params.tau_asymptotic);
             pout() << "Using tau_asymptotic = " << system_params.tau_asymptotic

@@ -73,7 +73,7 @@ void CSystem::add_matter_rhs(
     data_t tau = m_params.tau;
     data_t sigma = m_params.sigma;
 
-    if (m_params.use_dynamic_tau)
+    if (m_params.use_tau_radial_decay)
     {
         const Coordinates<data_t> &coords = gq.get_coordinates();
         tau = tau_from_radius(coords.get_radius());

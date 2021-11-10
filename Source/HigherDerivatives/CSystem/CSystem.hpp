@@ -38,9 +38,9 @@ class CSystem
         bool Box_transition; // for when transitioning from Box_driver
                              // to only time derivatives in v1
 
-        bool use_dynamic_tau;
-        double tau_asymptotic;   // if 'use_dynamic_tau'
-        double tau_decay_length; // if 'use_dynamic_tau'
+        bool use_tau_radial_decay;
+        double tau_asymptotic;   // if 'use_tau_radial_decay'
+        double tau_decay_length; // if 'use_tau_radial_decay'
     };
 
     //!  Constructor of class CSystem, inputs are the matter parameters.

@@ -39,9 +39,9 @@ class EBSystem
 
         bool use_last_index_raised;
 
-        bool use_dynamic_tau;
-        double tau_asymptotic;   // if 'use_dynamic_tau'
-        double tau_decay_length; // if 'use_dynamic_tau'
+        bool use_tau_radial_decay;
+        double tau_asymptotic;   // if 'use_tau_radial_decay'
+        double tau_decay_length; // if 'use_tau_radial_decay'
     };
 
     //!  Constructor of class EBSystem, inputs are the matter parameters.
