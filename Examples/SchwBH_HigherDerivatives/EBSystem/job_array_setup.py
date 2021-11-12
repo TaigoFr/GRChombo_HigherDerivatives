@@ -8,8 +8,8 @@
 import sys # to get command line arguments
 import math # pow
 
-eb_version = 2
-use_last_index_raised = 1
+# eb_version = 2
+# use_last_index_raised = 1
 
 float_params_start   = 10.
 float_params_ratio   = 1./3.
