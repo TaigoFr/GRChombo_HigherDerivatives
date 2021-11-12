@@ -78,6 +78,12 @@ void CSystem::add_matter_rhs(
         const Coordinates<data_t> &coords = gq.get_coordinates();
         tau = tau_from_radius(coords.get_radius());
     }
+    
+    if (m_params.use_sigma_radial_decay)
+    {
+        const Coordinates<data_t> &coords = gq.get_coordinates();
+        sigma = sigma_from_radius(coords.get_radius());
+    }
 
     data_t tau_rescaled = tau;
     data_t sigma_rescaled = sigma;
