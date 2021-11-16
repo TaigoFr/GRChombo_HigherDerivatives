@@ -81,8 +81,9 @@ void CSystem::add_matter_rhs(
     
     if (m_params.use_sigma_radial_decay)
     {
-        const Coordinates<data_t> &coords = gq.get_coordinates();
-        sigma = sigma_from_radius(coords.get_radius());
+        //const Coordinates<data_t> &coords = gq.get_coordinates();
+        //sigma = sigma_from_radius(coords.get_radius());
+        sigma = m_params.sigma + (m_params.sigma_asymptotic-m_params.sigma) * vars.chi;
     }
 
     data_t tau_rescaled = tau;
@@ -130,6 +131,7 @@ void CSystem::add_matter_rhs(
     }
     else if (m_params.version == 2)
     {
+    
         data_t dCdt = vars.dCdt;
 
         if (m_params.advection_type == 1 || m_params.advection_type == 2)
