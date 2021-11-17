@@ -197,6 +197,7 @@ tau_decay_length       = 50. # if 'use_tau_radial_decay', the distance from r=0 
 use_sigma_radial_decay        = 1 # change sigma with 1/r
 sigma_asymptotic         = 1.0 # if 'use_sigma_radial_decay', the asymptotic sigma for r->\infty
 sigma_decay_length       = 50. # if 'use_sigma_radial_decay', the distance from r=0 at which sigma increase starts
+sigma_decay_width       = 0.05 # if 'use_sigma_radial_decay'
 
 # chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10
