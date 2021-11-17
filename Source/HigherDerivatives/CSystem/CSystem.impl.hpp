@@ -83,7 +83,13 @@ void CSystem::add_matter_rhs(
     {
         //const Coordinates<data_t> &coords = gq.get_coordinates();
         //sigma = sigma_from_radius(coords.get_radius());
-        sigma = m_params.sigma + (m_params.sigma_asymptotic-m_params.sigma) * vars.chi;
+        
+        //sigma = m_params.sigma + (m_params.sigma_asymptotic-m_params.sigma) * vars.chi;
+        
+        data_t tanh_profile = 0.5 +0.5*tanh((sqrt(vars.chi) - sqrt(m_params.sigma_decay_length))/m_params.sigma_decay_width);
+        data_t sigma_decay_profile = m_params.sigma + (sqrt(vars.chi) - sqrt(m_params.sigma_decay_length ))/(1.0 - sqrt(m_params.sigma_decay_length)) * m_params.sigma_asymptotic;
+        
+        sigma = tanh_profile * sigma_decay_profile + (1.0 - tanh_profile) * m_params.sigma;
     }
 
     data_t tau_rescaled = tau;

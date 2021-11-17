@@ -136,6 +136,9 @@ class SimulationParameters : public SimulationParametersBase
             pp.load("sigma_decay_length", system_params.sigma_decay_length);
             pout() << "Using sigma_decay_length = "
                    << system_params.sigma_decay_length << std::endl;
+            pp.load("sigma_decay_width", system_params.sigma_decay_width);
+            pout() << "Using sigma_decay_width = "
+                   << system_params.sigma_decay_width << std::endl;       
         }
         
 
