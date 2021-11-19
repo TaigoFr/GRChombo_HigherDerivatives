@@ -7,6 +7,7 @@
 #define MOVINGPUNCTUREGAUGE_HPP_
 
 #include "DimensionDefinitions.hpp"
+#include "GeometricQuantities.hpp"
 #include "Tensor.hpp"
 
 /// This is an example of a gauge class that can be used in the CCZ4RHS compute
@@ -38,19 +39,20 @@ class MovingPunctureGauge
                          //!\Gamma - \eta B^i\f$
     };
 
-  protected:
-    params_t m_params;
+    const params_t m_params;
 
-  public:
     MovingPunctureGauge(const params_t &a_params) : m_params(a_params) {}
 
-    template <class data_t, template <typename> class vars_t,
+    template <class data_t, template <typename> class vars_rhs_t,
+              template <typename> class vars_t,
               template <typename> class diff2_vars_t>
-    inline void rhs_gauge(vars_t<data_t> &rhs, const vars_t<data_t> &vars,
-                          const vars_t<Tensor<1, data_t>> &d1,
-                          const diff2_vars_t<Tensor<2, data_t>> &d2,
-                          const vars_t<data_t> &advec) const
+    inline void rhs_gauge(vars_rhs_t<data_t> &rhs,
+                          GeometricQuantities<data_t, vars_t, diff2_vars_t,
+                                              MovingPunctureGauge> &gq) const
     {
+        const auto &vars = gq.get_vars();
+        const auto &advec = gq.get_advection();
+
         rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
                     m_params.lapse_coeff *
                         pow(vars.lapse, m_params.lapse_power) *

@@ -26,7 +26,7 @@ inline CCZ4RHS<gauge_t, deriv_t>::CCZ4RHS(
       m_cosmological_constant(a_cosmological_constant), m_deriv(a_dx)
 {
     // A user who wants to use BSSN should also have damping paramters = 0
-    if (m_formulation == USE_BSSN)
+    if (m_formulation == CCZ4Formulation::USE_BSSN)
     {
         if ((m_params.kappa1 != 0.) || (m_params.kappa2 != 0.) ||
             (m_params.kappa3 != 0.))
@@ -35,7 +35,7 @@ inline CCZ4RHS<gauge_t, deriv_t>::CCZ4RHS(
                           "should be set to zero in params");
         }
     }
-    if (m_formulation > USE_BSSN)
+    if (m_formulation > CCZ4Formulation::USE_BSSN)
         MayDay::Error("The requested formulation is not supported");
 }
 

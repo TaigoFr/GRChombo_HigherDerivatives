@@ -221,10 +221,10 @@ int main()
     struct timeval begin, end;
     gettimeofday(&begin, NULL);
 
-    BoxLoops::loop(
-        MatterWeyl4<DefaultScalarField>(DefaultScalarField(DefaultPotential()),
-                                        centerGW, dx, CCZ4RHS<>::USE_BSSN),
-        in_fab, out_fab);
+    BoxLoops::loop(MatterWeyl4<DefaultScalarField>(
+                       DefaultScalarField(DefaultPotential()), centerGW, dx,
+                       CCZ4Formulation::USE_BSSN),
+                   in_fab, out_fab);
 
     gettimeofday(&end, NULL);
 

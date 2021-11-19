@@ -71,7 +71,7 @@ class MatterCCZ4RHSWithDiffusion
                                diffusion_params_t a_diffusion_params,
                                double a_dx, double a_dt, double a_sigma,
                                const std::array<double, CH_SPACEDIM> a_center,
-                               int a_formulation = CCZ4::USE_CCZ4,
+                               int a_formulation = CCZ4Formulation::USE_CCZ4,
                                double a_G_Newton = 1.0);
 
     /// Compute function

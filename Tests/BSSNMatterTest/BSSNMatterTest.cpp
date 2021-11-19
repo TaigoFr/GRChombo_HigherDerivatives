@@ -230,7 +230,7 @@ int main()
     Potential::params_t potential_params;
     potential_params.scalar_mass = 1.1;
 
-    int formulation = 1; // BSSN
+    int formulation = CCZ4Formulation::USE_BSSN; // BSSN
     double G_Newton = 1.0;
     double sigma = 0.1;
 

@@ -6,6 +6,7 @@
 #ifndef CCZ4RHS_HPP_
 #define CCZ4RHS_HPP_
 
+#include "CCZ4Base.hpp"
 #include "CCZ4Vars.hpp"
 #include "Cell.hpp"
 #include "FourthOrderDerivatives.hpp"
@@ -17,19 +18,6 @@
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
 #include <array>
-
-/// Base parameter struct for CCZ4
-/** This struct collects the gauge independent CCZ4 parameters i.e. the damping
- * ones
- */
-struct CCZ4_base_params_t
-{
-    double kappa1;    //!< Damping parameter kappa1 as in arXiv:1106.2254
-    double kappa2;    //!< Damping parameter kappa2 as in arXiv:1106.2254
-    double kappa3;    //!< Damping parameter kappa3 as in arXiv:1106.2254
-    bool covariantZ4; //!< if true, replace kappa1->kappa1/lapse as in
-                      //!<  arXiv:1307.7391 eq. 27
-};
 
 /// Parameter struct for CCZ4
 /** This struct collects all parameters that are necessary for CCZ4 such as
@@ -53,12 +41,6 @@ template <class gauge_t = MovingPunctureGauge,
 class CCZ4RHS
 {
   public:
-    enum
-    {
-        USE_CCZ4,
-        USE_BSSN
-    };
-
     using params_t = CCZ4_params_t<typename gauge_t::params_t>;
 
     /// CCZ4 variables
@@ -79,10 +61,11 @@ class CCZ4RHS
   public:
     /// Constructor
     CCZ4RHS(
-        params_t a_params,            //!< The CCZ4 parameters
-        double a_dx,                  //!< The grid spacing
-        double a_sigma,               //!< Kreiss-Oliger dissipation coefficient
-        int a_formulation = USE_CCZ4, //!< Switches between CCZ4, BSSN,...
+        params_t a_params, //!< The CCZ4 parameters
+        double a_dx,       //!< The grid spacing
+        double a_sigma,    //!< Kreiss-Oliger dissipation coefficient
+        int a_formulation =
+            CCZ4Formulation::USE_CCZ4,     //!< Switches between CCZ4, BSSN,...
         double a_cosmological_constant = 0 //!< Value of the cosmological const.
     );
 

@@ -103,7 +103,7 @@ ALWAYS_INLINE bool relative_error(const data_t &t1, const data_t &t2,
 
 int runTest(int argc, char *argv[])
 {
-    int formulation = CCZ4RHS<>::USE_CCZ4;
+    int formulation = CCZ4Formulation::USE_CCZ4;
 
     CCZ4_params_t<> ccz4_params;
 
@@ -442,7 +442,7 @@ int runTest(int argc, char *argv[])
     // COMPARE WITH OLD CCZ4 FOR BSSN AS AN EXTRA TEST
     // Also good to test the rest of variables in GeometricQuantities
     gq.set_em_tensor(em_tensor_def, 0.); // set matter to 0 here
-    formulation = CCZ4RHS<>::USE_BSSN;
+    formulation = CCZ4Formulation::USE_BSSN;
     ccz4_params.kappa1 = 0.;
     ccz4_params.kappa2 = 0.;
     ccz4_params.kappa3 = 0.;

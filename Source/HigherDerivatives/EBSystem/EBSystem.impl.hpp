@@ -25,6 +25,7 @@ void EBSystem::compute_C(
     const auto &d1 = gq.get_d1_vars();
     const auto &d2 = gq.get_d2_vars();
     const auto &Kij = gq.get_extrinsic_curvature();
+    const auto &gauge = gq.get_gauge();
     // needed if 'use_last_index_raised' = false
     const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
 
@@ -77,7 +78,7 @@ void EBSystem::compute_C(
              (vars.h[i][j] * rhs.K + vars.K * rhs.h[i][j]) / GR_SPACEDIM) /
                 vars.chi;
 
-        dtd1_shift[i][j] = ccz4_params.shift_Gamma_coeff * d1.B[i][j];
+        dtd1_shift[i][j] = gauge.m_params.shift_Gamma_coeff * d1.B[i][j];
 
         FOR(k)
         {
@@ -89,7 +90,7 @@ void EBSystem::compute_C(
                                                        GR_SPACEDIM) /
                                       vars.chi;
 
-            dtd1_shift[i][j] += ccz4_params.shift_advec_coeff *
+            dtd1_shift[i][j] += gauge.m_params.shift_advec_coeff *
                                 (vars.shift[k] * d2.shift[i][k][j] +
                                  d1.shift[k][j] * d1.shift[i][k]);
         }

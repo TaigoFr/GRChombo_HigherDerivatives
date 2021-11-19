@@ -83,7 +83,7 @@ ALWAYS_INLINE bool relative_error(const data_t &t1, const data_t &t2,
 
 int runTest(int argc, char *argv[])
 {
-    int formulation = CCZ4::USE_CCZ4;
+    int formulation = CCZ4Formulation::USE_CCZ4;
 
     CCZ4_params_t<> ccz4_params;
 

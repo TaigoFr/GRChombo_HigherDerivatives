@@ -10,6 +10,8 @@
 #ifndef GEOMETRICQUANTITIES_IMPL_HPP_
 #define GEOMETRICQUANTITIES_IMPL_HPP_
 
+#include "CH_Timer.H"
+
 // helpers to avoid clutter in the code
 #define template_GQ                                                            \
     template <class data_t, template <typename> class vars_t,                  \
@@ -555,7 +557,7 @@ GeometricQuantities_t::set_advection_and_gauge(const Vars &a_advection,
 }
 template_GQ void
 GeometricQuantities_t::set_formulation(int formulation,
-                                       const CCZ4_params_t<> &a_ccz4_params)
+                                       const CCZ4_base_params_t &a_ccz4_params)
 {
     m_formulation = formulation;
     m_ccz4_params = &a_ccz4_params;
@@ -599,7 +601,7 @@ template_GQ int GeometricQuantities_t::get_formulation() const
 {
     return m_formulation;
 }
-template_GQ const CCZ4_params_t<> &
+template_GQ const CCZ4_base_params_t &
 GeometricQuantities_t::get_formulation_params() const
 {
     return *m_ccz4_params;
@@ -664,7 +666,7 @@ template_GQ const chris_t<data_t> &GeometricQuantities_t::get_chris()
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z_U_conformal()
 {
-    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
+    assert_with_label(m_formulation == CCZ4Formulation::USE_CCZ4, m_label);
     if (m_Z_U_conformal == nullptr)
         compute_Z_U_conformal();
     return *m_Z_U_conformal;
@@ -756,21 +758,21 @@ template_GQ const Tensor<3, data_t> &GeometricQuantities_t::get_chris_spatial()
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z_U()
 {
-    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
+    assert_with_label(m_formulation == CCZ4Formulation::USE_CCZ4, m_label);
     if (m_Z_U == nullptr)
         compute_Z_U();
     return *m_Z_U;
 }
 template_GQ const Tensor<1, data_t> &GeometricQuantities_t::get_Z()
 {
-    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
+    assert_with_label(m_formulation == CCZ4Formulation::USE_CCZ4, m_label);
     if (m_Z == nullptr)
         compute_Z();
     return *m_Z;
 }
 template_GQ const Tensor<2, data_t> &GeometricQuantities_t::get_covd_Z()
 {
-    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
+    assert_with_label(m_formulation == CCZ4Formulation::USE_CCZ4, m_label);
     if (m_covd_Z == nullptr)
         compute_covd_Z();
     return *m_covd_Z;
@@ -1044,7 +1046,7 @@ GeometricQuantities_t::get_levi_civita_ST()
 template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_Z_L_ST()
 {
-    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
+    assert_with_label(m_formulation == CCZ4Formulation::USE_CCZ4, m_label);
     if (m_Z_L_ST == nullptr)
         compute_Z_L_ST();
     return *m_Z_L_ST;
@@ -1052,7 +1054,7 @@ GeometricQuantities_t::get_Z_L_ST()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_grad_normal_LL()
 {
-    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
+    assert_with_label(m_formulation == CCZ4Formulation::USE_CCZ4, m_label);
     if (m_grad_normal_LL == nullptr)
         compute_grad_normal_LL();
     return *m_grad_normal_LL;
@@ -1060,7 +1062,7 @@ GeometricQuantities_t::get_grad_normal_LL()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_covd_Z_L_ST()
 {
-    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
+    assert_with_label(m_formulation == CCZ4Formulation::USE_CCZ4, m_label);
     if (m_covd_Z_L_ST == nullptr)
         compute_covd_Z_L_ST();
     return *m_covd_Z_L_ST;
@@ -1201,7 +1203,7 @@ GeometricQuantities_t::get_Gamma_L_ST()
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_d1_Z_L_ST()
 {
-    assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
+    assert_with_label(m_formulation == CCZ4Formulation::USE_CCZ4, m_label);
     if (m_d1_Z_L_ST == nullptr)
         compute_d1_Z_L_ST();
     return *m_d1_Z_L_ST;
@@ -1757,7 +1759,7 @@ template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
     }
 
     Tensor<1, data_t> Z_U_q = {0.};
-    if (q != 0 && m_formulation == CCZ4RHS<>::USE_CCZ4) // only if in CCZ4
+    if (q != 0 && m_formulation == CCZ4Formulation::USE_CCZ4) // only if in CCZ4
         TensorAlgebra::hard_copy(Z_U_q, get_Z_U_conformal());
 
     /*
@@ -1806,7 +1808,7 @@ template_GQ ricci_t<data_t> GeometricQuantities_t::compute_ricci_qDZ(int q)
                 // }
             }
 
-            if (q != 0 && m_formulation == CCZ4RHS<>::USE_CCZ4)
+            if (q != 0 && m_formulation == CCZ4Formulation::USE_CCZ4)
             {
                 z_terms += Z_U_q[k] * (vars.h[i][k] * d1.chi[j] +
                                        vars.h[j][k] * d1.chi[i] -
@@ -1857,7 +1859,7 @@ template_GQ void GeometricQuantities_t::compute_weyl_electric_part()
         delete m_weyl_electric_part;
 
     const auto &ricci =
-        get_ricci_qDZ((m_formulation == CCZ4RHS<>::USE_CCZ4 ? 1 : 0));
+        get_ricci_qDZ((m_formulation == CCZ4Formulation::USE_CCZ4 ? 1 : 0));
     const auto &Kij = get_extrinsic_curvature();
     const auto &h_UU_spatial = get_metric_UU_spatial();
     const auto &vars = get_vars();
@@ -1866,7 +1868,7 @@ template_GQ void GeometricQuantities_t::compute_weyl_electric_part()
         TensorAlgebra::compute_dot_product(Kij, Kij, h_UU_spatial);
 
     data_t K_minus_Theta = vars.K;
-    if (m_formulation == CCZ4RHS<>::USE_CCZ4)
+    if (m_formulation == CCZ4Formulation::USE_CCZ4)
         K_minus_Theta -= vars.Theta;
 
     m_weyl_electric_part = new Tensor<2, data_t>;
@@ -1918,7 +1920,7 @@ template_GQ void GeometricQuantities_t::compute_lie_derivatives()
     const Tensor<2, data_t> covd2lapse =
         get_covd_lapse(); // calculates chris_spatial -> not very efficient
 
-    bool ccz4 = (m_formulation == CCZ4RHS<>::USE_CCZ4);
+    bool ccz4 = (m_formulation == CCZ4Formulation::USE_CCZ4);
     bool k3 = (ccz4 && m_ccz4_params->kappa3 != 1.);
     bool vacuum = (m_em_tensor == nullptr);
 
@@ -2110,14 +2112,10 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
     compute_rhs_equations_no_gauge(rhs);
 
     // Gauge evolution equations
-    const auto &gauge = get_gauge();
-    const auto &vars = get_vars();
-    const auto &d1 = get_d1_vars();
-    const auto &d2 = get_d2_vars();
-    const auto &advec = get_advection();
     {
         CH_TIME("GeometricQuantities::compute_rhs_equations::GAUGE");
-        gauge.rhs_gauge(rhs, vars, d1, d2, advec);
+        const auto &gauge = get_gauge();
+        gauge.rhs_gauge(rhs, *this);
     }
 
     /*
@@ -2168,7 +2166,7 @@ GeometricQuantities_t::compute_rhs_equations_no_gauge(Vars &rhs)
             // and according with Alcubierre page 87)
             rhs.Gamma[i] = advec.Gamma[i] + LIE.Gamma[i] * vars.lapse +
                            2. / GR_SPACEDIM *
-                               (m_formulation == CCZ4RHS<>::USE_CCZ4
+                               (m_formulation == CCZ4Formulation::USE_CCZ4
                                     ? vars.Gamma[i]
                                     : chris.contracted[i]) *
                                div_shift;
@@ -2178,7 +2176,7 @@ GeometricQuantities_t::compute_rhs_equations_no_gauge(Vars &rhs)
                 // Use the calculated christoffels in the lie derivative terms,
                 // not the evolved ones, for BSSN (as according to the old code
                 // for BSSN and according with Alcubierre page 87)
-                rhs.Gamma[i] -= (m_formulation == CCZ4RHS<>::USE_CCZ4
+                rhs.Gamma[i] -= (m_formulation == CCZ4Formulation::USE_CCZ4
                                      ? vars.Gamma[j]
                                      : chris.contracted[j]) *
                                 d1.shift[i][j];
@@ -2232,7 +2230,7 @@ GeometricQuantities_t::compute_rhs_equations_no_gauge(Vars &rhs)
         // 2. / GR_SPACEDIM, {true});
         rhs.Gamma = TensorAlgebra::lie_derivative(
             advec.Gamma,
-            (m_formulation == CCZ4RHS<>::USE_CCZ4 ? vars.Gamma :
+            (m_formulation == CCZ4Formulation::USE_CCZ4 ? vars.Gamma :
         chris.contracted), d1.shift, vars.shift, div_shift, 2. / GR_SPACEDIM,
         {true}); FOR(i) { rhs.Gamma[i] += LIE.Gamma[i] * vars.lapse; }
 
@@ -2754,7 +2752,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST()
         kappa1 /= vars.lapse;
 
     data_t Z_dot_n = 0.;
-    if (m_formulation == CCZ4RHS<>::USE_CCZ4)
+    if (m_formulation == CCZ4Formulation::USE_CCZ4)
         Z_dot_n = TensorAlgebra::compute_dot_product(Z_L_ST, n_U);
 
     m_ricci_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>;
@@ -2769,7 +2767,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST()
                                                      (GR_SPACEDIM - 1.)) +
             m_cosmological_constant * g[m][n] * 2. / (GR_SPACEDIM - 1.);
 
-        if (m_formulation == CCZ4RHS<>::USE_CCZ4)
+        if (m_formulation == CCZ4Formulation::USE_CCZ4)
         {
             (*m_ricci_ST)[m][n] +=
                 -covd_Z_L_ST[m][n] - covd_Z_L_ST[n][m] +
