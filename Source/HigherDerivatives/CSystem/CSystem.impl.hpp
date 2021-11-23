@@ -75,21 +75,25 @@ void CSystem::add_matter_rhs(
 
     if (m_params.use_tau_radial_decay)
     {
-        const Coordinates<data_t> &coords = gq.get_coordinates();
-        tau = tau_from_radius(coords.get_radius());
+        //const Coordinates<data_t> &coords = gq.get_coordinates(); ///option 1
+        //tau = tau_from_radius(coords.get_radius()); ///option 1
+        
+       tau = (m_params.tau_asymptotic-m_params.tau)/(1.0 +exp(-(vars.chi/m_params.tau_decay_length -1.0)/m_params.tau_decay_width)) + m_params.tau;
     }
     
     if (m_params.use_sigma_radial_decay)
     {
-        //const Coordinates<data_t> &coords = gq.get_coordinates();
-        //sigma = sigma_from_radius(coords.get_radius());
+        //const Coordinates<data_t> &coords = gq.get_coordinates(); ///option 1
+        //sigma = sigma_from_radius(coords.get_radius()); ///option 1
         
-        //sigma = m_params.sigma + (m_params.sigma_asymptotic-m_params.sigma) * vars.chi;
+        //sigma = m_params.sigma + (m_params.sigma_asymptotic-m_params.sigma) * vars.chi; /// option 2
         
-        data_t tanh_profile = 0.5 +0.5*tanh((sqrt(vars.chi) - sqrt(m_params.sigma_decay_length))/m_params.sigma_decay_width);
-        data_t sigma_decay_profile = m_params.sigma + (sqrt(vars.chi) - sqrt(m_params.sigma_decay_length ))/(1.0 - sqrt(m_params.sigma_decay_length)) * m_params.sigma_asymptotic;
+       // data_t tanh_profile = 0.5 +0.5*tanh((sqrt(vars.chi) - sqrt(m_params.sigma_decay_length))/m_params.sigma_decay_width);  /// option 3
+       // data_t sigma_decay_profile = m_params.sigma + (sqrt(vars.chi) - sqrt(m_params.sigma_decay_length ))/(1.0 - sqrt(m_params.sigma_decay_length)) * m_params.sigma_asymptotic;  /// option 3
         
-        sigma = tanh_profile * sigma_decay_profile + (1.0 - tanh_profile) * m_params.sigma;
+       // sigma = tanh_profile * sigma_decay_profile + (1.0 - tanh_profile) * m_params.sigma;  /// option 3
+       
+       sigma = (m_params.sigma_asymptotic-m_params.sigma)/(1.0 +exp(-(vars.chi/m_params.sigma_decay_length -1.0)/m_params.sigma_decay_width) ) + m_params.sigma;
     }
 
     data_t tau_rescaled = tau;
