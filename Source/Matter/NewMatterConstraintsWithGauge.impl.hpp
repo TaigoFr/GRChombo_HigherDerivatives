@@ -12,10 +12,10 @@
 #define NEWMATTERCONSTRAINTSWITHGAUGE_IMPL_HPP_
 #include "DimensionDefinitions.hpp"
 
-template <class matter_t>
-MatterConstraints<matter_t>::MatterConstraints(
+template <class matter_t, class gauge_t>
+MatterConstraintsWithGauge<matter_t, gauge_t>::MatterConstraintsWithGauge(
     const matter_t a_matter, double dx, double G_Newton, int formulation,
-    CCZ4::params_t a_params, const std::array<double, CH_SPACEDIM> &a_center,
+    params_t a_params, const std::array<double, CH_SPACEDIM> &a_center,
     int a_c_Ham, const Interval &a_c_Moms, int a_c_Ham_abs_terms /* defaulted*/,
     const Interval &a_c_Moms_abs_terms /*defaulted*/)
     : Constraints(dx, a_c_Ham, a_c_Moms, a_c_Ham_abs_terms, a_c_Moms_abs_terms,
@@ -25,9 +25,10 @@ MatterConstraints<matter_t>::MatterConstraints(
 {
 }
 
-template <class matter_t>
+template <class matter_t, class gauge_t>
 template <class data_t>
-void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
+void MatterConstraintsWithGauge<matter_t, gauge_t>::compute(
+    Cell<data_t> current_cell) const
 {
     // Load local vars and calculate derivs
     const auto vars =
@@ -43,17 +44,18 @@ void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
                                      m_center);
 
     // make gauge
-    MovingPunctureGauge gauge(m_params);
+    gauge_t gauge(m_params);
 
     GeometricQuantities<data_t, MatterMetricVarsWithGauge,
-                        MatterDiff2MetricVarsWithGauge, MovingPunctureGauge>
-        gq(vars, d1, d2, "MatterConstraints::compute");
+                        MatterDiff2MetricVarsWithGauge, gauge_t>
+        gq(vars, d1, d2, "MatterConstraintsWithGauge::compute");
 
     gq.set_cosmological_constant(m_cosmological_constant);
     gq.set_formulation(m_formulation, m_params);
-    gq.set_advection_and_gauge(advec, gauge);
     gq.set_coordinates(coords);
-    // why need advection to calculate the constraints?
+    gq.set_advection(advec);
+    gq.set_gauge(gauge);
+    // why need advection/gauge to calculate the constraints?
     // the EM-tensor needs it in the C^2 EFT, because to calculate the
     // derivatives of 'C' it needs its time derivative, but the time derivative
     // is computed via the EOM (the RHS) and hence typically requires the

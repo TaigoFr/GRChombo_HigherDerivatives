@@ -13,6 +13,7 @@
 // Problem specific includes:
 #include "C2EFT.hpp"
 #include "MatterCCZ4RHSWithDiffusion.hpp"
+#include "MovingPunctureGaugeEtaRadialDecay.hpp"
 
 #ifdef USE_EBSYSTEM
 #include "EBSystem.hpp"
@@ -214,6 +215,26 @@ class SimulationParameters : public SimulationParametersBase
         }
         diffusion_params.update_min_chi(time, spin);
         /////////////
+
+        ccz4_params_modifiedGauge.kappa1 = ccz4_params.kappa1;
+        ccz4_params_modifiedGauge.kappa2 = ccz4_params.kappa2;
+        ccz4_params_modifiedGauge.kappa3 = ccz4_params.kappa3;
+        ccz4_params_modifiedGauge.covariantZ4 = ccz4_params.covariantZ4;
+        ccz4_params_modifiedGauge.lapse_advec_coeff =
+            ccz4_params.lapse_advec_coeff;
+        ccz4_params_modifiedGauge.lapse_power = ccz4_params.lapse_power;
+        ccz4_params_modifiedGauge.lapse_coeff = ccz4_params.lapse_coeff;
+        ccz4_params_modifiedGauge.shift_Gamma_coeff =
+            ccz4_params.shift_Gamma_coeff;
+        ccz4_params_modifiedGauge.shift_advec_coeff =
+            ccz4_params.shift_advec_coeff;
+        ccz4_params_modifiedGauge.eta = ccz4_params.eta;
+        pp.load("eta_sigmoid_decay",
+                ccz4_params_modifiedGauge.eta_sigmoid_decay, 17.);
+        pp.load("eta_sigmoid_chi_threshold",
+                ccz4_params_modifiedGauge.eta_sigmoid_chi_threshold, 0.92);
+        pp.load("eta_asymptotic", ccz4_params_modifiedGauge.eta_asymptotic,
+                0.1);
     }
 
     void check_params()
@@ -268,6 +289,9 @@ class SimulationParameters : public SimulationParametersBase
     // Initial data
     bool activate_extraction, track_punctures, calculate_constraint_norms;
     int puncture_tracking_level;
+
+    CCZ4_params_t<MovingPunctureGaugeEtaRadialDecay::params_t>
+        ccz4_params_modifiedGauge;
 
     // Collection of parameters necessary for initial conditions
     BoostedBH::params_t bh2_params;

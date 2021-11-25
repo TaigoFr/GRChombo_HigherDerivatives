@@ -98,8 +98,8 @@ class GeometricQuantities
     void set_vars(const Vars &a_vars);
     void set_d1_vars(const Diff1Vars &a_d1_vars);
     void set_d2_vars(const Diff2Vars &a_d2_vars);
-    void set_advection_and_gauge(const Vars &a_advection,
-                                 const gauge_t &a_gauge);
+    void set_advection(const Vars &a_advection);
+    void set_gauge(const gauge_t &a_gauge);
     void set_formulation(int formulation,
                          const CCZ4_base_params_t &a_ccz4_params);
     void set_em_tensor(const emtensor_t<data_t> &a_em_tensor, double G_Newton);

@@ -153,7 +153,8 @@ int runTest(int argc, char *argv[])
         vars, d1, d2, "EBSystemTest::runTest");
 
     gq.set_formulation(formulation, ccz4_params);
-    gq.set_advection_and_gauge(advec, gauge);
+    gq.set_advection(advec);
+    gq.set_gauge(gauge);
 
     // make EM Tensor
     bool apply_weak_field = false;

@@ -156,7 +156,8 @@ int runTest(int argc, char *argv[])
     GeometricQuantities<double, Vars, Diff2Vars, MovingPunctureGauge> gq(
         vars, d1, d2, "GeometricQuantitiesTest::runTest");
     gq.set_formulation(formulation, ccz4_params);
-    gq.set_advection_and_gauge(advec, gauge);
+    gq.set_advection(advec);
+    gq.set_gauge(gauge);
     gq.set_cosmological_constant(cosmological_constant);
 
     // make EM Tensor

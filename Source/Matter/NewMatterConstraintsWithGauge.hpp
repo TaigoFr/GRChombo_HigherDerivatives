@@ -26,7 +26,8 @@
    For an example of a matter_t class see ScalarField. \sa Constraints(),
    ScalarField()
 */
-template <class matter_t> class MatterConstraints : public Constraints
+template <class matter_t, class gauge_t = MovingPunctureGauge>
+class MatterConstraintsWithGauge : public Constraints
 {
   public:
     template <class data_t>
@@ -34,6 +35,8 @@ template <class matter_t> class MatterConstraints : public Constraints
 
     template <class data_t>
     using MatterDiff2Vars = typename matter_t::template Diff2Vars<data_t>;
+
+    using params_t = CCZ4_params_t<typename gauge_t::params_t>;
 
     template <class data_t>
     struct MatterMetricVarsWithGauge : public CCZ4::Vars<data_t>,
@@ -61,17 +64,18 @@ template <class matter_t> class MatterConstraints : public Constraints
 
     // added formulation, needed for higher derivative EM-tensors through
     // GeometricQuantities class
-    //! Constructor of class MatterConstraints
+    //! Constructor of class MatterConstraintsWithGauge
     /*!
         Can specify the vars of the constraint vars instead of using the
         hardcoded ones.
     */
-    MatterConstraints(const matter_t a_matter, double dx, double G_Newton,
-                      int formulation, CCZ4::params_t a_params,
-                      const std::array<double, CH_SPACEDIM> &a_center,
-                      int a_c_Ham, const Interval &a_c_Moms,
-                      int a_c_Ham_abs_terms = -1,
-                      const Interval &a_c_Moms_abs_terms = Interval());
+    MatterConstraintsWithGauge(const matter_t a_matter, double dx,
+                               double G_Newton, int formulation,
+                               params_t a_params,
+                               const std::array<double, CH_SPACEDIM> &a_center,
+                               int a_c_Ham, const Interval &a_c_Moms,
+                               int a_c_Ham_abs_terms = -1,
+                               const Interval &a_c_Moms_abs_terms = Interval());
 
     //! The compute member which calculates the constraints at each point in the
     //! box
@@ -81,7 +85,7 @@ template <class matter_t> class MatterConstraints : public Constraints
     matter_t my_matter; //!< The matter object, e.g. a scalar field
     double m_G_Newton;  //!< Newton's constant, set to one by default.
     int m_formulation;
-    CCZ4::params_t m_params;
+    params_t m_params;
     const std::array<double, CH_SPACEDIM> m_center;
 };
 

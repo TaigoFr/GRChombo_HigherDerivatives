@@ -200,9 +200,15 @@ advection_type         = 0 # only in v2 (0, 1 for simple, 2 for Luis' proposal) 
 advection_coeff        = 0 # only for advection type 1 and 2 in v2
 Box_transition         = 0 # (Not used on EB yet but could be used for the Luis advection case)
 use_last_index_raised  = 0 # evolve E_i^{~j} instead of E_{ij}
-use_tau_radial_decay        = 1 # change tau with 1/r
+
+use_tau_radial_decay   = 0 # change tau with 1/r
 tau_asymptotic         = 0.01 # if 'use_tau_radial_decay', the asymptotic tau for r->\infty
 tau_decay_length       = 50. # if 'use_tau_radial_decay', the distance from r=0 at which tau decay starts
+
+# Gamma driver decay with chi
+eta_sigmoid_decay         = 17.
+eta_sigmoid_chi_threshold = 0.92
+eta_asymptotic            = 1. # 1 ==> do nothing, because 'eta=1' above
 
 # chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10

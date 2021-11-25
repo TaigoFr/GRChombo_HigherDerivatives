@@ -547,11 +547,13 @@ template_GQ void GeometricQuantities_t::set_d2_vars(const Diff2Vars &a_d2_vars)
     m_d2_vars = &a_d2_vars;
     clean();
 }
-template_GQ void
-GeometricQuantities_t::set_advection_and_gauge(const Vars &a_advection,
-                                               const gauge_t &a_gauge)
+template_GQ void GeometricQuantities_t::set_advection(const Vars &a_advection)
 {
     m_advection = &a_advection;
+    clean_advection_and_gauge_dependent();
+}
+template_GQ void GeometricQuantities_t::set_gauge(const gauge_t &a_gauge)
+{
     m_gauge = &a_gauge;
     clean_advection_and_gauge_dependent();
 }

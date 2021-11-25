@@ -29,6 +29,7 @@
 // Problem specific includes
 #include "C2EFT.hpp"
 #include "DiffusionDiagnostic.hpp"
+#include "MovingPunctureGaugeEtaRadialDecay.hpp"
 #include "NCCDiagnostic.hpp"
 #include "WeakFieldConditionDiagnostic.hpp"
 
@@ -75,17 +76,18 @@ void HigherDerivativesLevel::initialData()
     fillAllGhosts();
 
 #ifdef USE_EBSYSTEM
-    ComputeEB compute(m_dx, m_p.formulation, m_p.ccz4_params,
-                      Interval(c_E11, c_E33), Interval(c_B11, c_B33),
-                      m_p.system_params.use_last_index_raised);
+    ComputeEB<MovingPunctureGaugeEtaRadialDecay> compute(
+        m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge,
+        Interval(c_E11, c_E33), Interval(c_B11, c_B33),
+        m_p.system_params.use_last_index_raised);
     BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
                    m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 
     if (m_p.system_params.version == 2)
     {
         bool compute_time_derivatives = true;
-        ComputeEB compute2(
-            m_dx, m_p.formulation, m_p.ccz4_params,
+        ComputeEB<MovingPunctureGaugeEtaRadialDecay> compute2(
+            m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge,
             Interval(c_Eaux11, c_Eaux33), Interval(c_Baux11, c_Baux33),
             m_p.system_params.use_last_index_raised, compute_time_derivatives);
 
@@ -93,7 +95,8 @@ void HigherDerivativesLevel::initialData()
                        EXCLUDE_GHOST_CELLS);
     }
 #elif USE_CSYSTEM
-    CDiagnostics compute(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
+    CDiagnostics<MovingPunctureGaugeEtaRadialDecay> compute(
+        m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge, c_C, -1);
     BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
                    m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 #endif
@@ -126,35 +129,39 @@ void HigherDerivativesLevel::computeDiagnostics()
     System EBsystem(m_p.system_params);
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
 
-    MatterConstraints<C2EFT<System>> constraints(
-        c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, m_p.center,
-        c_Ham, Interval(c_Mom, c_Mom));
+    MatterConstraintsWithGauge<C2EFT<System>, MovingPunctureGaugeEtaRadialDecay>
+        constraints(c2eft, m_dx, m_p.G_Newton, m_p.formulation,
+                    m_p.ccz4_params_modifiedGauge, m_p.center, c_Ham,
+                    Interval(c_Mom, c_Mom));
 
-    WeakFieldConditionDiagnostic<System> weakField(c2eft, m_dx, m_p.formulation,
-                                                   m_p.ccz4_params, m_p.center);
-    NCCDiagnostic<System> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
-                              m_p.center, m_p.G_Newton, c_NCC_plus, c_NCC_minus,
-                              c_NCC_Z4_plus, c_NCC_Z4_minus);
-    DiffusionDiagnostic<C2EFT<System>> diffusion(
-        c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, m_p.sigma,
-        m_p.center, m_p.formulation, m_p.G_Newton, c_diffusion_chi, c_rhs_chi,
-        c_det_h);
+    WeakFieldConditionDiagnostic<System, MovingPunctureGaugeEtaRadialDecay>
+        weakField(c2eft, m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge,
+                  m_p.center);
+    NCCDiagnostic<System, MovingPunctureGaugeEtaRadialDecay> ncc(
+        c2eft, m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge, m_p.center,
+        m_p.G_Newton, c_NCC_plus, c_NCC_minus, c_NCC_Z4_plus, c_NCC_Z4_minus);
+    DiffusionDiagnostic<C2EFT<System>, MovingPunctureGaugeEtaRadialDecay>
+        diffusion(c2eft, m_p.ccz4_params_modifiedGauge, m_p.diffusion_params,
+                  m_dx, m_dt, m_p.sigma, m_p.center, m_p.formulation,
+                  m_p.G_Newton, c_diffusion_chi, c_rhs_chi, c_det_h);
 
 #ifdef USE_EBSYSTEM
-    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params,
-                          m_p.system_params.use_last_index_raised);
-    ComputeEB computeEB(m_dx, m_p.formulation, m_p.ccz4_params,
-                        Interval(c_Ephys11, c_Ephys33),
-                        Interval(c_Bphys11, c_Bphys33),
-                        m_p.system_params.use_last_index_raised);
+    EBdiffDiagnostic<MovingPunctureGaugeEtaRadialDecay> diff(
+        m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge,
+        m_p.system_params.use_last_index_raised);
+    ComputeEB<MovingPunctureGaugeEtaRadialDecay> computeEB(
+        m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge,
+        Interval(c_Ephys11, c_Ephys33), Interval(c_Bphys11, c_Bphys33),
+        m_p.system_params.use_last_index_raised);
 
     if (m_p.system_params.version == 1)
     {
         // need to first store Eaux and Baux on the grid with the physical E & B
-        BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
-                                 Interval(c_Eaux11, c_Eaux33),
-                                 Interval(c_Baux11, c_Baux33),
-                                 m_p.system_params.use_last_index_raised),
+        BoxLoops::loop(ComputeEB<MovingPunctureGaugeEtaRadialDecay>(
+                           m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge,
+                           Interval(c_Eaux11, c_Eaux33),
+                           Interval(c_Baux11, c_Baux33),
+                           m_p.system_params.use_last_index_raised),
                        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     }
 
@@ -163,8 +170,9 @@ void HigherDerivativesLevel::computeDiagnostics()
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
 #elif USE_CSYSTEM
-    CDiagnostics diff(m_dx, m_p.formulation, m_p.ccz4_params, c_Cphys,
-                      c_C_diff);
+    CDiagnostics<MovingPunctureGaugeEtaRadialDecay> diff(
+        m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge, c_Cphys,
+        c_C_diff);
 
     BoxLoops::loop(
         make_compute_pack(weakField, ncc, diffusion, constraints, diff),
@@ -190,10 +198,11 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
         // don't include the above BoxLoops in this one because this one
         // excludes ghost cells and the fillAllGhosts will not fill the outer
         // boundaries for sommerfeld BC
-        BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
-                                 Interval(c_Eaux11, c_Eaux33),
-                                 Interval(c_Baux11, c_Baux33),
-                                 m_p.system_params.use_last_index_raised),
+        BoxLoops::loop(ComputeEB<MovingPunctureGaugeEtaRadialDecay>(
+                           m_dx, m_p.formulation, m_p.ccz4_params_modifiedGauge,
+                           Interval(c_Eaux11, c_Eaux33),
+                           Interval(c_Baux11, c_Baux33),
+                           m_p.system_params.use_last_index_raised),
                        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
         fillAllGhosts();
     }
@@ -207,9 +216,10 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
-    MatterCCZ4RHSWithDiffusion<C2EFT<System>> my_ccz4_matter(
-        c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, m_p.sigma,
-        m_p.center, m_p.formulation, m_p.G_Newton);
+    MatterCCZ4RHSWithDiffusion<C2EFT<System>, MovingPunctureGaugeEtaRadialDecay>
+        my_ccz4_matter(c2eft, m_p.ccz4_params_modifiedGauge,
+                       m_p.diffusion_params, m_dx, m_dt, m_p.sigma, m_p.center,
+                       m_p.formulation, m_p.G_Newton);
     BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 

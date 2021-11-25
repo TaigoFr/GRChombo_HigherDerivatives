@@ -18,7 +18,7 @@
 // ASSUMES ComputeEB WAS CALLED
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-class EBdiffDiagnostic
+template <class gauge_t = MovingPunctureGauge> class EBdiffDiagnostic
 {
 
     // Use the variable definitions in MatterCCZ4RHS
@@ -29,10 +29,11 @@ class EBdiffDiagnostic
     using Diff2Vars =
         typename MatterCCZ4RHS<C2EFT<EBSystem>>::template Diff2Vars<data_t>;
 
+    using params_t = CCZ4_params_t<typename gauge_t::params_t>;
+
   public:
     EBdiffDiagnostic(double m_dx, int a_formulation,
-                     const CCZ4_params_t<> &a_ccz4_params,
-                     bool use_last_index_raised)
+                     const params_t &a_ccz4_params, bool use_last_index_raised)
         : m_deriv(m_dx), m_formulation(a_formulation),
           m_ccz4_params(a_ccz4_params),
           m_use_last_index_raised(use_last_index_raised)
@@ -78,7 +79,7 @@ class EBdiffDiagnostic
   protected:
     FourthOrderDerivatives m_deriv;
     int m_formulation;
-    const CCZ4_params_t<> &m_ccz4_params;
+    const params_t &m_ccz4_params;
     bool m_use_last_index_raised;
 };
 

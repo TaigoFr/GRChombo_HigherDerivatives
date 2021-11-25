@@ -45,7 +45,8 @@ void MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, deriv_t>::compute(
     GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
         matter_vars, d1, d2, "MatterCCZ4RHSWithDiffusion::compute");
 
-    gq.set_advection_and_gauge(advec, this->m_gauge);
+    gq.set_advection(advec);
+    gq.set_gauge(this->m_gauge);
     gq.set_formulation(this->m_formulation, this->m_params);
     gq.set_cosmological_constant(this->m_cosmological_constant);
     gq.set_coordinates(coords);

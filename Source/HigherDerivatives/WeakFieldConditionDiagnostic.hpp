@@ -13,7 +13,8 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-template <class System> class WeakFieldConditionDiagnostic
+template <class System, class gauge_t = MovingPunctureGauge>
+class WeakFieldConditionDiagnostic
 {
     // Use the variable definitions in MatterCCZ4RHS
     template <class data_t>
@@ -23,10 +24,12 @@ template <class System> class WeakFieldConditionDiagnostic
     using Diff2Vars =
         typename MatterCCZ4RHS<C2EFT<System>>::template Diff2Vars<data_t>;
 
+    using params_t = CCZ4_params_t<typename gauge_t::params_t>;
+
   public:
     WeakFieldConditionDiagnostic(const C2EFT<System> &a_matter, double m_dx,
                                  int a_formulation,
-                                 const CCZ4_params_t<> &a_ccz4_params,
+                                 const params_t &a_ccz4_params,
                                  const std::array<double, CH_SPACEDIM> a_center)
         : my_matter(a_matter), m_formulation(a_formulation),
           m_ccz4_params(a_ccz4_params), m_deriv(m_dx), m_center(a_center)
@@ -45,12 +48,13 @@ template <class System> class WeakFieldConditionDiagnostic
                                          m_center);
 
         // make gauge
-        MovingPunctureGauge gauge(m_ccz4_params);
+        gauge_t gauge(m_ccz4_params);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars, MovingPunctureGauge> gq(
+        GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
             vars, d1, d2, "WeakFieldConditionDiagnostic::compute");
 
-        gq.set_advection_and_gauge(advec, gauge);
+        gq.set_advection(advec);
+        gq.set_gauge(gauge);
         gq.set_formulation(m_formulation, m_ccz4_params);
         gq.set_coordinates(coords);
 
@@ -69,7 +73,7 @@ template <class System> class WeakFieldConditionDiagnostic
   protected:
     const C2EFT<System> &my_matter; //!< The matter object, e.g. a scalar field.
     int m_formulation;
-    const CCZ4_params_t<> &m_ccz4_params;
+    const params_t &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
     const std::array<double, CH_SPACEDIM> m_center;
 };

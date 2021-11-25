@@ -12,17 +12,16 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-template <class matter_t>
+template <class matter_t, class gauge_t = MovingPunctureGauge>
 class DiffusionDiagnostic
-    : MatterCCZ4RHSWithDiffusion<matter_t, MovingPunctureGauge,
-                                 FourthOrderDerivatives>
+    : MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, FourthOrderDerivatives>
 {
   public:
     // Use this alias for the same template instantiation as this class
-    using MatterCCZ4 = MatterCCZ4RHSWithDiffusion<matter_t, MovingPunctureGauge,
-                                                  FourthOrderDerivatives>;
+    using MatterCCZ4 =
+        MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, FourthOrderDerivatives>;
 
-    using params_t = typename MatterCCZ4::params_t;
+    using params_t = CCZ4_params_t<typename gauge_t::params_t>;
 
     template <class data_t>
     using Vars = typename MatterCCZ4::template Vars<data_t>;
@@ -38,8 +37,7 @@ class DiffusionDiagnostic
                         int a_formulation, double a_G_Newton,
                         int a_diffusion_var, int a_diffusion_rhs_var,
                         int a_det_conformal_metric = -1)
-        : MatterCCZ4RHSWithDiffusion<matter_t, MovingPunctureGauge,
-                                     FourthOrderDerivatives>(
+        : MatterCCZ4RHSWithDiffusion<matter_t, gauge_t, FourthOrderDerivatives>(
               a_matter, a_params, a_diffusion_params, a_dx, a_dt, a_sigma,
               a_center, a_formulation, a_G_Newton),
           m_diffusion_var(a_diffusion_var),
@@ -56,10 +54,11 @@ class DiffusionDiagnostic
         const auto advec =
             this->m_deriv.template advection<Vars>(current_cell, vars.shift);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars, MovingPunctureGauge> gq(
+        GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
             vars, d1, d2, "DiffusionDiagnostic::compute");
 
-        gq.set_advection_and_gauge(advec, this->m_gauge);
+        gq.set_advection(advec);
+        gq.set_gauge(this->m_gauge);
         gq.set_formulation(this->m_formulation, this->m_params);
 
         Vars<data_t> rhs;

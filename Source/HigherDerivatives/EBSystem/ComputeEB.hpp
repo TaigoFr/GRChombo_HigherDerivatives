@@ -15,7 +15,7 @@
 #include "TensorAlgebra.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-class ComputeEB
+template <class gauge_t = MovingPunctureGauge> class ComputeEB
 {
 
     // Use the variable definitions in MatterCCZ4RHS
@@ -26,11 +26,12 @@ class ComputeEB
     using Diff2Vars =
         typename MatterCCZ4RHS<C2EFT<EBSystem>>::template Diff2Vars<data_t>;
 
+    using params_t = CCZ4_params_t<typename gauge_t::params_t>;
+
   public:
-    ComputeEB(double m_dx, int a_formulation,
-              const CCZ4_params_t<> &a_ccz4_params, const Interval &E_comps,
-              const Interval &B_comps, bool use_last_index_raised,
-              bool compute_time_derivatives = false)
+    ComputeEB(double m_dx, int a_formulation, const params_t &a_ccz4_params,
+              const Interval &E_comps, const Interval &B_comps,
+              bool use_last_index_raised, bool compute_time_derivatives = false)
         : m_formulation(a_formulation), m_ccz4_params(a_ccz4_params),
           m_deriv(m_dx), m_E_comps(E_comps), m_B_comps(B_comps),
           m_compute_time_derivatives(compute_time_derivatives),
@@ -46,8 +47,8 @@ class ComputeEB
         const auto d1 = m_deriv.template diff1<Vars>(current_cell);
         const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2,
-                                                        "ComputeEB::compute");
+        GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
+            vars, d1, d2, "ComputeEB::compute");
 
         gq.set_formulation(m_formulation, m_ccz4_params);
 
@@ -145,10 +146,7 @@ class ComputeEB
                 // now need to raise them back to get the time derivative LU
                 // this needs the rhs of 'h', dt_h
 
-                // gauge does not matter as we only compute
-                // 'compute_rhs_equations_no_gauge' (we don't use the full RHS
-                // equations)
-                gq.set_advection_and_gauge(advec, EmptyGauge());
+                gq.set_advection(advec);
 
                 Tensor<2, data_t> Eij_no_time_der = gq.get_weyl_electric_part();
                 Tensor<2, data_t> Bij_no_time_der = gq.get_weyl_magnetic_part();
@@ -223,7 +221,7 @@ class ComputeEB
 
   protected:
     int m_formulation;
-    const CCZ4_params_t<> &m_ccz4_params;
+    const params_t &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
     const Interval m_E_comps, m_B_comps;
     bool m_compute_time_derivatives;

@@ -15,7 +15,7 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-class CDiagnostics
+template <class gauge_t = MovingPunctureGauge> class CDiagnostics
 {
 
     // Use the variable definitions in MatterCCZ4RHS
@@ -26,10 +26,11 @@ class CDiagnostics
     using Diff2Vars =
         typename MatterCCZ4RHS<C2EFT<CSystem>>::template Diff2Vars<data_t>;
 
+    using params_t = CCZ4_params_t<typename gauge_t::params_t>;
+
   public:
-    CDiagnostics(double m_dx, int a_formulation,
-                 const CCZ4_params_t<> &a_ccz4_params, int a_C_comp = -1,
-                 int a_C_diff_comp = -1)
+    CDiagnostics(double m_dx, int a_formulation, const params_t &a_ccz4_params,
+                 int a_C_comp = -1, int a_C_diff_comp = -1)
         : m_formulation(a_formulation), m_ccz4_params(a_ccz4_params),
           m_deriv(m_dx), m_C_comp(a_C_comp), m_C_diff_comp(a_C_diff_comp)
     {
@@ -41,7 +42,7 @@ class CDiagnostics
         const auto d1 = m_deriv.template diff1<Vars>(current_cell);
         const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars> gq(
+        GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
             vars, d1, d2, "CDiagnostics::compute");
 
         gq.set_formulation(m_formulation, m_ccz4_params);
@@ -56,7 +57,7 @@ class CDiagnostics
 
   protected:
     int m_formulation;
-    const CCZ4_params_t<> &m_ccz4_params;
+    const params_t &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
 
     int m_C_comp, m_C_diff_comp;
