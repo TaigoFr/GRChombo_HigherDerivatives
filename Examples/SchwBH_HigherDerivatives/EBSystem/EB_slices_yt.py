@@ -74,11 +74,10 @@ def do_plot(use_log):
         ax.plot(np.array(ray["index", "z"][srt]), np.abs(np.array(ray["Ephys11"][srt])), label=r"$|E11_{phys}|$")
         ax.legend(fontsize=fontsize)
 
-        # if use_log:
-        #     ax.set_ylim([minE11abs * 0.9 , maxE11abs * 1.1])
-        # else:
-        #     ax.set_ylim([minE11 * (1.1 if minE11 < 0 else 0.9), maxE11 * (0.9 if maxE11 < 0 else 1.1)])
-        ax.set_ylim([0 , maxE11abs * 1.05])
+        if use_log:
+            ax.set_ylim([minE11abs * 0.95 , maxE11abs * 1.05])
+        else:
+            ax.set_ylim([0, maxE11abs * 1.05])
 
         plt.xlabel("Radius (M)", fontsize=fontsize)
 
