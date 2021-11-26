@@ -231,10 +231,17 @@ class SimulationParameters : public SimulationParametersBase
         ccz4_params_modifiedGauge.eta = ccz4_params.eta;
         pp.load("eta_sigmoid_decay",
                 ccz4_params_modifiedGauge.eta_sigmoid_decay, 17.);
+        pout() << "Using eta_sigmoid_decay = "
+               << ccz4_params_modifiedGauge.eta_sigmoid_decay << std::endl;
         pp.load("eta_sigmoid_chi_threshold",
                 ccz4_params_modifiedGauge.eta_sigmoid_chi_threshold, 0.92);
+        pout() << "Using eta_sigmoid_chi_threshold = "
+               << ccz4_params_modifiedGauge.eta_sigmoid_chi_threshold
+               << std::endl;
         pp.load("eta_asymptotic", ccz4_params_modifiedGauge.eta_asymptotic,
                 0.1);
+        pout() << "Using eta_asymptotic = "
+               << ccz4_params_modifiedGauge.eta_asymptotic << std::endl;
     }
 
     void check_params()
