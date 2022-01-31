@@ -23,6 +23,7 @@ class ChiExtractionTaggingCriterion
     const spherical_extraction_params_t m_params;
     const int m_level;
     const bool m_activate_extraction;
+    const double m_buffer;
 
   public:
     template <class data_t> struct Vars
@@ -41,16 +42,18 @@ class ChiExtractionTaggingCriterion
     // The constructor
     ChiExtractionTaggingCriterion(const double dx, const int a_level,
                                   const spherical_extraction_params_t a_params,
-                                  const bool activate_extraction = false)
+                                  const bool activate_extraction = false,
+                                  const double a_buffer = 0.2)
         : m_dx(dx), m_deriv(dx), m_params(a_params), m_level(a_level),
-          m_activate_extraction(activate_extraction){};
+          m_activate_extraction(activate_extraction), m_buffer(a_buffer){};
     // below is a constructor for backward compatibility
     ChiExtractionTaggingCriterion(const double dx, const int a_level,
                                   const int a_max_level,
                                   const spherical_extraction_params_t a_params,
-                                  const bool activate_extraction = false)
+                                  const bool activate_extraction = false,
+                                  const double a_buffer = 0.2)
         : ChiExtractionTaggingCriterion(dx, a_level, a_params,
-                                        activate_extraction){};
+                                        activate_extraction, a_buffer){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -80,7 +83,7 @@ class ChiExtractionTaggingCriterion
                     // add a 20% buffer to extraction zone so not too near to
                     // boundary
                     auto regrid = simd_compare_lt(
-                        r, 1.2 * m_params.extraction_radii[iradius]);
+                        r, m_buffer * m_params.extraction_radii[iradius]);
                     criterion = simd_conditional(regrid, 100.0, criterion);
                 }
             }

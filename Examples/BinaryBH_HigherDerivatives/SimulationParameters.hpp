@@ -66,6 +66,9 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("calculate_constraint_norms", calculate_constraint_norms,
                 false);
 
+        pp.load("tagging_buffer_ah", tagging_buffer_ah, 0.7);
+        pp.load("tagging_buffer_extraction", tagging_buffer_extraction, 0.3);
+
 #ifdef USE_AHFINDER
         pp.load("AH_1_initial_guess", AH_1_initial_guess,
                 0.5 * bh1_params.mass);
@@ -268,6 +271,8 @@ class SimulationParameters : public SimulationParametersBase
     // Initial data
     bool activate_extraction, track_punctures, calculate_constraint_norms;
     int puncture_tracking_level;
+
+    double tagging_buffer_ah, tagging_buffer_extraction;
 
     // Collection of parameters necessary for initial conditions
     BoostedBH::params_t bh2_params;

@@ -29,6 +29,7 @@ class ChiPunctureExtractionTaggingCriterion
     const spherical_extraction_params_t m_params;
     const std::vector<double> m_puncture_masses;
     const std::vector<std::array<double, CH_SPACEDIM>> &m_puncture_coords;
+    const double m_buffer_ah, m_buffer_extraction;
 
   public:
     template <class data_t> struct Vars
@@ -51,12 +52,14 @@ class ChiPunctureExtractionTaggingCriterion
         const std::vector<std::array<double, CH_SPACEDIM>> &a_puncture_coords,
         const bool activate_extraction = false,
         const bool track_punctures = false,
-        const std::vector<double> a_puncture_masses = {1.0, 1.0})
+        const std::vector<double> a_puncture_masses = {1.0, 1.0},
+        const double a_buffer_ah = 0.5, const double a_buffer_extraction = 0.2)
         : m_dx(dx), m_level(a_level), m_max_level(a_max_level),
           m_track_punctures(track_punctures),
           m_activate_extraction(activate_extraction), m_deriv(dx),
           m_params(a_params), m_puncture_masses(a_puncture_masses),
-          m_puncture_coords(a_puncture_coords)
+          m_puncture_coords(a_puncture_coords), m_buffer_ah(a_buffer_ah),
+          m_buffer_extraction(a_buffer_extraction)
     {
         // check that the number of punctures is consistent
         CH_assert(m_puncture_masses.size() == m_puncture_coords.size());
@@ -90,7 +93,8 @@ class ChiPunctureExtractionTaggingCriterion
                     // add a 20% buffer to extraction zone so not too near to
                     // boundary
                     auto regrid = simd_compare_lt(
-                        r, 1.2 * m_params.extraction_radii[iradius]);
+                        r, m_buffer_extraction *
+                               m_params.extraction_radii[iradius]);
                     criterion = simd_conditional(regrid, 100.0, criterion);
                 }
             }
@@ -117,7 +121,7 @@ class ChiPunctureExtractionTaggingCriterion
                 // decide whether to tag based on distance to horizon
                 // plus a fudge factor of 1.5
                 auto regrid = simd_compare_lt(
-                    r, 1.5 * factor * m_puncture_masses[ipuncture]);
+                    r, m_buffer_ah * factor * m_puncture_masses[ipuncture]);
                 criterion = simd_conditional(regrid, 100.0, criterion);
             }
         }

@@ -249,15 +249,18 @@ void BinaryBHHDLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
         BoxLoops::loop(ChiPunctureExtractionTaggingCriterion(
                            m_dx, m_level, m_p.max_level, m_p.extraction_params,
                            puncture_coords, m_p.activate_extraction,
-                           m_p.track_punctures, puncture_masses),
+                           m_p.track_punctures, puncture_masses,
+                           m_p.tagging_buffer_ah,
+                           m_p.tagging_buffer_extraction),
                        current_state, tagging_criterion);
     }
     else
     {
-        BoxLoops::loop(ChiExtractionTaggingCriterion(m_dx, m_level,
-                                                     m_p.extraction_params,
-                                                     m_p.activate_extraction),
-                       current_state, tagging_criterion);
+        BoxLoops::loop(
+            ChiExtractionTaggingCriterion(m_dx, m_level, m_p.extraction_params,
+                                          m_p.activate_extraction,
+                                          m_p.tagging_buffer_extraction),
+            current_state, tagging_criterion);
     }
 }
 
