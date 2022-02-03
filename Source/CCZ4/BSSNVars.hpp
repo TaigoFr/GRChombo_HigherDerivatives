@@ -33,10 +33,10 @@ struct VarsNoGauge : public ADMConformalVars::VarsNoGauge<data_t>
         ADMConformalVars::VarsNoGauge<data_t>::enum_mapping(mapping_function);
 #if CH_SPACEDIM == 3
         define_enum_mapping(mapping_function, GRInterval<c_Gamma1, c_Gamma3>(),
-                            Gamma); //!< The auxilliary variable Gamma^i
+                            Gamma); //!< The auxiliary variable Gamma^i
 #elif CH_SPACEDIM == 2
         define_enum_mapping(mapping_function, GRInterval<c_Gamma1, c_Gamma2>(),
-                            Gamma); //!< The auxilliary variable Gamma^i
+                            Gamma); //!< The auxiliary variable Gamma^i
 #else
 #ifdef CH_SPACEDIM
 #error define_enum_mapping() has not got your dimension combination implemented.
