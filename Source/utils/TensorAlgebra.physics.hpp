@@ -18,6 +18,16 @@ template <class data_t, int size = CH_SPACEDIM> struct chris_t
     Tensor<1, data_t, size> contracted; //!< contracted christoffel
 };
 
+template <class data_t, int size = CH_SPACEDIM> struct adm_metric_t
+{
+    data_t lapse;
+    Tensor<1, data_t, size> shift;
+    Tensor<1, data_t, size> shift_L;
+    Tensor<2, data_t, size> metric_spatial;
+    Tensor<2, data_t, size> metric_spatial_UU;
+    Tensor<2, data_t, size> K_LL;
+};
+
 namespace TensorAlgebra
 {
 
@@ -118,6 +128,65 @@ Tensor<3, data_t> compute_phys_chris(const Tensor<1, data_t> &d1_chi,
         }
     }
     return chris_phys;
+}
+
+// Note final indices are time for spacetime metric
+template <class data_t>
+adm_metric_t<data_t>
+adm_vars_from_metric_ST(const Tensor<2, data_t, CH_SPACETIMEDIM> &g,
+                        const Tensor<3, data_t, CH_SPACETIMEDIM> &dg)
+{
+    adm_metric_t<data_t> out;
+
+    // Tensor<2, data_t, size> K_LL;
+
+    FOR(i)
+    {
+        // shift
+        out.shift_L[i] = g[i + 1][0];
+        // spatial metric
+        FOR(j) { out.metric_spatial[i][j] = g[i + 1][j + 1]; }
+    }
+
+    out.metric_spatial_UU = compute_inverse_sym(out.metric_spatial);
+    out.shift = raise_all(out.shift_L, out.metric_spatial_UU);
+
+    // lapse
+    data_t lapse_squared = -g[0][0];
+    FOR(k) { lapse_squared += out.shift_L[k] * out.shift[k]; }
+    out.lapse = sqrt(lapse_squared);
+
+    // Kij
+    Tensor<2, double> dt_metric_spatial;
+    Tensor<1, Tensor<1, double>> d1_shift_L;
+    Tensor<2, Tensor<1, double>> d1_metric_spatial;
+    FOR2(i, j)
+    {
+        dt_metric_spatial[i][j] = dg[i + 1][j + 1][0];
+        d1_shift_L[j][i] = dg[0][j + 1][i + 1];
+        FOR1(k) { d1_metric_spatial[i][j][k] = dg[i + 1][j + 1][k + 1]; }
+    }
+
+    const auto chris_phys =
+        compute_christoffel(d1_metric_spatial, out.metric_spatial_UU);
+
+    Tensor<1, Tensor<1, data_t>> covd_shift_L = d1_shift_L;
+
+    FOR(i, j, k)
+    {
+        covd_shift_L[i][j] += -chris_phys.ULL[k][i][j] * out.shift_L[k];
+    }
+
+    const data_t lapse_inverse = 1.0 / out.lapse;
+
+    FOR(i, j)
+    {
+        out.K_LL[i][j] =
+            -0.5 * lapse_inverse *
+            (dt_metric_spatial[i][j] - covd_shift_L[i][j] - covd_shift_L[j][i]);
+    }
+
+    return out;
 }
 
 } // namespace TensorAlgebra
