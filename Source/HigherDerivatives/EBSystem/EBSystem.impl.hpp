@@ -16,8 +16,8 @@
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t, class gauge_t>
 void EBSystem::compute_C(
-    data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
-    Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
+    data_t &C, Tensor<1, data_t, CH_SPACETIMEDIM> &d1_C,
+    Tensor<2, data_t, CH_SPACETIMEDIM> &d2_C,
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
     const C2EFT<EBSystem>::params_t &pm) const
 {
@@ -54,9 +54,9 @@ void EBSystem::compute_C(
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // indices are only spatial, derivatives are 4D
-    Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Eij, d1_Bij, d1_Eij_LU,
+    Tensor<2, Tensor<1, data_t, CH_SPACETIMEDIM>> d1_Eij, d1_Bij, d1_Eij_LU,
         d1_Bij_LU, d1_h, d1_h_dot_hUU;
-    Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Kij; // needed for d2_h
+    Tensor<2, Tensor<1, data_t, CH_SPACETIMEDIM>> d1_Kij; // needed for d2_h
     // 2nd mixed derivatives of shift needed for d2_h[i][j][0][0]
     Tensor<2, data_t> dtd1_shift; // mixed derivative
 
@@ -159,8 +159,8 @@ void EBSystem::compute_C(
 
     // indices are only spatial, derivatives are 4D
     // d2_Eij will be 'LU' if 'use_last_index_raised' = true
-    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> d2_Eij, d2_Bij, d2_h;
-    Tensor<2, data_t, CH_SPACEDIM + 1> Eij_dot_d2_Eij, Bij_dot_d2_Bij;
+    Tensor<2, Tensor<2, data_t, CH_SPACETIMEDIM>> d2_Eij, d2_Bij, d2_h;
+    Tensor<2, data_t, CH_SPACETIMEDIM> Eij_dot_d2_Eij, Bij_dot_d2_Bij;
 
     // compute d2_h
     FOR(i, j)
@@ -242,7 +242,7 @@ void EBSystem::compute_C(
             TensorAlgebra::compute_dot_product(metric_UU_spatial, Bij_LU, 0, 0);
 
         // computing some helping variables
-        Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> d1_Eij_LL, d1_Bij_LL;
+        Tensor<2, Tensor<1, data_t, CH_SPACETIMEDIM>> d1_Eij_LL, d1_Bij_LL;
         Tensor<2, data_t> Eij_dot_Eij_UU, Bij_dot_Bij_UU;
 
         FOR(i, j)
@@ -324,8 +324,8 @@ void EBSystem::compute_C(
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t, class gauge_t>
 void EBSystem::compute_Riemann(
-    Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LLLU,
-    Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LULU,
+    Tensor<4, data_t, CH_SPACETIMEDIM> &riemann_LLLU,
+    Tensor<4, data_t, CH_SPACETIMEDIM> &riemann_LULU,
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     const auto &vars = gq.get_vars();
@@ -349,7 +349,7 @@ void EBSystem::compute_Riemann(
     }
 
     // valid in vacuum!
-    Tensor<4, data_t, CH_SPACEDIM + 1> riemann_LLLL =
+    Tensor<4, data_t, CH_SPACETIMEDIM> riemann_LLLL =
         gq.compute_weyl_tensor_LLLL(Eij_LL, Bij_LL);
 
     FOR_ST(a, b, c, d, e)
@@ -538,11 +538,11 @@ template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t, class gauge_t,
           template <typename> class rhs_vars_t>
 void EBSystem::compute_d2_Eij_and_Bij(
-    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Eij,
-    Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Bij,
+    Tensor<2, Tensor<2, data_t, CH_SPACETIMEDIM>> &d2_Eij,
+    Tensor<2, Tensor<2, data_t, CH_SPACETIMEDIM>> &d2_Bij,
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
     rhs_vars_t<data_t> &rhs,
-    Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> &d1_h) const
+    Tensor<2, Tensor<1, data_t, CH_SPACETIMEDIM>> &d1_h) const
 {
     if (m_params.version == 1)
     {

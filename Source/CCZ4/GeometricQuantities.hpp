@@ -104,7 +104,7 @@ class GeometricQuantities
     void set_cosmological_constant(double cosmological_constant);
     void set_coordinates(const Coordinates<data_t> &a_coords);
     /*
-    Cheat sheet (L is \Lambda):
+    Cheat sheet (L is \Lambda, k = 16 \pi G):
      k T_mn -> -2 L g_mn
      k T    -> -2 (d+1) L
      k rho  -> 2 L
@@ -190,49 +190,49 @@ class GeometricQuantities
 
     //////// ST ////////
     // ST
-    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_metric_ST();
-    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_projector_LU_ST();
-    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_metric_UU_ST();
-    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_normal_U_ST();
-    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_normal_L_ST();
-    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_shift_ST();
-    const Tensor<3, data_t, CH_SPACEDIM + 1> &
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_metric_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_projector_LU_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_metric_UU_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_normal_U_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_normal_L_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_shift_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &
     get_levi_civita_spatial_ST();                                   // LLL
-    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_levi_civita_ST(); // LLL
-    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_Z_L_ST();
-    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_grad_normal_LL();
-    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_covd_Z_L_ST();
-    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_acceleration_ST();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_levi_civita_ST(); // LLL
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_Z_L_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_grad_normal_LL();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_covd_Z_L_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_acceleration_ST();
 
     // EM-tensor dependent
-    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_em_tensor_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_em_tensor_ST();
     const data_t &get_em_tensor_trace_ST();
-    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_weyl_tensor_LLLL();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_weyl_tensor_LLLL();
     const data_t &get_weyl_squared();
 
     // EOM / Formulation dependent
-    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLL_ST();
-    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLL_ST_v2();
-    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_ricci_ST();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_riemann_LLLL_ST();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_riemann_LLLL_ST_v2();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_ricci_ST();
     const data_t &get_ricci_scalar_ST();
     const data_t &get_ricci_squared();
     const data_t &get_kretschmann();
     const data_t &get_riemann_squared(); // alternative to Kretschmann
-    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLU_ST();
-    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LULU_ST();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_riemann_LLLU_ST();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_riemann_LULU_ST();
 
     // Advection dependent
-    const Tensor<3, data_t, CH_SPACEDIM + 1> &get_chris_ST();
-    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_Gamma_ST();
-    const Tensor<1, data_t, CH_SPACEDIM + 1> &get_Gamma_L_ST();
-    // const Tensor<2, data_t, CH_SPACEDIM + 1> &get_d1_Z_L_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_chris_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_Gamma_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_Gamma_L_ST();
+    // const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d1_Z_L_ST();
     // // commented, but working!
 
     //////// EXTRA ////////
     ricci_t<data_t> compute_ricci_qDZ(int q); // computes Rij + q * DiZj
     void compute_rhs_equations(Vars &);
     void compute_rhs_equations_no_gauge(Vars &);
-    Tensor<4, data_t, CH_SPACEDIM + 1>
+    Tensor<4, data_t, CH_SPACETIMEDIM>
     compute_weyl_tensor_LLLL(const Tensor<2, data_t> &Eij,
                              const Tensor<2, data_t> &Bij);
 
@@ -341,41 +341,41 @@ class GeometricQuantities
 
     //////// ST ////////
     // ST
-    Tensor<2, data_t, CH_SPACEDIM + 1> *m_metric_ST;
-    Tensor<2, data_t, CH_SPACEDIM + 1> *m_projector_LU_ST;
-    Tensor<2, data_t, CH_SPACEDIM + 1> *m_metric_UU_ST;
-    Tensor<1, data_t, CH_SPACEDIM + 1> *m_normal_U_ST;
-    Tensor<1, data_t, CH_SPACEDIM + 1> *m_normal_L_ST;
-    Tensor<1, data_t, CH_SPACEDIM + 1> *m_shift_ST;
-    Tensor<3, data_t, CH_SPACEDIM + 1> *m_levi_civita_spatial_ST;
-    Tensor<4, data_t, CH_SPACEDIM + 1> *m_levi_civita_ST;
-    Tensor<1, data_t, CH_SPACEDIM + 1> *m_Z_L_ST;
-    Tensor<2, data_t, CH_SPACEDIM + 1> *m_grad_normal_LL;
-    Tensor<2, data_t, CH_SPACEDIM + 1> *m_covd_Z_L_ST;
-    Tensor<1, data_t, CH_SPACEDIM + 1> *m_acceleration_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_metric_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_projector_LU_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_metric_UU_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_normal_U_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_normal_L_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_shift_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_levi_civita_spatial_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_levi_civita_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_Z_L_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_grad_normal_LL;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_covd_Z_L_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_acceleration_ST;
 
     // EM-tensor
-    Tensor<2, data_t, CH_SPACEDIM + 1> *m_em_tensor_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_em_tensor_ST;
     data_t *m_em_tensor_trace_ST;
-    Tensor<4, data_t, CH_SPACEDIM + 1> *m_weyl_tensor_LLLL;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_weyl_tensor_LLLL;
     data_t *m_weyl_squared;
 
     // EOM dependent
-    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLL_ST;
-    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLL_ST_v2;
-    Tensor<2, data_t, CH_SPACEDIM + 1> *m_ricci_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_riemann_LLLL_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_riemann_LLLL_ST_v2;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_ricci_ST;
     data_t *m_ricci_scalar_ST;
     data_t *m_ricci_squared;
     data_t *m_kretschmann;
     data_t *m_riemann_squared;
-    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLU_ST;
-    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LULU_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_riemann_LLLU_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_riemann_LULU_ST;
 
     // Advection dependent
-    Tensor<3, data_t, CH_SPACEDIM + 1> *m_chris_ST;
-    Tensor<1, data_t, CH_SPACEDIM + 1> *m_Gamma_ST;
-    Tensor<1, data_t, CH_SPACEDIM + 1> *m_Gamma_L_ST;
-    // Tensor<2, data_t, CH_SPACEDIM + 1> *m_d1_Z_L_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_chris_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_Gamma_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_Gamma_L_ST;
+    // Tensor<2, data_t, CH_SPACETIMEDIM> *m_d1_Z_L_ST;
 
     //////// spatial ////////
     // spatial conformal

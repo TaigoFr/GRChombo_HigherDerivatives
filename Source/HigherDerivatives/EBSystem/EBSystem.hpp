@@ -100,16 +100,16 @@ class EBSystem
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t, class gauge_t>
     void
-    compute_C(data_t &C, Tensor<1, data_t, CH_SPACEDIM + 1> &d1_C,
-              Tensor<2, data_t, CH_SPACEDIM + 1> &d2_C,
+    compute_C(data_t &C, Tensor<1, data_t, CH_SPACETIMEDIM> &d1_C,
+              Tensor<2, data_t, CH_SPACETIMEDIM> &d2_C,
               GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
               const C2EFT<EBSystem>::params_t &pm) const;
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t, class gauge_t>
     void compute_Riemann(
-        Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LLLU,
-        Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LULU,
+        Tensor<4, data_t, CH_SPACETIMEDIM> &riemann_LLLU,
+        Tensor<4, data_t, CH_SPACETIMEDIM> &riemann_LULU,
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
     //! The function which adds in the RHS for the matter field vars,
@@ -138,11 +138,11 @@ class EBSystem
               template <typename> class diff2_vars_t, class gauge_t,
               template <typename> class rhs_vars_t>
     void compute_d2_Eij_and_Bij(
-        Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Eij,
-        Tensor<2, Tensor<2, data_t, CH_SPACEDIM + 1>> &d2_Bij,
+        Tensor<2, Tensor<2, data_t, CH_SPACETIMEDIM>> &d2_Eij,
+        Tensor<2, Tensor<2, data_t, CH_SPACETIMEDIM>> &d2_Bij,
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq,
         rhs_vars_t<data_t> &rhs,
-        Tensor<2, Tensor<1, data_t, CH_SPACEDIM + 1>> &d1_h) const;
+        Tensor<2, Tensor<1, data_t, CH_SPACETIMEDIM>> &d1_h) const;
 
     template <class data_t> data_t tau_from_radius(const data_t &radius) const
     {

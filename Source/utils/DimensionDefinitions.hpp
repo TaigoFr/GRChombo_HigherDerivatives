@@ -30,7 +30,11 @@
 #define FOR(...)                                                               \
     GET_MACRO6(__VA_ARGS__, FOR5, FOR4, FOR3, FOR2, FOR1, DUMMYFOR)(__VA_ARGS__)
 
-#define FOR1_ST(IDX) for (int IDX = 0; IDX < GR_SPACEDIM + 1; ++IDX)
+#ifndef CH_SPACETIMEDIM
+#define CH_SPACETIMEDIM (CH_SPACEDIM + 1)
+#endif
+
+#define FOR1_ST(IDX) for (int IDX = 0; IDX < CH_SPACETIMEDIM; ++IDX)
 #define FOR2_ST(IDX1, IDX2) FOR1_ST(IDX1) FOR1_ST(IDX2)
 #define FOR3_ST(IDX1, IDX2, IDX3) FOR2_ST(IDX1, IDX2) FOR1_ST(IDX3)
 #define FOR4_ST(IDX1, IDX2, IDX3, IDX4) FOR2_ST(IDX1, IDX2) FOR2_ST(IDX3, IDX4)

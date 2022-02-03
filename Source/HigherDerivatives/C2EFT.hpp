@@ -43,7 +43,7 @@ template <class System> class C2EFT
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t, class gauge_t>
     void compute_emtensor_4D(
-        Tensor<2, data_t, CH_SPACEDIM + 1> &Tmn,
+        Tensor<2, data_t, CH_SPACETIMEDIM> &Tmn,
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
 
     //! The function which adds in the RHS for the matter field vars,

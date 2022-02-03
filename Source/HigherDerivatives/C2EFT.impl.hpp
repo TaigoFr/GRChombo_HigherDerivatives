@@ -20,7 +20,7 @@ emtensor_t<data_t> C2EFT<System>::compute_emtensor(
 {
     emtensor_t<data_t> emtensor;
 
-    Tensor<2, data_t, CH_SPACEDIM + 1> Tmn; // 4D
+    Tensor<2, data_t, CH_SPACETIMEDIM> Tmn; // 4D
 
     compute_emtensor_4D(Tmn, gq);
 
@@ -28,13 +28,13 @@ emtensor_t<data_t> C2EFT<System>::compute_emtensor(
     const auto &n_U = gq.get_normal_U_ST();
     const auto &proj_LU = gq.get_projector_LU_ST();
 
-    Tensor<1, data_t, CH_SPACEDIM + 1> Tmn_dot_normal_U =
+    Tensor<1, data_t, CH_SPACETIMEDIM> Tmn_dot_normal_U =
         TensorAlgebra::compute_dot_product(Tmn, n_U);
 
-    Tensor<1, data_t, CH_SPACEDIM + 1> Si_4D =
+    Tensor<1, data_t, CH_SPACETIMEDIM> Si_4D =
         TensorAlgebra::compute_dot_product(Tmn_dot_normal_U, proj_LU);
 
-    Tensor<2, data_t, CH_SPACEDIM + 1> Sij_4D =
+    Tensor<2, data_t, CH_SPACETIMEDIM> Sij_4D =
         TensorAlgebra::compute_dot_product(
             proj_LU, TensorAlgebra::compute_dot_product(Tmn, proj_LU), 1, 0);
 
@@ -74,26 +74,26 @@ template <class System>
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t, class gauge_t>
 void C2EFT<System>::compute_emtensor_4D(
-    Tensor<2, data_t, CH_SPACEDIM + 1> &Tmn,
+    Tensor<2, data_t, CH_SPACETIMEDIM> &Tmn,
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
     const auto &g = gq.get_metric_ST();
     const auto &chris_ST = gq.get_chris_ST();
 
     data_t C;
-    Tensor<1, data_t, CH_SPACEDIM + 1> d1_C_4D;
-    Tensor<2, data_t, CH_SPACEDIM + 1> d2_C_4D;
+    Tensor<1, data_t, CH_SPACETIMEDIM> d1_C_4D;
+    Tensor<2, data_t, CH_SPACETIMEDIM> d2_C_4D;
     m_system.compute_C(C, d1_C_4D, d2_C_4D, gq, m_params);
 
     // compute Riemann
     // Can either be from evolved variables (if evolving
     // Eij or Bij for example), or otherwise simply use
     // gq.get_riemann_LLLU() and gq.get_riemann_LULU()
-    Tensor<4, data_t, CH_SPACEDIM + 1> riemann_LLLU;
-    Tensor<4, data_t, CH_SPACEDIM + 1> riemann_LULU;
+    Tensor<4, data_t, CH_SPACETIMEDIM> riemann_LLLU;
+    Tensor<4, data_t, CH_SPACETIMEDIM> riemann_LULU;
     m_system.compute_Riemann(riemann_LLLU, riemann_LULU, gq);
 
-    const Tensor<2, data_t, CH_SPACEDIM + 1> covd2_C =
+    const Tensor<2, data_t, CH_SPACETIMEDIM> covd2_C =
         TensorAlgebra::covariant_derivative(d2_C_4D, d1_C_4D, chris_ST);
 
     FOR_ST(a, b)

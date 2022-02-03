@@ -983,49 +983,49 @@ GeometricQuantities_t::get_dt_chris_spatial_contracted()
 }
 */
 //////////////////////////////////////////////////////////////////////////
-template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_metric_ST()
 {
     if (m_metric_ST == nullptr)
         compute_metric_ST();
     return *m_metric_ST;
 }
-template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_projector_LU_ST()
 {
     if (m_projector_LU_ST == nullptr)
         compute_projector_LU_ST();
     return *m_projector_LU_ST;
 }
-template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_metric_UU_ST()
 {
     if (m_metric_UU_ST == nullptr)
         compute_metric_UU_ST();
     return *m_metric_UU_ST;
 }
-template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_normal_U_ST()
 {
     if (m_normal_U_ST == nullptr)
         compute_normal_U_ST();
     return *m_normal_U_ST;
 }
-template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_normal_L_ST()
 {
     if (m_normal_L_ST == nullptr)
         compute_normal_L_ST();
     return *m_normal_L_ST;
 }
-template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_shift_ST()
 {
     if (m_shift_ST == nullptr)
         compute_shift_ST();
     return *m_shift_ST;
 }
-template_GQ const Tensor<3, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_levi_civita_spatial_ST()
 {
     assert_with_label(GR_SPACEDIM == 3, m_label);
@@ -1033,7 +1033,7 @@ GeometricQuantities_t::get_levi_civita_spatial_ST()
         compute_levi_civita_spatial_ST();
     return *m_levi_civita_spatial_ST;
 }
-template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_levi_civita_ST()
 {
     assert_with_label(GR_SPACEDIM == 3, m_label);
@@ -1041,7 +1041,7 @@ GeometricQuantities_t::get_levi_civita_ST()
         compute_levi_civita_ST();
     return *m_levi_civita_ST;
 }
-template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_Z_L_ST()
 {
     assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
@@ -1049,7 +1049,7 @@ GeometricQuantities_t::get_Z_L_ST()
         compute_Z_L_ST();
     return *m_Z_L_ST;
 }
-template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_grad_normal_LL()
 {
     assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
@@ -1057,7 +1057,7 @@ GeometricQuantities_t::get_grad_normal_LL()
         compute_grad_normal_LL();
     return *m_grad_normal_LL;
 }
-template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_covd_Z_L_ST()
 {
     assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
@@ -1065,7 +1065,7 @@ GeometricQuantities_t::get_covd_Z_L_ST()
         compute_covd_Z_L_ST();
     return *m_covd_Z_L_ST;
 }
-template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_acceleration_ST()
 {
     if (m_acceleration_ST == nullptr)
@@ -1073,7 +1073,7 @@ GeometricQuantities_t::get_acceleration_ST()
     return *m_acceleration_ST;
 }
 //////////////////////////////////////////////////////////////////////////
-template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_em_tensor_ST()
 {
     if (m_em_tensor_ST == nullptr)
@@ -1086,7 +1086,7 @@ template_GQ const data_t &GeometricQuantities_t::get_em_tensor_trace_ST()
         compute_em_tensor_trace_ST();
     return *m_em_tensor_trace_ST;
 }
-template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_weyl_tensor_LLLL()
 {
     assert_with_label(GR_SPACEDIM == 3, m_label);
@@ -1102,7 +1102,7 @@ template_GQ const data_t &GeometricQuantities_t::get_weyl_squared()
     return *m_weyl_squared;
 }
 //////////////////////////////////////////////////////////////////////////
-template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_riemann_LLLL_ST()
 {
     assert_with_label(m_formulation >= 0, m_label); // formulation is set
@@ -1111,7 +1111,7 @@ GeometricQuantities_t::get_riemann_LLLL_ST()
         compute_riemann_LLLL_ST();
     return *m_riemann_LLLL_ST;
 }
-template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_riemann_LLLL_ST_v2()
 {
     assert_with_label(m_formulation >= 0, m_label); // formulation is set
@@ -1119,7 +1119,7 @@ GeometricQuantities_t::get_riemann_LLLL_ST_v2()
         compute_riemann_LLLL_ST_v2();
     return *m_riemann_LLLL_ST_v2;
 }
-template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_ricci_ST()
 {
     assert_with_label(m_formulation >= 0, m_label); // formulation is set
@@ -1157,7 +1157,7 @@ template_GQ const data_t &GeometricQuantities_t::get_riemann_squared()
         compute_riemann_squared();
     return *m_riemann_squared;
 }
-template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_riemann_LLLU_ST()
 {
     assert_with_label(m_formulation >= 0, m_label); // formulation is set
@@ -1166,7 +1166,7 @@ GeometricQuantities_t::get_riemann_LLLU_ST()
         compute_riemann_LLLU_ST();
     return *m_riemann_LLLU_ST;
 }
-template_GQ const Tensor<4, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_riemann_LULU_ST()
 {
     assert_with_label(m_formulation >= 0, m_label); // formulation is set
@@ -1176,21 +1176,21 @@ GeometricQuantities_t::get_riemann_LULU_ST()
     return *m_riemann_LULU_ST;
 }
 //////////////////////////////////////////////////////////////////////////
-template_GQ const Tensor<3, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_chris_ST()
 {
     if (m_chris_ST == nullptr)
         compute_chris_ST();
     return *m_chris_ST;
 }
-template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_Gamma_ST()
 {
     if (m_Gamma_ST == nullptr)
         compute_Gamma_ST();
     return *m_Gamma_ST;
 }
-template_GQ const Tensor<1, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_Gamma_L_ST()
 {
     if (m_Gamma_L_ST == nullptr)
@@ -1198,7 +1198,7 @@ GeometricQuantities_t::get_Gamma_L_ST()
     return *m_Gamma_L_ST;
 }
 /*
-template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_d1_Z_L_ST()
 {
     assert_with_label(m_formulation == CCZ4RHS<>::USE_CCZ4, m_label);
@@ -2352,7 +2352,7 @@ template_GQ void GeometricQuantities_t::compute_metric_ST()
     const data_t shift2 =
         TensorAlgebra::compute_dot_product(vars.shift, shift_L);
 
-    m_metric_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>;
+    m_metric_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>;
     (*m_metric_ST)[0][0] = -vars.lapse * vars.lapse + shift2;
 
     FOR(i)
@@ -2369,7 +2369,7 @@ template_GQ void GeometricQuantities_t::compute_projector_LU_ST()
 
     const auto &vars = get_vars();
 
-    m_projector_LU_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>({0.});
+    m_projector_LU_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>({0.});
     FOR(i)
     {
         (*m_projector_LU_ST)[0][i + 1] = vars.shift[i];
@@ -2385,7 +2385,7 @@ template_GQ void GeometricQuantities_t::compute_metric_UU_ST()
     const auto &metric_UU_spatial = get_metric_UU_spatial();
     const data_t lapse_squared = vars.lapse * vars.lapse;
 
-    m_metric_UU_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>;
+    m_metric_UU_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>;
     (*m_metric_UU_ST)[0][0] = -1. / lapse_squared;
 
     FOR(i)
@@ -2407,7 +2407,7 @@ template_GQ void GeometricQuantities_t::compute_normal_U_ST()
 
     const auto &vars = get_vars();
 
-    m_normal_U_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>;
+    m_normal_U_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>;
     (*m_normal_U_ST)[0] = 1. / vars.lapse;
 
     FOR(i) { (*m_normal_U_ST)[i + 1] = -vars.shift[i] / vars.lapse; }
@@ -2417,7 +2417,7 @@ template_GQ void GeometricQuantities_t::compute_normal_L_ST()
     if (m_normal_L_ST != nullptr)
         delete m_normal_L_ST;
 
-    m_normal_L_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>({0.});
+    m_normal_L_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>({0.});
     (*m_normal_L_ST)[0] = -get_vars().lapse;
 }
 template_GQ void GeometricQuantities_t::compute_shift_ST()
@@ -2427,7 +2427,7 @@ template_GQ void GeometricQuantities_t::compute_shift_ST()
 
     const auto &vars = get_vars();
 
-    m_shift_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>({0.});
+    m_shift_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>({0.});
     FOR(i) { (*m_shift_ST)[i + 1] = vars.shift[i]; }
 }
 template_GQ void GeometricQuantities_t::compute_levi_civita_spatial_ST()
@@ -2438,7 +2438,7 @@ template_GQ void GeometricQuantities_t::compute_levi_civita_spatial_ST()
     const auto &levi_civita_ST = get_levi_civita_ST();
     const auto &n_U = get_normal_U_ST();
 
-    m_levi_civita_spatial_ST = new Tensor<3, data_t, CH_SPACEDIM + 1>({0.});
+    m_levi_civita_spatial_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
     FOR_ST(i, j, k)
     {
         FOR_ST(l)
@@ -2453,14 +2453,14 @@ template_GQ void GeometricQuantities_t::compute_levi_civita_ST()
     if (m_levi_civita_ST != nullptr)
         delete m_levi_civita_ST;
 
-    Tensor<4, data_t, CH_SPACEDIM + 1> levi_civita_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> levi_civita_ST;
 
     const auto &vars = get_vars();
 
     const auto epsilon4_symbol = TensorAlgebra::epsilon4D();
     const data_t sqrt_g_det = vars.lapse / (vars.chi * sqrt(vars.chi));
 
-    m_levi_civita_ST = new Tensor<4, data_t, CH_SPACEDIM + 1>;
+    m_levi_civita_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>;
     FOR_ST(i, j, k, l)
     {
         (*m_levi_civita_ST)[i][j][k][l] =
@@ -2475,7 +2475,7 @@ template_GQ void GeometricQuantities_t::compute_Z_L_ST()
     const auto &vars = get_vars();
     const auto &Z = get_Z();
 
-    m_Z_L_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>;
+    m_Z_L_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>;
     (*m_Z_L_ST)[0] = -vars.lapse * vars.Theta +
                      TensorAlgebra::compute_dot_product(vars.shift, Z);
     FOR(i) { (*m_Z_L_ST)[i + 1] = Z[i]; }
@@ -2485,7 +2485,7 @@ template_GQ void GeometricQuantities_t::compute_grad_normal_LL()
     if (m_grad_normal_LL != nullptr)
         delete m_grad_normal_LL;
 
-    Tensor<2, data_t, CH_SPACEDIM + 1> grad_normal_LL = 0.;
+    Tensor<2, data_t, CH_SPACETIMEDIM> grad_normal_LL = 0.;
 
     const auto &vars = get_vars();
     const auto &d1 = get_d1_vars();
@@ -2496,7 +2496,7 @@ template_GQ void GeometricQuantities_t::compute_grad_normal_LL()
     const auto d1_lapse_ST =
         TensorAlgebra::make_spatial_tensor_ST(d1.lapse, shift_ST);
 
-    m_grad_normal_LL = new Tensor<2, data_t, CH_SPACEDIM + 1>;
+    m_grad_normal_LL = new Tensor<2, data_t, CH_SPACETIMEDIM>;
     FOR_ST(m, n)
     {
         (*m_grad_normal_LL)[m][n] =
@@ -2546,7 +2546,7 @@ template_GQ void GeometricQuantities_t::compute_covd_Z_L_ST()
     const auto Qi_ST = TensorAlgebra::make_spatial_tensor_ST(Qi, shift_ST);
     const auto Qj_ST = TensorAlgebra::make_spatial_tensor_ST(Qj, shift_ST);
 
-    m_covd_Z_L_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>;
+    m_covd_Z_L_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>;
     FOR_ST(m, n)
     {
         (*m_covd_Z_L_ST)[m][n] = Q * normal_L_ST[m] * normal_L_ST[n] -
@@ -2562,7 +2562,7 @@ template_GQ void GeometricQuantities_t::compute_acceleration_ST()
     const auto &vars = get_vars();
     const auto &acceleration = get_acceleration_spatial();
 
-    m_acceleration_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>;
+    m_acceleration_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>;
     (*m_acceleration_ST)[0] =
         TensorAlgebra::compute_dot_product(vars.shift, acceleration);
     FOR(i) { (*m_acceleration_ST)[i + 1] = acceleration[i]; }
@@ -2582,7 +2582,7 @@ template_GQ void GeometricQuantities_t::compute_em_tensor_ST()
     const auto Sm_ST =
         TensorAlgebra::make_spatial_tensor_ST(em_tensor.Si, shift_ST);
 
-    m_em_tensor_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>;
+    m_em_tensor_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>;
     FOR_ST(m, n)
     {
         (*m_em_tensor_ST)[m][n] =
@@ -2609,10 +2609,10 @@ template_GQ void GeometricQuantities_t::compute_weyl_tensor_LLLL()
     const auto &Eij = get_weyl_electric_part();
     const auto &Bij = get_weyl_magnetic_part();
 
-    m_weyl_tensor_LLLL = new Tensor<4, data_t, CH_SPACEDIM + 1>(
+    m_weyl_tensor_LLLL = new Tensor<4, data_t, CH_SPACETIMEDIM>(
         compute_weyl_tensor_LLLL(Eij, Bij));
 }
-template_GQ Tensor<4, data_t, CH_SPACEDIM + 1>
+template_GQ Tensor<4, data_t, CH_SPACETIMEDIM>
 GeometricQuantities_t::compute_weyl_tensor_LLLL(const Tensor<2, data_t> &Eij,
                                                 const Tensor<2, data_t> &Bij)
 {
@@ -2624,7 +2624,7 @@ GeometricQuantities_t::compute_weyl_tensor_LLLL(const Tensor<2, data_t> &Eij,
     const auto &shift_ST = get_shift_ST();
 
     Tensor<2, data_t, 4> l_LL; // l[a][b] = g[a][b] + 2n[a]n[b]
-    Tensor<3, data_t, CH_SPACEDIM + 1> epsilon3_ULL = {0.};
+    Tensor<3, data_t, CH_SPACETIMEDIM> epsilon3_ULL = {0.};
     FOR_ST(a, b)
     {
         l_LL[a][b] = g[a][b] + 2. * n_L[a] * n_L[b];
@@ -2639,14 +2639,14 @@ GeometricQuantities_t::compute_weyl_tensor_LLLL(const Tensor<2, data_t> &Eij,
     const auto E_LL = TensorAlgebra::make_spatial_tensor_ST(Eij, shift_ST);
     const auto B_LL = TensorAlgebra::make_spatial_tensor_ST(Bij, shift_ST);
 
-    Tensor<3, data_t, CH_SPACEDIM + 1> B_dot_epsilon = 0.;
+    Tensor<3, data_t, CH_SPACETIMEDIM> B_dot_epsilon = 0.;
     FOR_ST(a, b, c, d)
     {
         B_dot_epsilon[a][b][c] += B_LL[a][d] * epsilon3_ULL[d][b][c];
     }
 
     // Weyl
-    Tensor<4, data_t, CH_SPACEDIM + 1> weyl_LLLL;
+    Tensor<4, data_t, CH_SPACETIMEDIM> weyl_LLLL;
     FOR_ST(m, n, r, s)
     {
         weyl_LLLL[m][n][r][s] =
@@ -2686,7 +2686,7 @@ template_GQ void GeometricQuantities_t::compute_riemann_LLLL_ST()
     const auto &ricci_scalar = get_ricci_scalar_ST();
     const auto &g = get_metric_ST();
 
-    m_riemann_LLLL_ST = new Tensor<4, data_t, CH_SPACEDIM + 1>;
+    m_riemann_LLLL_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>;
     FOR_ST(a, b, m, n)
     {
         (*m_riemann_LLLL_ST)[a][b][m][n] =
@@ -2717,7 +2717,7 @@ template_GQ void GeometricQuantities_t::compute_riemann_LLLL_ST_v2()
     const auto EOMnn_4D = TensorAlgebra::make_spatial_tensor_ST(
         eom_double_normal_projection, shift_ST);
 
-    m_riemann_LLLL_ST_v2 = new Tensor<4, data_t, CH_SPACEDIM + 1>;
+    m_riemann_LLLL_ST_v2 = new Tensor<4, data_t, CH_SPACETIMEDIM>;
     FOR_ST(m, n, r, s)
     {
         (*m_riemann_LLLL_ST_v2)[m][n][r][s] =
@@ -2757,7 +2757,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST()
     if (m_formulation == CCZ4RHS<>::USE_CCZ4)
         Z_dot_n = TensorAlgebra::compute_dot_product(Z_L_ST, n_U);
 
-    m_ricci_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>;
+    m_ricci_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>;
     FOR_ST(m, n)
     {
         (*m_ricci_ST)[m][n] =
@@ -2839,7 +2839,7 @@ template_GQ void GeometricQuantities_t::compute_riemann_LLLU_ST()
     const auto &g_UU = get_metric_UU_ST();
     const auto &riemann_LLLL = get_riemann_LLLL_ST();
 
-    m_riemann_LLLU_ST = new Tensor<4, data_t, CH_SPACEDIM + 1>({0.});
+    m_riemann_LLLU_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
     FOR_ST(a, b, c, d, e)
     {
         (*m_riemann_LLLU_ST)[a][b][c][d] +=
@@ -2854,7 +2854,7 @@ template_GQ void GeometricQuantities_t::compute_riemann_LULU_ST()
     const auto &g_UU = get_metric_UU_ST();
     const auto &riemann_LLLU = get_riemann_LLLU_ST();
 
-    m_riemann_LULU_ST = new Tensor<4, data_t, CH_SPACEDIM + 1>({0.});
+    m_riemann_LULU_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
     FOR_ST(a, b, c, d, e)
     {
         (*m_riemann_LULU_ST)[a][b][c][d] +=
@@ -2916,7 +2916,7 @@ template_GQ void GeometricQuantities_t::compute_chris_ST()
         FOR(j) { shift_dot_covd_shift[i] += vars.shift[j] * covd_shift[i][j]; }
     }
 
-    m_chris_ST = new Tensor<3, data_t, CH_SPACEDIM + 1>;
+    m_chris_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>;
 
     (*m_chris_ST)[0][0][0] =
         (rhs.lapse + advec.lapse - shift_dot_shift_dot_Kij) / vars.lapse;
@@ -2961,14 +2961,14 @@ template_GQ void GeometricQuantities_t::compute_Gamma_ST()
 {
     if (m_Gamma_ST != nullptr)
         delete m_Gamma_ST;
-    m_Gamma_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>(
+    m_Gamma_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>(
         TensorAlgebra::compute_trace(get_chris_ST(), get_metric_UU_ST()));
 }
 template_GQ void GeometricQuantities_t::compute_Gamma_L_ST()
 {
     if (m_Gamma_L_ST != nullptr)
         delete m_Gamma_L_ST;
-    m_Gamma_L_ST = new Tensor<1, data_t, CH_SPACEDIM + 1>(
+    m_Gamma_L_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>(
         TensorAlgebra::compute_dot_product(get_Gamma_ST(), get_metric_ST()));
 }
 /*
@@ -3023,7 +3023,7 @@ template_GQ void GeometricQuantities_t::compute_d1_Z_L_ST()
         }
     }
 
-    m_d1_Z_L_ST = new Tensor<2, data_t, CH_SPACEDIM + 1>;
+    m_d1_Z_L_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>;
     (*m_d1_Z_L_ST)[0][0] = -vars.lapse * rhs.Theta - rhs.lapse * vars.Theta +
                            rhs_shift_dot_Z + shift_dot_dt_Z;
 
