@@ -37,6 +37,7 @@ enum
     c_WeakFieldVar,
     c_WeakFieldCondition,
     c_WeakFieldVar_after_WFC,
+    c_WeakField_over_Kretschmann,
 
     c_NCC_plus,
     c_NCC_minus,
@@ -80,6 +81,7 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "WeakFieldVar",
     "WeakFieldCondition",
     "WeakFieldVar_after_WFC",
+    "WeakField_over_Kretschmann",
 
     "NCC_plus",
     "NCC_minus",

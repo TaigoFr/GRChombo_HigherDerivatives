@@ -130,8 +130,9 @@ void HigherDerivativesLevel::computeDiagnostics()
         c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, m_p.center,
         c_Ham, Interval(c_Mom, c_Mom));
 
-    WeakFieldConditionDiagnostic<System> weakField(c2eft, m_dx, m_p.formulation,
-                                                   m_p.ccz4_params, m_p.center);
+    WeakFieldConditionDiagnostic<System> weakField(
+        c2eft, m_dx, m_p.formulation, m_p.ccz4_params, m_p.center,
+        c_WeakField_over_Kretschmann);
     NCCDiagnostic<System> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
                               m_p.center, m_p.G_Newton, c_NCC_plus, c_NCC_minus,
                               c_NCC_Z4_plus, c_NCC_Z4_minus);

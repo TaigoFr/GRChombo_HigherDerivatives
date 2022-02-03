@@ -17,8 +17,8 @@ checkpoint_interval = 20
 # set to 0 to turn off plot files (except at t=0 and t=stop_time)
 # set to -1 to never ever print plotfiles
 plot_interval = 10
-num_plot_vars = 21
-plot_vars = chi lapse shift1 C dCdt Ham Mom C_diff Cphys WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus rhs_chi diffusion_chi det_h M_adm J_adm
+num_plot_vars = 22
+plot_vars = chi lapse shift1 C dCdt Ham Mom C_diff Cphys WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC WeakField_over_Kretschmann NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus rhs_chi diffusion_chi det_h M_adm J_adm
 
 # subpaths - specific directories for hdf5, pout, extraction data
 # (these are created at runtime)
@@ -102,7 +102,7 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 0              #C and dCdt
 vars_parity_diagnostic = 0 0              #Ham and Mom
                          0 0              #C diff and C phys
-                         0 0 0            #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC
+                         0 0 0 0          #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC, WeakField_over_Kretschmann
                          0 0 0 0          #NCC x 4
                          0 0 0            #rhs chi and diffusion chi and det_h
                          0 0              #ADM M and J
@@ -165,10 +165,10 @@ c_sigma   = 1.0            # wave evolution scale for evolved C
 c_version              = 2 # v1 or v2 (with or without laplacian)
 rescale_tau_by_lapse   = 0 # rescale tau by lapse, only in v2
 rescale_sigma_by_lapse = 0 # rescale sigma by lapse (1) or lapse^2 (2), onlyin v2
-advection_type         = 0 # only in v2 (0, 1 for simple, 2 for Luis' proposal)
-advection_coeff	       = 0 # only for advection type 1 and 2
-Box_transition         = 1 # only if 'c_version= 1' transition from laplacian to only time derivatives
-use_tau_radial_decay        = 1 # change tau with 1/r
+advection_type         = 2 # only in v2 (0, 1 for simple, 2 for Luis' proposal)
+advection_coeff	       = 1.0 # only for advection type 1 and 2
+Box_transition         = 0 # only if 'c_version= 1' transition from laplacian to only time derivatives
+use_tau_radial_decay   = 0 # change tau with 1/r
 tau_asymptotic         = 0.01 # if 'use_tau_radial_decay', the asymptotic tau for r->\infty
 tau_decay_length       = 50. # if 'use_tau_radial_decay', the distance from r=0 at which tau decay starts
 

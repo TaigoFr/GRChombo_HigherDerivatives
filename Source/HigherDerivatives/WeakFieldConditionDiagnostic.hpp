@@ -24,12 +24,14 @@ template <class System> class WeakFieldConditionDiagnostic
         typename MatterCCZ4RHS<C2EFT<System>>::template Diff2Vars<data_t>;
 
   public:
-    WeakFieldConditionDiagnostic(const C2EFT<System> &a_matter, double m_dx,
-                                 int a_formulation,
-                                 const CCZ4_params_t<> &a_ccz4_params,
-                                 const std::array<double, CH_SPACEDIM> a_center)
+    WeakFieldConditionDiagnostic(
+        const C2EFT<System> &a_matter, double m_dx, int a_formulation,
+        const CCZ4_params_t<> &a_ccz4_params,
+        const std::array<double, CH_SPACEDIM> a_center,
+        const int a_compute_ratio_with_kretschmann = -1)
         : my_matter(a_matter), m_formulation(a_formulation),
-          m_ccz4_params(a_ccz4_params), m_deriv(m_dx), m_center(a_center)
+          m_ccz4_params(a_ccz4_params), m_deriv(m_dx), m_center(a_center),
+          m_compute_ratio_with_kretschmann(a_compute_ratio_with_kretschmann)
     {
     }
 
@@ -54,6 +56,12 @@ template <class System> class WeakFieldConditionDiagnostic
         gq.set_formulation(m_formulation, m_ccz4_params);
         gq.set_coordinates(coords);
 
+        data_t kretschmann = 0;
+        if (m_compute_ratio_with_kretschmann >= 0)
+        {
+            kretschmann = gq.get_kretschmann();
+        }
+
         const auto emtensor = my_matter.compute_emtensor(gq);
         data_t weak_field = my_matter.weak_field_var(emtensor, gq);
         data_t weak_field_condition =
@@ -64,6 +72,10 @@ template <class System> class WeakFieldConditionDiagnostic
         current_cell.store_vars(weak_field, c_WeakFieldVar);
         current_cell.store_vars(weak_field_condition, c_WeakFieldCondition);
         current_cell.store_vars(weak_field_after_WFC, c_WeakFieldVar_after_WFC);
+
+        if (m_compute_ratio_with_kretschmann)
+            current_cell.store_vars(weak_field * weak_field / kretschmann,
+                                    m_compute_ratio_with_kretschmann);
     }
 
   protected:
@@ -72,6 +84,7 @@ template <class System> class WeakFieldConditionDiagnostic
     const CCZ4_params_t<> &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
     const std::array<double, CH_SPACEDIM> m_center;
+    const int m_compute_ratio_with_kretschmann;
 };
 
 #endif /* WEAKFIELDCONDITIONDIAGNOSTIC */
