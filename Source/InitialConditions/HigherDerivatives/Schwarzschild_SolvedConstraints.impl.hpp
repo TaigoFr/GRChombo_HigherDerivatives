@@ -19,6 +19,16 @@ void Schwarzschild_SolvedConstraints::compute(Cell<data_t> current_cell) const
     VarsTools::assign(vars, 0.); // Set only the non-zero components below
     Coordinates<data_t> coords(current_cell, m_dx, m_params.center);
 
+    compute_vars(vars, coords);
+
+    // Store the initial values of the variables
+    current_cell.store_vars(vars);
+}
+
+template <class data_t, template <typename> class vars_t>
+void Schwarzschild_SolvedConstraints::compute_vars(
+    vars_t<data_t> &vars, const Coordinates<data_t> &coords) const
+{
     // start with unit lapse and flat metric (must be relaxed for chi)
     vars.lapse = 1;
 
@@ -26,9 +36,6 @@ void Schwarzschild_SolvedConstraints::compute(Cell<data_t> current_cell) const
     FOR(i) vars.h[i][i] = 1.;
 
     fill_from_files(vars.chi, vars.A, coords);
-
-    // Store the initial values of the variables
-    current_cell.store_vars(vars);
 }
 
 template <class data_t>

@@ -45,6 +45,10 @@ class Schwarzschild_SolvedConstraints
     //! Function to compute the value of all the initial vars on the grid
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
+    template <class data_t, template <typename> class vars_t>
+    void compute_vars(vars_t<data_t> &vars,
+                      const Coordinates<data_t> &coords) const;
+
     template <class data_t>
     void fill_from_files(data_t &chi, Tensor<2, data_t> &A,
                          const Coordinates<data_t> &coords) const;
