@@ -29,7 +29,7 @@ std::array<T, N + M> concatenate(const std::array<T, N> &first,
 
 template <typename T, size_t N,
           std::enable_if_t<std::is_arithmetic<T>::value, bool> = true>
-T norm2(const std::array<T, N> &a_array)
+T norm_squared(const std::array<T, N> &a_array)
 {
     T out = 0;
     for (auto &elem : a_array)
