@@ -82,7 +82,8 @@ void BinaryBHHDLevel::initialData()
     ComputeEB compute(m_dx, m_p.formulation, m_p.ccz4_params,
                       Interval(c_E11, c_E33), Interval(c_B11, c_B33),
                       m_p.system_params.use_last_index_raised);
-    BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 
     if (m_p.system_params.version == 2)
     {
@@ -95,7 +96,8 @@ void BinaryBHHDLevel::initialData()
     }
 #elif USE_CSYSTEM
     CDiagnostics compute(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
-    BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
+                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 #endif
 
 #ifdef USE_AHFINDER

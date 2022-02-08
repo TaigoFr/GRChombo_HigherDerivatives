@@ -138,8 +138,6 @@ adm_vars_from_metric_ST(const Tensor<2, data_t, CH_SPACETIMEDIM> &g,
 {
     adm_metric_t<data_t> out;
 
-    // Tensor<2, data_t, size> K_LL;
-
     FOR(i)
     {
         // shift

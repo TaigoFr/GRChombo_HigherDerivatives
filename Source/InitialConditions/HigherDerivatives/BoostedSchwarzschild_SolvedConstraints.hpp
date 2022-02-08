@@ -20,7 +20,7 @@ class BoostedSchwarzschild_SolvedConstraints
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
     template <class data_t>
-    TensorAlgebra::adm_metric_t<data_t>
+    adm_metric_t<data_t>
     compute_adm_boosted_vars(const Coordinates<data_t> &boosted_coords) const;
 
     template <class data_t>
@@ -30,9 +30,8 @@ class BoostedSchwarzschild_SolvedConstraints
                                   const Coordinates<data_t> &rest_coords) const;
 
     template <class data_t, template <typename> class vars_t>
-    void compute_conformal_variables(
-        vars_t<data_t> &vars,
-        TensorAlgebra::adm_metric_t<data_t> adm_vars) const;
+    void compute_conformal_variables(vars_t<data_t> &vars,
+                                     adm_metric_t<data_t> adm_vars) const;
 
   protected:
     const std::array<double, CH_SPACEDIM> m_boost_velocity;

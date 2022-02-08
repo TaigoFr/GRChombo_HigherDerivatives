@@ -45,6 +45,8 @@ print_progress_only_to_rank_0 = 1
 # amplitude = 0.05
 # r0 = 1.
 
+boost_velocity = 0 0 0
+
 #################################################
 # Grid parameters
 

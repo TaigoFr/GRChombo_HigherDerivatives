@@ -34,8 +34,8 @@ void BinaryBH_SolvedConstraints::compute(Cell<data_t> current_cell) const
                                         m_bh2.m_params.center);
 
     // compute the ADM variables from each star
-    auto adm_vars1_boosted = m_bh1.compute_adm_vars(coords1_boosted);
-    auto adm_vars2_boosted = m_bh2.compute_adm_vars(coords2_boosted);
+    auto adm_vars1_boosted = m_bh1.compute_adm_boosted_vars(coords1_boosted);
+    auto adm_vars2_boosted = m_bh2.compute_adm_boosted_vars(coords2_boosted);
 
     compute_vars_superposition(vars, adm_vars1_boosted, adm_vars2_boosted);
 

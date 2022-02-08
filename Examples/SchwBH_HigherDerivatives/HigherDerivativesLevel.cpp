@@ -66,7 +66,8 @@ void HigherDerivativesLevel::initialData()
         pout() << "HigherDerivativesLevel::initialData " << m_level << endl;
 
     // Set up the compute class for the SchwKS initial data
-    InitialData id(m_p.id_params, m_dx);
+    // InitialData id(m_p.id_params, m_dx);
+    InitialData id(m_p.id_params, m_dx, "", m_p.boost_velocity);
 
     // First set everything to zero then desired initial data
     BoxLoops::loop(make_compute_pack(SetValue(0.), id), m_state_new,

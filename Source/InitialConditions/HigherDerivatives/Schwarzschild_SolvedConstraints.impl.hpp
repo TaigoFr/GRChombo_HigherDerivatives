@@ -29,13 +29,13 @@ template <class data_t, template <typename> class vars_t>
 void Schwarzschild_SolvedConstraints::compute_vars(
     vars_t<data_t> &vars, const Coordinates<data_t> &coords) const
 {
+    fill_from_files(vars.chi, vars.A, coords);
+
     // start with unit lapse and flat metric (must be relaxed for chi)
-    vars.lapse = 1;
+    vars.lapse = sqrt(vars.chi);
 
     // conformal metric is flat
     FOR(i) vars.h[i][i] = 1.;
-
-    fill_from_files(vars.chi, vars.A, coords);
 }
 
 template <class data_t>
