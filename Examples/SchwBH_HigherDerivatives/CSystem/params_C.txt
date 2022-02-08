@@ -45,7 +45,7 @@ print_progress_only_to_rank_0 = 1
 # amplitude = 0.05
 # r0 = 1.
 
-boost_velocity = 0 0 0
+boost_velocity = 0 0 0 # only boost in x direction!
 
 #################################################
 # Grid parameters
@@ -89,7 +89,7 @@ isPeriodic = 0 0 0
 # 0 = static, 1 = sommerfeld, 2 = reflective
 # (see BoundaryConditions.hpp for details)
 hi_boundary = 1 1 1
-lo_boundary = 2 2 2
+lo_boundary = 1 2 2
 
 # if reflective boundaries selected, must set
 # parity of all vars (in order given by UserVariables.hpp)
@@ -220,8 +220,8 @@ AH_num_points_u = 49
 AH_num_points_v = 48
 AH_solve_interval = 1
 AH_print_interval = 1
-AH_track_center = false
-AH_predict_origin = false
+AH_track_center = true
+AH_predict_origin = true
 # AH_level_to_run = 0
 # AH_allow_re_attempt = 0
 AH_stop_if_max_fails = 1
