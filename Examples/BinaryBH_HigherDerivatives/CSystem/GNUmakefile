@@ -21,12 +21,13 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/BoxUtils  \
             $(GRCHOMBO_SOURCE)/GRChomboCore  \
             $(GRCHOMBO_SOURCE)/TaggingCriteria  \
-            $(GRCHOMBO_SOURCE)/InitialConditions/BlackHoles \
+            $(GRCHOMBO_SOURCE)/InitialConditions/HigherDerivatives \
             $(GRCHOMBO_SOURCE)/BlackHoles \
             $(GRCHOMBO_SOURCE)/AMRInterpolator  \
             $(GRCHOMBO_SOURCE)/ApparentHorizonFinder \
             $(GRCHOMBO_SOURCE)/HigherDerivatives \
             $(GRCHOMBO_SOURCE)/HigherDerivatives/CSystem \
+			$(GRCHOMBO_SOURCE)/utils/CubicSpline1DInterpolation \
             ..
 
 include $(CHOMBO_HOME)/mk/Make.test

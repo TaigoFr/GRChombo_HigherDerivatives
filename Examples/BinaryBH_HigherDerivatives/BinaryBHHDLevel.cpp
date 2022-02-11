@@ -29,7 +29,7 @@
 #include "ChiPunctureExtractionTaggingCriterion.hpp"
 
 // BH ID and System defined here:
-#include "BinaryBH.hpp"
+#include "BinaryBH_SolvedConstraints.hpp"
 #include "SimulationParameters.hpp"
 
 // Problem specific includes
@@ -69,11 +69,11 @@ void BinaryBHHDLevel::initialData()
         pout() << "BinaryBHHDLevel::initialData " << m_level << endl;
 
     // Set up the compute class for the BinaryBH initial data
-    BinaryBH binary(m_p.bh1_params, m_p.bh2_params, m_dx);
+    BinaryBH_SolvedConstraints binary(m_p.bh1_params, m_p.bh2_params, m_dx);
 
     // First set everything to zero then desired initial data
     BoxLoops::loop(make_compute_pack(SetValue(0.), binary), m_state_new,
-                   m_state_new, INCLUDE_GHOST_CELLS);
+                   m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 
     fillAllGhosts();
 

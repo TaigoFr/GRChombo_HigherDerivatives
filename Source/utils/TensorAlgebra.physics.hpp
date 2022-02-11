@@ -11,6 +11,8 @@
 #ifndef TENSORALGEBRA_PHYSICS_HPP_
 #define TENSORALGEBRA_PHYSICS_HPP_
 
+#include "VarsTools.hpp"
+
 template <class data_t, int size = CH_SPACEDIM> struct chris_t
 {
     Tensor<3, data_t, size> ULL;        //!< standard christoffel symbols
@@ -155,9 +157,9 @@ adm_vars_from_metric_ST(const Tensor<2, data_t, CH_SPACETIMEDIM> &g,
     out.lapse = sqrt(lapse_squared);
 
     // Kij
-    Tensor<2, double> dt_metric_spatial;
-    Tensor<1, Tensor<1, double>> d1_shift_L;
-    Tensor<2, Tensor<1, double>> d1_metric_spatial;
+    Tensor<2, data_t> dt_metric_spatial;
+    Tensor<1, Tensor<1, data_t>> d1_shift_L;
+    Tensor<2, Tensor<1, data_t>> d1_metric_spatial;
     FOR2(i, j)
     {
         dt_metric_spatial[i][j] = dg[i + 1][j + 1][0];
@@ -182,6 +184,84 @@ adm_vars_from_metric_ST(const Tensor<2, data_t, CH_SPACETIMEDIM> &g,
         out.K_LL[i][j] =
             -0.5 * lapse_inverse *
             (dt_metric_spatial[i][j] - covd_shift_L[i][j] - covd_shift_L[j][i]);
+    }
+
+    return out;
+}
+
+// Note final indices are time for spacetime metric
+template <class data_t, template <typename> class vars_t>
+void conformal_vars_from_adm_vars(vars_t<data_t> &vars,
+                                  adm_metric_t<data_t> adm_vars)
+{
+    VarsTools::assign(vars, 0.); // Set only the non-zero components below
+
+    data_t det_metric =
+        TensorAlgebra::compute_determinant_sym(adm_vars.metric_spatial);
+    vars.lapse = adm_vars.lapse;
+    vars.shift = adm_vars.shift;
+    vars.chi = pow(det_metric, -1. / GR_SPACEDIM);
+    FOR(i, j) { vars.h[i][j] = vars.chi * adm_vars.metric_spatial[i][j]; }
+
+    vars.K =
+        TensorAlgebra::compute_trace(adm_vars.K_LL, adm_vars.metric_spatial_UU);
+    FOR(i, j)
+    {
+        vars.A[i][j] =
+            vars.chi * (adm_vars.K_LL[i][j] -
+                        vars.K * adm_vars.metric_spatial[i][j] / GR_SPACEDIM);
+    }
+
+    // Theta = 0
+
+    // Does NOT compute Gamma^i -> use GammaCalculator in another BoxTools in
+    // initialData to compute them
+}
+
+template <class data_t, template <typename> class vars_t>
+adm_metric_t<data_t> adm_vars_superposition(const vars_t<data_t> &vars1,
+                                            const vars_t<data_t> &vars2)
+{
+    adm_metric_t<data_t> out;
+
+    // first 3-metric
+    FOR2(i, j)
+    {
+        out.metric_spatial[i][j] = vars1.metric_spatial[i][j] +
+                                   vars2.metric_spatial[i][j] - delta(i, j);
+    }
+    out.metric_spatial_UU = compute_inverse_sym(out.metric_spatial);
+
+    // gauge
+    out.lapse =
+        sqrt(vars1.lapse * vars1.lapse + vars2.lapse * vars2.lapse - 1.);
+    FOR2(i, j)
+    {
+        out.shift[i] +=
+            out.metric_spatial_UU[i][j] * (vars1.shift_L[j] + vars2.shift_L[j]);
+    }
+    out.shift_L = lower_all(out.shift, out.metric_spatial);
+
+    // extrinsic curvature
+    // raise an index before superposing
+    Tensor<2, data_t> K_UL1, K_UL2, K_UL;
+    FOR2(i, j)
+    {
+        K_UL1[i][j] = 0.;
+        K_UL2[i][j] = 0.;
+        K_UL[i][j] = 0.;
+        out.K_LL[i][j] = 0.;
+    }
+    FOR3(i, j, k)
+    {
+        K_UL1[i][j] += vars1.metric_spatial_UU[i][k] * vars1.K_LL[k][j];
+        K_UL2[i][j] += vars2.metric_spatial_UU[i][k] * vars2.K_LL[k][j];
+    }
+    FOR2(i, j) { K_UL[i][j] = K_UL1[i][j] + K_UL2[i][j]; }
+    FOR3(i, j, k)
+    {
+        out.K_LL[i][j] += 0.5 * (out.metric_spatial[i][k] * K_UL[k][j] +
+                                 out.metric_spatial[j][k] * K_UL[k][i]);
     }
 
     return out;

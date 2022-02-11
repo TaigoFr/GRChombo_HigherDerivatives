@@ -24,7 +24,7 @@ class Schwarzschild_SolvedConstraints
 
   protected:
     double m_dx;
-    params_t m_params;
+    const params_t m_params;
 
     mutable FileInterpolator1D file_psi, file_Krr;
 

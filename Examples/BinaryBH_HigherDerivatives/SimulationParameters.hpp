@@ -24,7 +24,7 @@ typedef CSystem System;
 #error "Please define either USE_CSYSTEM or USE_EBSYSTEM"
 #endif
 
-#include "BoostedBH.hpp"
+#include "BoostedSchwarzschild_SolvedConstraints.hpp"
 
 class SimulationParameters : public SimulationParametersBase
 {
@@ -39,9 +39,10 @@ class SimulationParameters : public SimulationParametersBase
     {
         // Initial data
         pp.load("massA", bh1_params.mass);
-        pp.load("momentumA", bh1_params.momentum);
         pp.load("massB", bh2_params.mass);
-        pp.load("momentumB", bh2_params.momentum);
+
+        pp.load("boost_velocityA", bh1_params.boost_velocity, {0.});
+        pp.load("boost_velocityB", bh2_params.boost_velocity, {0.});
 
         // Get the centers of the BHs either explicitly or as
         // an offset (not both, or they will be offset from center
@@ -226,15 +227,13 @@ class SimulationParameters : public SimulationParametersBase
         warn_parameter("massB", bh2_params.mass, bh2_params.mass >= 0,
                        "should be >= 0");
         warn_array_parameter(
-            "momentumA", bh1_params.momentum,
-            std::sqrt(ArrayTools::norm_squared(bh1_params.momentum)) <
-                0.3 * bh1_params.mass,
-            "approximation used for boosted BH only valid for small boosts");
+            "boost_velocityA", bh1_params.boost_velocity,
+            std::sqrt(ArrayTools::norm_squared(bh1_params.boost_velocity)) < 1,
+            "should be < 1");
         warn_array_parameter(
-            "momentumB", bh2_params.momentum,
-            std::sqrt(ArrayTools::norm_squared(bh2_params.momentum)) <
-                0.3 * bh1_params.mass,
-            "approximation used for boosted BH only valid for small boosts");
+            "boost_velocityB", bh2_params.boost_velocity,
+            std::sqrt(ArrayTools::norm_squared(bh2_params.boost_velocity)) < 1,
+            "should be < 1");
         FOR(idir)
         {
             std::string nameA = "centerA[" + std::to_string(idir) + "]";
@@ -275,8 +274,8 @@ class SimulationParameters : public SimulationParametersBase
     double tagging_buffer_ah, tagging_buffer_extraction;
 
     // Collection of parameters necessary for initial conditions
-    BoostedBH::params_t bh2_params;
-    BoostedBH::params_t bh1_params;
+    BoostedSchwarzschild_SolvedConstraints::params_t bh2_params;
+    BoostedSchwarzschild_SolvedConstraints::params_t bh1_params;
 
 #ifdef USE_AHFINDER
     double AH_1_initial_guess;

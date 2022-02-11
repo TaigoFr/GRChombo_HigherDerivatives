@@ -18,16 +18,15 @@ template <class data_t>
 void BoostedSchwarzschild_SolvedConstraints::compute(
     Cell<data_t> current_cell) const
 {
-    BSSNVars::VarsWithGauge<data_t> vars;
-    VarsTools::assign(vars, 0.); // Set only the non-zero components below
     Coordinates<data_t> boosted_coords(current_cell, this->m_dx,
-                                       this->m_params.center);
+                                       m_params.center);
 
     // get boosted ADM variables
     auto adm_vars_boosted = compute_adm_boosted_vars(boosted_coords);
 
     // convert ADM variables to conformal variables
-    compute_conformal_variables(vars, adm_vars_boosted);
+    BSSNVars::VarsWithGauge<data_t> vars;
+    TensorAlgebra::conformal_vars_from_adm_vars(vars, adm_vars_boosted);
 
     // Store the initial values of the variables
     current_cell.store_vars(vars);
@@ -41,7 +40,7 @@ BoostedSchwarzschild_SolvedConstraints::compute_adm_boosted_vars(
 {
     // first calculate the rest frame coordinates
     Coordinates<data_t> unboosted_coords =
-        LorentzBoosts::unboost_coords(boosted_coords, m_boost_velocity);
+        LorentzBoosts::unboost_coords(boosted_coords, m_params.boost_velocity);
 
     // compute spacetime metric and derivatives
     Tensor<2, data_t, CH_SPACETIMEDIM> g_rest = {0.};
@@ -49,8 +48,9 @@ BoostedSchwarzschild_SolvedConstraints::compute_adm_boosted_vars(
     compute_rest_spacetime_metric(g_rest, dg_rest, unboosted_coords);
 
     // convert rest-frame tensors to boosted frame
-    auto g_boosted = LorentzBoosts::boost_LL(g_rest, m_boost_velocity);
-    auto dg_boosted = LorentzBoosts::boost_LLL(dg_rest, m_boost_velocity);
+    auto g_boosted = LorentzBoosts::boost_LL(g_rest, m_params.boost_velocity);
+    auto dg_boosted =
+        LorentzBoosts::boost_LLL(dg_rest, m_params.boost_velocity);
 
     return TensorAlgebra::adm_vars_from_metric_ST(g_boosted, dg_boosted);
 }
@@ -100,27 +100,6 @@ void BoostedSchwarzschild_SolvedConstraints::compute_rest_spacetime_metric(
             dg_rest[j + 1][j + 1][i + 1] =
                 -dchi_rest_dr * chi_rest2_inv * xOr[i];
         }
-    }
-}
-
-template <class data_t, template <typename> class vars_t>
-void BoostedSchwarzschild_SolvedConstraints::compute_conformal_variables(
-    vars_t<data_t> &vars, adm_metric_t<data_t> adm_vars) const
-{
-    data_t det_metric =
-        TensorAlgebra::compute_determinant_sym(adm_vars.metric_spatial);
-    vars.lapse = adm_vars.lapse;
-    vars.shift = adm_vars.shift;
-    vars.chi = pow(det_metric, -1. / GR_SPACEDIM);
-    FOR(i, j) { vars.h[i][j] = vars.chi * adm_vars.metric_spatial[i][j]; }
-
-    vars.K =
-        TensorAlgebra::compute_trace(adm_vars.K_LL, adm_vars.metric_spatial_UU);
-    FOR(i, j)
-    {
-        vars.A[i][j] =
-            vars.chi * (adm_vars.K_LL[i][j] -
-                        vars.K * adm_vars.metric_spatial[i][j] / GR_SPACEDIM);
     }
 }
 

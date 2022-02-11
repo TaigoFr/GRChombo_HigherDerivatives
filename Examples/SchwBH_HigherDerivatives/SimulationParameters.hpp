@@ -58,10 +58,10 @@ class SimulationParameters : public SimulationParametersBase
         // pp.load("r0", id_params.r0);
         id_params.center = center;
 
-        pp.load("boost_velocity", boost_velocity, {0.});
-        pout() << "Using boost_velocity = (" << boost_velocity[0] << ", "
-               << boost_velocity[1] << ", " << boost_velocity[2] << ")"
-               << std::endl;
+        pp.load("boost_velocity", id_params.boost_velocity, {0.});
+        pout() << "Using boost_velocity = (" << id_params.boost_velocity[0]
+               << ", " << id_params.boost_velocity[1] << ", "
+               << id_params.boost_velocity[2] << ")" << std::endl;
 
         pp.load("epsilon", hd_params.epsilon);
         pout() << "Using epsilon = " << hd_params.epsilon << std::endl;
@@ -231,7 +231,6 @@ class SimulationParameters : public SimulationParametersBase
 
     // Schwarzschild bh initial data
     InitialData::params_t id_params;
-    std::array<double, CH_SPACEDIM> boost_velocity;
 
     C2EFT<System>::params_t hd_params;
     System::params_t system_params;
