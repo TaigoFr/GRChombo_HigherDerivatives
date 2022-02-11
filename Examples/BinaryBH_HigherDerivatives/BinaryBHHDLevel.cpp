@@ -58,7 +58,7 @@ void BinaryBHHDLevel::specificAdvance()
     if (m_p.nan_check)
         BoxLoops::loop(
             NanCheck(m_dx, m_p.center, "NaNCheck in specific Advance"),
-            m_state_new, m_state_new, EXCLUDE_GHOST_CELLS, disable_simd());
+            m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 }
 
 // Initial data for field and metric variables

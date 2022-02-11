@@ -8,6 +8,7 @@
 
 #include "CubicSplineInterpolator.hpp"
 #include "TriDiagonalMatrix.hpp"
+#include "simd.hpp"
 
 #include <cassert>
 
@@ -122,6 +123,7 @@ void CubicSplineInterpolator::solve()
     solved = true;
 }
 
+template <>
 double CubicSplineInterpolator::interpolate(double x, unsigned derivative) const
 {
     assert(solved);
@@ -178,4 +180,20 @@ double CubicSplineInterpolator::interpolate(double x, unsigned derivative) const
     }
 
     return answer;
+}
+
+// add compatibility with being called with simd, even though it is done in
+// serial mode
+template <>
+simd<double> CubicSplineInterpolator::interpolate(simd<double> x,
+                                                  unsigned derivative) const
+{
+    double in_arr[simd_traits<double>::simd_len];
+    double out_arr[simd_traits<double>::simd_len];
+    simd<double>::store(in_arr, x);
+
+    for (int i = 0; i < simd_traits<double>::simd_len; ++i)
+        out_arr[i] = interpolate(in_arr[i], derivative);
+
+    return simd<double>::load(out_arr);
 }

@@ -32,7 +32,8 @@ class CubicSplineInterpolator
                                  BoundaryType a_right, double a_right_value,
                                  bool solve_if_points_set = true);
 
-    double interpolate(double x, unsigned derivative = 0) const;
+    template <typename data_t>
+    data_t interpolate(data_t x, unsigned derivative = 0) const;
 
     void solve();
 

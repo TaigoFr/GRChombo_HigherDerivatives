@@ -12,7 +12,7 @@
 // Our includes
 #include "GRInterval.hpp"
 #include "Tensor.hpp"
-#include "UserVariables.hpp"
+// #include "UserVariables.hpp"
 
 // Chombo namespace
 #include "UsingNamespace.H"
@@ -84,15 +84,15 @@ ALWAYS_INLINE void assign(vars_t &vars, const value_t &value)
     });
 }
 
-/// Prints all elements of the vars element with component names
-/// (Very useful for debugging)
-template <template <typename> class vars_t, typename data_t>
-void print(const vars_t<data_t> &vars)
-{
-    vars.enum_mapping([](const int &ivar, data_t &var) {
-        pout() << UserVariables::variable_names[ivar] << ": " << var << "\n";
-    });
-}
+// /// Prints all elements of the vars element with component names
+// /// (Very useful for debugging)
+// template <template <typename> class vars_t, typename data_t>
+// void print(const vars_t<data_t> &vars)
+// {
+//     vars.enum_mapping([](const int &ivar, data_t &var) {
+//         pout() << UserVariables::variable_names[ivar] << ": " << var << "\n";
+//     });
+// }
 } // namespace VarsTools
 
 #endif /* VARSTOOLS_HPP_ */

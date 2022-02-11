@@ -38,18 +38,16 @@ print_progress_only_to_rank_0 = 1
 #################################################
 # Initial Data parameters
 
+# provide INITIAL_DATA.dat with 'mass'
 # provide 'offset' or 'center'
-
-massA = 1
-massB = 0.82
 
 offsetA = -2 0 0
 offsetB = 2 0 0
 # centerA = 256 232 256
 # centerB = 256 250 256
 
-momentumA = 0. -0.14025 0.0
-momentumB = 0. 0.14025 0.0
+boost_velocityA = 0. -0.14 0.0
+boost_velocityB = 0. 0.14 0.0
 
 #################################################
 # Grid parameters
@@ -178,7 +176,9 @@ calculate_constraint_norms = 1
 #################################################
 # Higher Derivatives Evolution parameters
 
-epsilon   = 0.0001         # energy scale
+# provide INITIAL_DATA.dat with 'epsilon'
+
+# epsilon   = 0.0001         # energy scale
 tau       = 0.1            # damping time scale for evolved Eij/Bij
 rescale_tau_by_lapse   = 0 # rescale tau by lapse
 rescale_sigma_by_lapse = 0 # rescale sigma by lapse (1) or lapse^2 (2)

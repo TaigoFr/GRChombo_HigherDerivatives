@@ -73,7 +73,9 @@ class FileInterpolator1D
         spline.set_boundary_conditions(a_left, a_left_value, a_right,
                                        a_right_value);
     }
-    inline double interpolate(double x, int derivative = 0)
+
+    template <typename data_t>
+    inline data_t interpolate(data_t x, int derivative = 0)
     {
         return spline.interpolate(x, derivative);
     }

@@ -36,7 +36,7 @@ void SingleBHLevel::specificAdvance()
     if (m_p.nan_check)
         BoxLoops::loop(
             NanCheck(m_dx, m_p.center, "NaNCheck in specific Advance"),
-            m_state_new, m_state_new, EXCLUDE_GHOST_CELLS, disable_simd());
+            m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 }
 
 void SingleBHLevel::initialData()

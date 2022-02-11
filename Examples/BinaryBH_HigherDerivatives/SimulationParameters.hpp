@@ -38,8 +38,17 @@ class SimulationParameters : public SimulationParametersBase
     void readParams(GRParmParse &pp)
     {
         // Initial data
-        pp.load("massA", bh1_params.mass);
-        pp.load("massB", bh2_params.mass);
+        if (pp.contains("massA") && pp.contains("massB"))
+        {
+            pp.load("massA", bh1_params.mass);
+            pp.load("massB", bh2_params.mass);
+        }
+        else
+        {
+            // equal mass
+            pp.load("mass", bh1_params.mass);
+            bh2_params.mass = bh1_params.mass;
+        }
 
         pp.load("boost_velocityA", bh1_params.boost_velocity, {0.});
         pp.load("boost_velocityB", bh2_params.boost_velocity, {0.});

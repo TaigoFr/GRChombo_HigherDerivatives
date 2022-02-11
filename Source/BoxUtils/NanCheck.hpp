@@ -35,16 +35,19 @@ class NanCheck
     {
     }
 
-    void compute(Cell<double> current_cell) const
+    template <class data_t> void compute(Cell<data_t> current_cell) const
     {
         bool stop = false;
         int num_vars = current_cell.get_num_in_vars();
         for (int ivar = 0; ivar < num_vars; ++ivar)
         {
-            double val;
+            data_t val;
             current_cell.load_vars(val, ivar);
-            if (std::isnan(val) || abs(val) > m_max_abs)
+            if (simd_isnan_any(val) || simd_compare_gt_any(abs(val), m_max_abs))
+            {
                 stop = true;
+                break;
+            }
         }
         if (stop)
         {
