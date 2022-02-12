@@ -23,6 +23,9 @@ class FileInterpolator1D
                        const std::string &y_label,
                        double y_default_if_missing_file = 0.)
     {
+        pout() << "Reading interpolation labels: " << N_label << ", " << x_label
+               << ", " << y_label << std::endl;
+
         GRParmParse pp;
 
         int n = 0;
@@ -57,6 +60,8 @@ class FileInterpolator1D
             spline.set_points({-1.e5, 1.e5}, {y_default_if_missing_file,
                                               y_default_if_missing_file});
         }
+
+        pout() << "Done reading interpolation labels." << y_label << std::endl;
     }
 
     inline void allow_extrapolation(bool allow)
