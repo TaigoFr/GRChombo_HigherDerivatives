@@ -233,8 +233,8 @@ adm_metric_t<data_t> adm_vars_superposition(const adm_metric_t<data_t> &vars1,
     out.metric_spatial_UU = compute_inverse_sym(out.metric_spatial);
 
     // gauge
-    out.lapse =
-        sqrt(vars1.lapse * vars1.lapse + vars2.lapse * vars2.lapse - 1.);
+    out.lapse = 1. / sqrt(1. / (vars1.lapse * vars1.lapse) +
+                          1. / (vars2.lapse * vars2.lapse) - 1.);
     FOR2(i, j)
     {
         out.shift[i] +=
