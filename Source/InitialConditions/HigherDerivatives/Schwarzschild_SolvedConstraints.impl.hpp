@@ -43,10 +43,10 @@ void Schwarzschild_SolvedConstraints::fill_from_files(
     data_t &chi, Tensor<2, data_t> &A, const Coordinates<data_t> &coords) const
 {
     data_t r = coords.get_radius();
-    static const double minimum_r = 1e-6;
+    static const data_t minimum_r = 1e-6;
     r = simd_max(r, minimum_r);
 
-    double psi = file_psi.interpolate(r);
+    data_t psi = file_psi.interpolate(r);
     if (psi >= 0.)
         chi = pow(psi, -4);
     else
