@@ -218,9 +218,9 @@ void conformal_vars_from_adm_vars(vars_t<data_t> &vars,
     // initialData to compute them
 }
 
-template <class data_t, template <typename> class vars_t>
-adm_metric_t<data_t> adm_vars_superposition(const vars_t<data_t> &vars1,
-                                            const vars_t<data_t> &vars2)
+template <class data_t>
+adm_metric_t<data_t> adm_vars_superposition(const adm_metric_t<data_t> &vars1,
+                                            const adm_metric_t<data_t> &vars2)
 {
     adm_metric_t<data_t> out;
 
