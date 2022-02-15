@@ -88,6 +88,12 @@ void BoostedSchwarzschild_SolvedConstraints::compute_rest_spacetime_metric(
     // all time derivatives are 0
     data_t psi_rest = this->file_psi.interpolate(r, 0);
     data_t dpsi_rest_dr = this->file_psi.interpolate(r, 1); // 1st derivative
+    if (psi_rest < 0.)
+    { // file not defined
+        psi_rest = 1. + m_params.mass / (2. * r);
+        dpsi_rest_dr = -m_params.mass / (2. * r * r);
+    }
+
     data_t dchi_rest_dr = -4. * vars.chi * dpsi_rest_dr / psi_rest;
     data_t dlapse_rest_dr = 0.5 * vars.lapse * dchi_rest_dr / vars.chi;
     data_t chi_rest2_inv = chi_rest_inv * chi_rest_inv;
