@@ -86,7 +86,7 @@ max_level = 8 # There are (max_level+1) grids, so min is zero
 regrid_interval =   0   0   1   0   0   0   0   0
 regrid_threshold = 0.05
 
-tagging_buffer_ah = 2.0 # finest level is at 1.7x horizon radius
+tagging_buffer_ah = 3.0 # finest level is at 1.7x horizon radius
 tagging_buffer_extraction = 1.5 # extraction levels are at 1.3x extraction radius
 
 # Max and min box sizes
