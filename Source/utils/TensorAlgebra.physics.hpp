@@ -160,11 +160,11 @@ adm_vars_from_metric_ST(const Tensor<2, data_t, CH_SPACETIMEDIM> &g,
     Tensor<2, data_t> dt_metric_spatial;
     Tensor<1, Tensor<1, data_t>> d1_shift_L;
     Tensor<2, Tensor<1, data_t>> d1_metric_spatial;
-    FOR2(i, j)
+    FOR(i, j)
     {
         dt_metric_spatial[i][j] = dg[i + 1][j + 1][0];
         d1_shift_L[j][i] = dg[0][j + 1][i + 1];
-        FOR1(k) { d1_metric_spatial[i][j][k] = dg[i + 1][j + 1][k + 1]; }
+        FOR(k) { d1_metric_spatial[i][j][k] = dg[i + 1][j + 1][k + 1]; }
     }
 
     const auto chris_phys =
@@ -225,7 +225,7 @@ adm_metric_t<data_t> adm_vars_superposition(const adm_metric_t<data_t> &vars1,
     adm_metric_t<data_t> out;
 
     // first 3-metric
-    FOR2(i, j)
+    FOR(i, j)
     {
         out.metric_spatial[i][j] = vars1.metric_spatial[i][j] +
                                    vars2.metric_spatial[i][j] - delta(i, j);
@@ -235,17 +235,21 @@ adm_metric_t<data_t> adm_vars_superposition(const adm_metric_t<data_t> &vars1,
     // gauge
     out.lapse = 1. / sqrt(1. / (vars1.lapse * vars1.lapse) +
                           1. / (vars2.lapse * vars2.lapse) - 1.);
-    FOR2(i, j)
+    FOR(i)
     {
-        out.shift[i] +=
-            out.metric_spatial_UU[i][j] * (vars1.shift_L[j] + vars2.shift_L[j]);
+        out.shift[i] = 0.;
+        FOR(j)
+        {
+            out.shift[i] += out.metric_spatial_UU[i][j] *
+                            (vars1.shift_L[j] + vars2.shift_L[j]);
+        }
     }
     out.shift_L = lower_all(out.shift, out.metric_spatial);
 
     // extrinsic curvature
     // raise an index before superposing
     Tensor<2, data_t> K_UL1, K_UL2, K_UL;
-    FOR2(i, j)
+    FOR(i, j)
     {
         K_UL1[i][j] = 0.;
         K_UL2[i][j] = 0.;
@@ -257,7 +261,7 @@ adm_metric_t<data_t> adm_vars_superposition(const adm_metric_t<data_t> &vars1,
         K_UL1[i][j] += vars1.metric_spatial_UU[i][k] * vars1.K_LL[k][j];
         K_UL2[i][j] += vars2.metric_spatial_UU[i][k] * vars2.K_LL[k][j];
     }
-    FOR2(i, j) { K_UL[i][j] = K_UL1[i][j] + K_UL2[i][j]; }
+    FOR(i, j) { K_UL[i][j] = K_UL1[i][j] + K_UL2[i][j]; }
     FOR3(i, j, k)
     {
         out.K_LL[i][j] += 0.5 * (out.metric_spatial[i][k] * K_UL[k][j] +
