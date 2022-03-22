@@ -321,8 +321,9 @@ void BinaryBHHDLevel::specificPostTimeStep()
         if (m_level == 0)
         {
             AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
-            double L2_Ham = amr_reductions.norm(c_Ham);
-            double L2_Mom = amr_reductions.norm(Interval(c_Mom, c_Mom));
+            double L2_Ham = amr_reductions.norm(c_Ham, 2, true);
+            double L2_Mom =
+                amr_reductions.norm(Interval(c_Mom, c_Mom), 2, true);
             SmallDataIO constraints_file(m_p.data_path + "constraint_norms",
                                          m_dt, m_time, m_restart_time,
                                          SmallDataIO::APPEND, first_step);
