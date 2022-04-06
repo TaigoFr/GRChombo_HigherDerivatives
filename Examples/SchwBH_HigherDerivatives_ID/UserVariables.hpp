@@ -37,8 +37,7 @@ enum
     c_B23,
     c_B33,
 
-    // these are not used for anything, just for compatibility with EBSystem
-    // classes
+    // used to store time derivatives of EB fields
     c_Eaux11,
     c_Eaux12,
     c_Eaux13,

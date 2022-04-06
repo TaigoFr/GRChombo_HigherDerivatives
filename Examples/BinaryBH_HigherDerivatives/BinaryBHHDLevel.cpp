@@ -85,8 +85,9 @@ void BinaryBHHDLevel::initialData()
     BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
                    m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 
-    if (m_p.system_params.version == 2)
+    if (m_p.system_params.version == 2 || m_p.system_params.version == 3)
     {
+        fillAllGhosts();
         bool compute_time_derivatives = true;
         ComputeEB compute2(
             m_dx, m_p.formulation, m_p.ccz4_params,

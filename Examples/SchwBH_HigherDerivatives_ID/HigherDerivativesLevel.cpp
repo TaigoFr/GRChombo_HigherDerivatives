@@ -72,10 +72,25 @@ void HigherDerivativesLevel::initialData()
     fillAllGhosts();
 
     // #ifdef USE_CSYSTEM
-    CDiagnostics compute(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
-    BoxLoops::loop(make_compute_pack(GammaCalculator(m_dx), compute),
-                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    CDiagnostics compute_C(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
+    bool use_last_index_raised = false;
+    ComputeEB compute_EB(m_dx, m_p.formulation, m_p.ccz4_params,
+                         Interval(c_E11, c_E33), Interval(c_B11, c_B33),
+                         use_last_index_raised);
+    BoxLoops::loop(
+        make_compute_pack(GammaCalculator(m_dx), compute_C, compute_EB),
+        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     // #endif
+
+    fillAllGhosts();
+    bool compute_time_derivatives = true;
+    ComputeEB compute2(m_dx, m_p.formulation, m_p.ccz4_params,
+                       Interval(c_Eaux11, c_Eaux33),
+                       Interval(c_Baux11, c_Baux33), use_last_index_raised,
+                       compute_time_derivatives);
+
+    BoxLoops::loop(make_compute_pack(compute2), m_state_new, m_state_new,
+                   EXCLUDE_GHOST_CELLS);
 
 #ifdef USE_AHFINDER
     // Diagnostics needed for AHFinder (calculate anyway as AHFinder not yet
