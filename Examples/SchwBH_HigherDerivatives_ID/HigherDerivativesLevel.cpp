@@ -34,6 +34,7 @@
 #endif
 
 #include "CDiagnostics.hpp"
+#include "ComputeCdot.hpp"
 #include "ComputeEB.hpp"
 
 #include "ADMQuantities.hpp"
@@ -90,6 +91,16 @@ void HigherDerivativesLevel::initialData()
                        compute_time_derivatives);
 
     BoxLoops::loop(make_compute_pack(compute2), m_state_new, m_state_new,
+                   EXCLUDE_GHOST_CELLS);
+
+    // fill ghosts is only needed for the case of use_last_index_raised==false
+    // as for 'true' we use no derivatives (and this could be even done in the
+    // same BoxLoops)
+    fillAllGhosts();
+    ComputeCdot cdot(m_dx, m_p.formulation, m_p.ccz4_params,
+                     use_last_index_raised, c_dCdt);
+
+    BoxLoops::loop(make_compute_pack(cdot), m_state_new, m_state_new,
                    EXCLUDE_GHOST_CELLS);
 
 #ifdef USE_AHFINDER
