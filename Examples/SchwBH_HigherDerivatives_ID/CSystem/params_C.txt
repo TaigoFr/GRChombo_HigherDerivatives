@@ -51,6 +51,8 @@ write_plot_ghosts = 0
 
 boost_velocity = 0.1 0 0 # only boost in x direction!
 
+id_use_last_index_raised = 1 # 1 gives less noise at r=0
+
 #################################################
 # Grid parameters
 

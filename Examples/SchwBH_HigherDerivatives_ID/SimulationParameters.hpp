@@ -171,7 +171,7 @@ class SimulationParameters : public SimulationParametersBase
 #endif
 
         // NEW
-        pp.load("id_use_last_index_raised", id_use_last_index_raised, false);
+        pp.load("id_use_last_index_raised", id_use_last_index_raised);
     }
 
     void check_params()
