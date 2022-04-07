@@ -8,17 +8,21 @@ verbosity = 0
 
 # location / naming of output files
 # output_path = "" # Main path for all files. Must exist!
-chk_prefix = HigherDerivatives_
-plot_prefix = HigherDerivativesp_
+chk_prefix = HigherDerivativesChk_
+plot_prefix = HigherDerivatives_
 # restart_file = HigherDerivatives_000000.3d.hdf5
 
 # HDF5files are written every dt = L/N*dt_multiplier*checkpoint_interval
-checkpoint_interval = 20
+checkpoint_interval = -1
 # set to 0 to turn off plot files (except at t=0 and t=stop_time)
 # set to -1 to never ever print plotfiles
-plot_interval = 10
-num_plot_vars = 22
-plot_vars = chi lapse shift1 C dCdt Ham Mom C_diff Cphys WeakFieldVar WeakFieldCondition WeakFieldVar_after_WFC WeakField_over_Kretschmann NCC_plus NCC_minus NCC_Z4_plus NCC_Z4_minus rhs_chi diffusion_chi det_h M_adm J_adm
+plot_interval = 1
+num_plot_vars = 27
+plot_vars = chi h11 h12 h13 h22 h23 h33
+            K   A11 A12 A13 A22 A23 A33
+            Theta Gamma1 Gamma2 Gamma3
+            lapse shift1 shift2 shift3 B1 B2 B3
+            C dCdt
 
 # subpaths - specific directories for hdf5, pout, extraction data
 # (these are created at runtime)
@@ -31,7 +35,7 @@ data_subpath = "data"
 print_progress_only_to_rank_0 = 1
 
 # ignore_checkpoint_name_mismatch = 0
-# write_plot_ghosts = 0
+write_plot_ghosts = 0
 
 #################################################
 # Initial Data parameters
@@ -45,7 +49,7 @@ print_progress_only_to_rank_0 = 1
 # amplitude = 0.05
 # r0 = 1.
 
-boost_velocity = 0 0 0 # only boost in x direction!
+boost_velocity = 0.1 0 0 # only boost in x direction!
 
 #################################################
 # Grid parameters
@@ -102,12 +106,10 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 1 2 3          #Theta and Gamma
                          0 1 2 3 1 2 3    #lapse shift and B
                          0 0              #C and dCdt
-vars_parity_diagnostic = 0 0              #Ham and Mom
-                         0 0              #C diff and C phys
-                         0 0 0 0          #WeakFieldVar, Weak field condition, WeakFieldVar_after_WFC, WeakField_over_Kretschmann
-                         0 0 0 0          #NCC x 4
-                         0 0 0            #rhs chi and diffusion chi and det_h
-                         0 0              #ADM M and J
+                         0 4 6 0 5 0      #Eij
+                         0 4 6 0 5 0      #Bij
+                         0 4 6 0 5 0      #Eaux
+                         0 4 6 0 5 0      #Baux
 
 # if sommerfeld boundaries selected, must select
 # non zero asymptotic values
@@ -125,7 +127,7 @@ nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0
 
 # dt will be dx*dt_multiplier on each grid level
 dt_multiplier = 0.25
-stop_time = 200.0
+stop_time = 0.0
 # max_steps = 100
 
 # Spatial derivative order (only affects CCZ4 RHS)
@@ -214,7 +216,7 @@ extraction_extrapolation_radii = 0 1 2
 #################################################
 # Apparent Horizon Finder parameters
 
-AH_activate = 1 
+AH_activate = 1
 AH_num_ranks = 20
 AH_num_points_u = 49
 AH_num_points_v = 48

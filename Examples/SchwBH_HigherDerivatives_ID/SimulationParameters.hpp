@@ -169,6 +169,9 @@ class SimulationParameters : public SimulationParametersBase
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * id_params.mass);
 #endif
+
+        // NEW
+        pp.load("id_use_last_index_raised", id_use_last_index_raised, false);
     }
 
     void check_params()
@@ -200,6 +203,8 @@ class SimulationParameters : public SimulationParametersBase
 #ifdef USE_AHFINDER
     double AH_initial_guess;
 #endif
+
+    bool id_use_last_index_raised;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */

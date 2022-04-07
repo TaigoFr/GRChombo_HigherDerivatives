@@ -71,37 +71,36 @@ void HigherDerivativesLevel::initialData()
                    m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 
     fillAllGhosts();
+    BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
+                   EXCLUDE_GHOST_CELLS);
+    fillAllGhosts();
 
     // #ifdef USE_CSYSTEM
     CDiagnostics compute_C(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
-    bool use_last_index_raised = false;
     ComputeEB compute_EB(m_dx, m_p.formulation, m_p.ccz4_params,
                          Interval(c_E11, c_E33), Interval(c_B11, c_B33),
-                         use_last_index_raised);
-    BoxLoops::loop(
-        make_compute_pack(GammaCalculator(m_dx), compute_C, compute_EB),
-        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+                         m_p.id_use_last_index_raised);
+    BoxLoops::loop(make_compute_pack(compute_C, compute_EB), m_state_new,
+                   m_state_new, EXCLUDE_GHOST_CELLS);
     // #endif
 
     fillAllGhosts();
     bool compute_time_derivatives = true;
     ComputeEB compute2(m_dx, m_p.formulation, m_p.ccz4_params,
                        Interval(c_Eaux11, c_Eaux33),
-                       Interval(c_Baux11, c_Baux33), use_last_index_raised,
-                       compute_time_derivatives);
-
+                       Interval(c_Baux11, c_Baux33),
+                       m_p.id_use_last_index_raised, compute_time_derivatives);
     BoxLoops::loop(make_compute_pack(compute2), m_state_new, m_state_new,
                    EXCLUDE_GHOST_CELLS);
 
-    // fill ghosts is only needed for the case of use_last_index_raised==false
-    // as for 'true' we use no derivatives (and this could be even done in the
-    // same BoxLoops)
+    // fill ghosts is only needed for the case of
+    // m_p.id_use_last_index_raised==false as for 'true' we use no derivatives
+    // (and this could be even done in the same BoxLoops)
     fillAllGhosts();
     ComputeCdot cdot(m_dx, m_p.formulation, m_p.ccz4_params,
-                     use_last_index_raised, c_dCdt);
-
+                     m_p.id_use_last_index_raised, c_dCdt);
     BoxLoops::loop(make_compute_pack(cdot), m_state_new, m_state_new,
-                   EXCLUDE_GHOST_CELLS);
+                   EXCLUDE_GHOST_CELLS, disable_simd());
 
 #ifdef USE_AHFINDER
     // Diagnostics needed for AHFinder (calculate anyway as AHFinder not yet

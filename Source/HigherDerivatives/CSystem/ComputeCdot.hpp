@@ -40,13 +40,108 @@ class ComputeCdot
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
         const auto vars = current_cell.template load_vars<Vars>();
-        const auto d1 = m_deriv.template diff1<Vars>(current_cell);
-        const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2,
-                                                        "ComputeCdot::compute");
+        /*
+        double m_dx = m_deriv.m_dx;
+        Coordinates<data_t> coords(current_cell, m_dx, {64., 0., 0});
 
-        gq.set_formulation(m_formulation, m_ccz4_params);
+        if (m_dx < 1)
+            pout() << coords << std::endl;
+        if (m_dx < 1 && abs(coords.x - 0 - 5) < m_dx &&
+            abs(coords.y - 0) < m_dx)
+        {
+            if (m_use_last_index_raised)
+            {
+                pout() << coords << "; Eij_LU[0][0]=" << vars.Eij[0][0]
+                       << "; dt_Eij_LU[0][0]=" << vars.Eaux[0][0]
+                       << "; Bij_LU[0][0]=" << vars.Bij[0][0]
+                       << "; dt_Bij_LU[0][0]=" << vars.Baux[0][0]
+                       << "; Eij_LU[0][1]=" << vars.Eij[0][1]
+                       << "; dt_Eij_LU[0][1]=" << vars.Eaux[0][1]
+                       << "; Bij_LU[0][1]=" << vars.Bij[0][1]
+                       << "; dt_Bij_LU[0][1]=" << vars.Baux[0][1]
+                       << "; Eij_LU[1][1]=" << vars.Eij[1][1]
+                       << "; dt_Eij_LU[1][1]=" << vars.Eaux[1][1]
+                       << "; Bij_LU[1][1]=" << vars.Bij[1][1]
+                       << "; dt_Bij_LU[1][1]=" << vars.Baux[1][1] << std::endl;
+            }
+            else
+            {
+                const auto d1 = m_deriv.template diff1<Vars>(current_cell);
+                const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
+                const auto advec =
+                    m_deriv.template advection<Vars>(current_cell, vars.shift);
+                GeometricQuantities<data_t, Vars, Diff2Vars> gq(
+                    vars, d1, d2, "ComputeCdot::compute");
+                gq.set_formulation(m_formulation, m_ccz4_params);
+                gq.set_advection_and_gauge(advec, EmptyGauge());
+                const auto &h_UU = gq.get_metric_UU_spatial();
+
+                Tensor<2, data_t> dt_Eij_LU = {0.};
+                Tensor<2, data_t> dt_Bij_LU = {0.};
+
+                Tensor<2, data_t> Eij_LU =
+                    TensorAlgebra::compute_dot_product(vars.Eij, h_UU);
+                Tensor<2, data_t> Bij_LU =
+                    TensorAlgebra::compute_dot_product(vars.Bij, h_UU);
+
+                Tensor<2, data_t> Eij_no_time_der = vars.Eij;
+                Tensor<2, data_t> Bij_no_time_der = vars.Bij;
+
+                Tensor<2, data_t> Eij_no_time_der_LU =
+                    TensorAlgebra::compute_dot_product(Eij_no_time_der, h_UU);
+                Tensor<2, data_t> Bij_no_time_der_LU =
+                    TensorAlgebra::compute_dot_product(Bij_no_time_der, h_UU);
+
+                Vars<data_t> rhs;
+                gq.compute_rhs_equations_no_gauge(rhs);
+
+                Tensor<2, data_t> dt_h;
+                data_t chi2 = vars.chi * vars.chi;
+                FOR(i, j)
+                {
+                    dt_h[i][j] =
+                        rhs.h[i][j] / vars.chi - rhs.chi * vars.h[i][j] / chi2;
+                }
+
+                // (recall Eij and Bij are used to store the time derivatives LU
+                // when 'm_compute_time_derivatives == true')
+                FOR(i, j, k)
+                {
+                    dt_Eij_LU[i][j] += vars.Eaux[i][k] * h_UU[k][j];
+                    dt_Bij_LU[i][j] += vars.Baux[i][k] * h_UU[k][j];
+                    FOR(l)
+                    {
+                        dt_Eij_LU[i][j] +=
+                            -Eij_no_time_der_LU[i][l] * h_UU[j][k] * dt_h[k][l];
+                        dt_Bij_LU[i][j] +=
+                            -Bij_no_time_der_LU[i][l] * h_UU[j][k] * dt_h[k][l];
+                    }
+                }
+
+                pout() << coords << "; Eij_LU[0][0]=" << Eij_LU[0][0]
+                       << "; dt_Eij_LU[0][0]=" << dt_Eij_LU[0][0]
+                       << "; Bij_LU[0][0]=" << Bij_LU[0][0]
+                       << "; dt_Bij_LU[0][0]=" << dt_Bij_LU[0][0]
+                       << "; Eij_LU[0][1]=" << Eij_LU[0][1]
+                       << "; dt_Eij_LU[0][1]=" << dt_Eij_LU[0][1]
+                       << "; Bij_LU[0][1]=" << Bij_LU[0][1]
+                       << "; dt_Bij_LU[0][1]=" << dt_Bij_LU[0][1]
+                       << "; Eij_LU[1][1]=" << Eij_LU[1][1]
+                       << "; dt_Eij_LU[1][1]=" << dt_Eij_LU[1][1]
+                       << "; Bij_LU[1][1]=" << Bij_LU[1][1]
+                       << "; dt_Bij_LU[1][1]=" << dt_Bij_LU[1][1] << std::endl;
+
+                data_t C_dot2 = 0.;
+                FOR(i, j)
+                {
+                    C_dot2 += 16. * (Eij_LU[i][j] * dt_Eij_LU[j][i] -
+                                     Bij_LU[i][j] * dt_Bij_LU[j][i]);
+                }
+                pout() << "C_dot2 =" << C_dot2 << std::endl;
+            }
+        }
+        */
 
         data_t C_dot = 0.;
         if (m_use_last_index_raised)
@@ -59,6 +154,15 @@ class ComputeCdot
         }
         else
         {
+            const auto d1 = m_deriv.template diff1<Vars>(current_cell);
+            const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
+            const auto advec =
+                m_deriv.template advection<Vars>(current_cell, vars.shift);
+
+            GeometricQuantities<data_t, Vars, Diff2Vars> gq(
+                vars, d1, d2, "ComputeCdot::compute");
+            gq.set_formulation(m_formulation, m_ccz4_params);
+            gq.set_advection_and_gauge(advec, EmptyGauge());
 
             // raise last index
             const auto &h_UU = gq.get_metric_UU_spatial();
@@ -91,7 +195,7 @@ class ComputeCdot
 
                 FOR(k)
                 {
-                    C_dot += 16. *
+                    C_dot += -16. *
                              (Eij_UU[i][j] * Eij_LU[i][k] -
                               Bij_UU[i][j] * Bij_LU[i][k]) *
                              dt_h[j][k];
@@ -100,6 +204,15 @@ class ComputeCdot
         }
 
         current_cell.store_vars(C_dot, m_C_dot_comp);
+
+        /*
+        if (m_dx < 1 && abs(coords.x - 0 - 5) < m_dx &&
+            abs(coords.y - 0) < m_dx)
+        {
+            pout() << "C_dot =" << C_dot << std::endl;
+            MayDay::Error("STOP HERE");
+        }
+        */
     }
 
   protected:
