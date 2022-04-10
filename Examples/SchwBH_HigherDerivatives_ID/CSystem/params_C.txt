@@ -170,7 +170,7 @@ tau       = 0.05           # damping time scale for evolved C
 c_sigma   = 1.0            # wave evolution scale for evolved C
 c_version              = 2 # v1 or v2 (with or without laplacian)
 rescale_tau_by_lapse   = 0 # rescale tau by lapse, only in v2
-rescale_sigma_by_lapse = 0 # rescale sigma by lapse (1) or lapse^2 (2), onlyin v2
+rescale_sigma_by_lapse = 0 # rescale sigma by lapse (1) or lapse^2 (2), only in v2
 advection_type         = 2 # only in v2 (0, 1 for simple, 2 for Luis' proposal)
 advection_coeff	       = 1.0 # only for advection type 1 and 2
 Box_transition         = 0 # only if 'c_version= 1' transition from laplacian to only time derivatives
