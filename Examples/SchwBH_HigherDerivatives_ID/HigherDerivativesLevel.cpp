@@ -157,7 +157,8 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
     MatterCCZ4RHSWithDiffusion<C2EFT<System>> my_ccz4_matter(
         c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, m_p.sigma,
         m_p.center, m_p.formulation, m_p.G_Newton);
-    BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(make_compute_pack(SetValue(0.), my_ccz4_matter), a_soln,
+                   a_rhs, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do at ODE update, after soln + rhs

@@ -35,7 +35,7 @@ data_subpath = "data"
 print_progress_only_to_rank_0 = 1
 
 # ignore_checkpoint_name_mismatch = 0
-write_plot_ghosts = 0
+write_plot_ghosts = 1
 
 #################################################
 # Initial Data parameters
