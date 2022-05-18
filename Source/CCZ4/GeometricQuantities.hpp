@@ -212,14 +212,33 @@ class GeometricQuantities
 
     // EOM / Formulation dependent
     const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLL_ST();
+//my ugly stuff
+    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLL_ST_T();
+//my ugly stuff    
     const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLL_ST_v2();
-    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_ricci_ST();
+    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_ricci_ST();   
     const data_t &get_ricci_scalar_ST();
+//my ugly stuff
+    const Tensor<2, data_t, CH_SPACEDIM + 1> &get_ricci_ST_T();
+    const data_t &get_ricci_scalar_ST_T();    
+//my ugly stuff     
     const data_t &get_ricci_squared();
+//my ugly stuff
+    const data_t &get_ricci_squared_T();
+//my ugly stuff    
     const data_t &get_kretschmann();
+// my ugly stuff
+    const data_t &get_kretschmann_T();
+// my ugly stuff    
     const data_t &get_riemann_squared(); // alternative to Kretschmann
+
     const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLU_ST();
     const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LULU_ST();
+//my ugly stuff
+    const data_t &get_riemann_squared_T(); // alternative to Kretschmann
+    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LLLU_ST_T();
+    const Tensor<4, data_t, CH_SPACEDIM + 1> &get_riemann_LULU_ST_T();    
+//my ugly stuff        
 
     // Advection dependent
     const Tensor<3, data_t, CH_SPACEDIM + 1> &get_chris_ST();
@@ -362,14 +381,33 @@ class GeometricQuantities
 
     // EOM dependent
     Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLL_ST;
+//my ugly stuff
+    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLL_ST_T;
+//my ugly stuff    
     Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLL_ST_v2;
     Tensor<2, data_t, CH_SPACEDIM + 1> *m_ricci_ST;
     data_t *m_ricci_scalar_ST;
+//my ugly stuff
+    Tensor<2, data_t, CH_SPACEDIM + 1> *m_ricci_ST_T;
+    data_t *m_ricci_scalar_ST_T;    
+//my ugly stuff        
     data_t *m_ricci_squared;
+//my ugly stuff
+    data_t *m_ricci_squared_T;
+//my ugly stuff    
     data_t *m_kretschmann;
+//my ugly stuff
+    data_t *m_kretschmann_T;
+//my ugly stuff    
     data_t *m_riemann_squared;
     Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLU_ST;
     Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LULU_ST;
+//my ugly stuff
+    data_t *m_riemann_squared_T;
+    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LLLU_ST_T;
+    Tensor<4, data_t, CH_SPACEDIM + 1> *m_riemann_LULU_ST_T;
+//my ugly stuff
+    
 
     // Advection dependent
     Tensor<3, data_t, CH_SPACEDIM + 1> *m_chris_ST;
@@ -456,14 +494,32 @@ class GeometricQuantities
 
     // EOM dependent
     void compute_riemann_LLLL_ST();
+//my ugly stuff
+    void compute_riemann_LLLL_ST_T();
+//my ugly stuff    
     void compute_riemann_LLLL_ST_v2();
     void compute_ricci_ST();
     void compute_ricci_scalar_ST();
+//my ugly stuff
+    void compute_ricci_ST_T();
+    void compute_ricci_scalar_ST_T();    
+//my ugly stuff    
     void compute_ricci_squared();
+//my ugly stuff
+    void compute_ricci_squared_T();
+//my ugly stiff    
     void compute_kretschmann();
+//my ugly stuff
+    void compute_kretschmann_T();
+//my ugly stuff    
     void compute_riemann_squared();
     void compute_riemann_LLLU_ST();
     void compute_riemann_LULU_ST();
+//my ugly stuff
+    void compute_riemann_squared_T();
+    void compute_riemann_LLLU_ST_T();
+    void compute_riemann_LULU_ST_T();
+//my ugly stuff    
 
     // Advection dependent
     void compute_chris_ST();
