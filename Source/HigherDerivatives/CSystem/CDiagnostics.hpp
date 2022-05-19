@@ -46,7 +46,7 @@ class CDiagnostics
 
         gq.set_formulation(m_formulation, m_ccz4_params);
 
-        data_t C = gq.get_kretschmann();
+        data_t C = gq.get_kretschmann_T();
 
         if (m_C_diff_comp >= 0)
             current_cell.store_vars(abs(C - vars.C), m_C_diff_comp);

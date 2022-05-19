@@ -59,7 +59,7 @@ template <class System> class WeakFieldConditionDiagnostic
         data_t kretschmann = 0;
         if (m_compute_ratio_with_kretschmann >= 0)
         {
-            kretschmann = gq.get_kretschmann();
+            kretschmann = gq.get_kretschmann_T();
         }
 
         const auto emtensor = my_matter.compute_emtensor(gq);
