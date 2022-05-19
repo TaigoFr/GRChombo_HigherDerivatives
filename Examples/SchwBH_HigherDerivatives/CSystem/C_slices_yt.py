@@ -14,8 +14,8 @@ import os
 rmin = 0.
 rmax = 5.
 location = './HigherDerivatives'
-is_corner = True
-jump = 1 # plot every 'jump' files
+is_corner = False
+jump = 5 # plot every 'jump' files
 
 #################################################################
 
@@ -38,8 +38,6 @@ def read_hdf5(location, is_corner=False):
 
 ds, center = read_hdf5(location, is_corner)
 
-assert((center == [0,0,0]).all()) # fix ray domain below if not
-
 # ds = ds[0:5]
 
 fontsize = 18
@@ -51,7 +49,8 @@ minCabs = 10**10
 maxCabs = 0
 for i in range(0, len(ds), jump):
     file = ds[i]
-    ray = file.r[[0, 0, rmin]:[0, 0, rmax]]
+    ray = file.r[[center[0] + 0, center[1] + 0, center[2] + rmin]:[center[0] + 0, center[1] + 0, center[2] + rmax]]
+
     minC = min(minC, min(np.min(ray["C"]), np.min(ray["Cphys"])))
     maxC = max(maxC, max(np.max(ray["C"]), np.max(ray["Cphys"])))
     minCabs = min(minCabs, min(np.min(np.abs(ray["C"])), np.min(np.abs(ray["Cphys"]))))
@@ -59,13 +58,14 @@ for i in range(0, len(ds), jump):
 
 print("Min/Max C/Cphys = (%f,%f)" % (minC, maxC))
 print("Min/Max Abs C/Cphys = (%f,%f)" % (minCabs, maxCabs))
+print("Average |C-Cphys|/C", [CminusCphys / C * 100 for CminusCphys, C in zip(allAverageCminusCphys, allAverageC)])
 
 def do_plot(use_log):
     name_end = "_log" if use_log else ""
 
     for i in range(0, len(ds), jump):
         file = ds[i]
-        ray = file.r[[0, 0, rmin]:[0, 0, rmax]]
+        ray = file.r[[center[0] + 0, center[1] + 0, center[2] + rmin]:[center[0] + 0, center[1] + 0, center[2] + rmax]]
 
         srt = np.argsort(ray["radius"]) # ray does not have elements ordered
 
