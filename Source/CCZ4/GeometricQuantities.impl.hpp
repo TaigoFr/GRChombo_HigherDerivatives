@@ -2978,7 +2978,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST_T()
         m_ricci_ST_T = new Tensor<2, data_t, CH_SPACEDIM + 1>;
     FOR_ST(m, n)
     {
-        (*m_ricci_ST)[m][n] =
+        (*m_ricci_ST_T)[m][n] =
             m_16_pi_G_Newton / 2. *
                 (m_em_tensor == nullptr
                      ? 0.
