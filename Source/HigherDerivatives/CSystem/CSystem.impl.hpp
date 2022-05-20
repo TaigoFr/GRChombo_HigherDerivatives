@@ -49,12 +49,12 @@ void CSystem::compute_Riemann(
     Tensor<4, data_t, CH_SPACEDIM + 1> &riemann_LULU,
     GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
 {
-//my ugly stuff
-    //riemann_LLLU = gq.get_riemann_LLLU_ST();
-    //riemann_LULU = gq.get_riemann_LULU_ST();
+    // my ugly stuff
+    // riemann_LLLU = gq.get_riemann_LLLU_ST();
+    // riemann_LULU = gq.get_riemann_LULU_ST();
     riemann_LLLU = gq.get_riemann_LLLU_ST_T();
     riemann_LULU = gq.get_riemann_LULU_ST_T();
-//my ugly stuff    
+    // my ugly stuff
 }
 
 // Adds in the RHS for the matter vars
@@ -68,10 +68,10 @@ void CSystem::add_matter_rhs(
 {
     const auto &vars = gq.get_vars();
     const auto &advec = gq.get_advection();
-// my ugly stuff    
-    //const auto &kretschmann = gq.get_kretschmann();
-    const auto &kretschmann = gq.get_kretschmann_T();    
-//my ugly stuff
+    // my ugly stuff
+    // const auto &kretschmann = gq.get_kretschmann();
+    const auto &kretschmann = gq.get_kretschmann_T();
+    // my ugly stuff
     CH_assert(m_params.sigma != 0.);
 
     total_rhs.C = vars.dCdt;

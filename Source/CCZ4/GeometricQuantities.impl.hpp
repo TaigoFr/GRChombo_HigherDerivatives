@@ -114,25 +114,25 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
 
     m_riemann_LLLL_ST = nullptr;
     m_riemann_LLLL_ST_v2 = nullptr;
-    m_ricci_ST = nullptr;  
-    m_ricci_scalar_ST = nullptr;     
+    m_ricci_ST = nullptr;
+    m_ricci_scalar_ST = nullptr;
     m_ricci_squared = nullptr;
     m_kretschmann = nullptr;
-//my ugly stuff
+    // my ugly stuff
     m_ricci_ST_T = nullptr;
-    m_ricci_scalar_ST_T = nullptr;    
+    m_ricci_scalar_ST_T = nullptr;
     m_ricci_squared_T = nullptr;
     m_kretschmann_T = nullptr;
-//my ugly stuff    
+    // my ugly stuff
     m_riemann_squared = nullptr;
     m_riemann_LLLU_ST = nullptr;
     m_riemann_LULU_ST = nullptr;
-//my ugly stuff    
-    m_riemann_LLLL_ST_T = nullptr;  
+    // my ugly stuff
+    m_riemann_LLLL_ST_T = nullptr;
     m_riemann_squared_T = nullptr;
     m_riemann_LLLU_ST_T = nullptr;
     m_riemann_LULU_ST_T = nullptr;
-//my ugly stuff    
+    // my ugly stuff
     m_chris_ST = nullptr;
     m_Gamma_ST = nullptr;
     m_Gamma_L_ST = nullptr;
@@ -452,27 +452,27 @@ template_GQ void GeometricQuantities_t::clean_eom_dependent()
         delete m_riemann_LLLL_ST_v2;
         m_riemann_LLLL_ST_v2 = nullptr;
     }
-    
+
     /* MY ugly stuff  */
     if (m_riemann_LLLL_ST_T != nullptr)
     {
         delete m_riemann_LLLL_ST_T;
         m_riemann_LLLL_ST_T = nullptr;
     }
-    /* MY ugly stuff  */    
-    
+    /* MY ugly stuff  */
+
     if (m_ricci_ST != nullptr)
     {
         delete m_ricci_ST;
         m_ricci_ST = nullptr;
     }
-   
+
     if (m_ricci_scalar_ST != nullptr)
     {
         delete m_ricci_scalar_ST;
         m_ricci_scalar_ST = nullptr;
     }
-    
+
     if (m_ricci_squared != nullptr)
     {
         delete m_ricci_squared;
@@ -483,7 +483,7 @@ template_GQ void GeometricQuantities_t::clean_eom_dependent()
         delete m_kretschmann;
         m_kretschmann = nullptr;
     }
-//my ugly stuff
+    // my ugly stuff
 
     if (m_ricci_ST_T != nullptr)
     {
@@ -495,19 +495,19 @@ template_GQ void GeometricQuantities_t::clean_eom_dependent()
         delete m_ricci_scalar_ST_T;
         m_ricci_scalar_ST_T = nullptr;
     }
-    
+
     if (m_ricci_squared_T != nullptr)
     {
         delete m_ricci_squared_T;
         m_ricci_squared_T = nullptr;
-    }        
-    
+    }
+
     if (m_kretschmann_T != nullptr)
     {
         delete m_kretschmann_T;
         m_kretschmann_T = nullptr;
     }
-//my ugly stuff        
+    // my ugly stuff
     if (m_riemann_squared != nullptr)
     {
         delete m_riemann_squared;
@@ -523,7 +523,7 @@ template_GQ void GeometricQuantities_t::clean_eom_dependent()
         delete m_riemann_LULU_ST;
         m_riemann_LULU_ST = nullptr;
     }
-    
+
     /* MY ugly stuff  */
     if (m_riemann_squared_T != nullptr)
     {
@@ -539,8 +539,8 @@ template_GQ void GeometricQuantities_t::clean_eom_dependent()
     {
         delete m_riemann_LULU_ST_T;
         m_riemann_LULU_ST_T = nullptr;
-    }    
-    /* MY ugly stuff  */        
+    }
+    /* MY ugly stuff  */
 
     clean_advection_and_gauge_dependent();
 }
@@ -1228,7 +1228,7 @@ template_GQ const data_t &GeometricQuantities_t::get_kretschmann()
         compute_kretschmann();
     return *m_kretschmann;
 }
-//my ugly stuff
+// my ugly stuff
 template_GQ const Tensor<2, data_t, CH_SPACEDIM + 1> &
 GeometricQuantities_t::get_ricci_ST_T()
 {
@@ -1262,7 +1262,7 @@ template_GQ const data_t &GeometricQuantities_t::get_kretschmann_T()
         compute_kretschmann_T();
     return *m_kretschmann_T;
 }
-//my ugky stuff
+// my ugky stuff
 template_GQ const data_t &GeometricQuantities_t::get_riemann_squared()
 {
     assert_with_label(m_formulation >= 0, m_label); // formulation is set
@@ -1318,7 +1318,6 @@ GeometricQuantities_t::get_riemann_LULU_ST_T()
     return *m_riemann_LULU_ST_T;
 }
 /*My ugly stuff*/
-
 
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<3, data_t, CH_SPACEDIM + 1> &
@@ -2850,7 +2849,7 @@ template_GQ void GeometricQuantities_t::compute_riemann_LLLL_ST_T()
         delete m_riemann_LLLL_ST_T;
 
     const auto &weyl = get_weyl_tensor_LLLL(); // No need to change this one
-    const auto &ricci = get_ricci_ST_T(); // changed this one
+    const auto &ricci = get_ricci_ST_T();      // changed this one
     const auto &ricci_scalar = get_ricci_scalar_ST_T(); // changed this one
     const auto &g = get_metric_ST();
 
@@ -2948,7 +2947,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST()
         }
     }
 }
-//my ugly stuff
+// my ugly stuff
 template_GQ void GeometricQuantities_t::compute_ricci_ST_T()
 {
     if (m_ricci_ST_T != nullptr)
@@ -2968,15 +2967,15 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST_T()
         get_em_tensor_trace_ST();
     }
 
-   // data_t kappa1 = m_ccz4_params->kappa1;
-    //if (m_ccz4_params->covariantZ4)
-        //kappa1 /= vars.lapse;
+    // data_t kappa1 = m_ccz4_params->kappa1;
+    // if (m_ccz4_params->covariantZ4)
+    // kappa1 /= vars.lapse;
 
-    //data_t Z_dot_n = 0.;
+    // data_t Z_dot_n = 0.;
     if (m_formulation == CCZ4RHS<>::USE_CCZ4)
-        //Z_dot_n = TensorAlgebra::compute_dot_product(Z_L_ST, n_U);
+        // Z_dot_n = TensorAlgebra::compute_dot_product(Z_L_ST, n_U);
 
-    m_ricci_ST_T = new Tensor<2, data_t, CH_SPACEDIM + 1>;
+        m_ricci_ST_T = new Tensor<2, data_t, CH_SPACEDIM + 1>;
     FOR_ST(m, n)
     {
         (*m_ricci_ST)[m][n] =
@@ -2988,17 +2987,18 @@ template_GQ void GeometricQuantities_t::compute_ricci_ST_T()
                                                      (GR_SPACEDIM - 1.)) +
             m_cosmological_constant * g[m][n] * 2. / (GR_SPACEDIM - 1.);
 
-        //if (m_formulation == CCZ4RHS<>::USE_CCZ4)
+        // if (m_formulation == CCZ4RHS<>::USE_CCZ4)
         //{
         //    (*m_ricci_ST)[m][n] +=
         //        -covd_Z_L_ST[m][n] - covd_Z_L_ST[n][m] +
         //        kappa1 * (n_L[m] * Z_L_ST[n] + n_L[n] * Z_L_ST[m] -
         //                  2. / (GR_SPACEDIM - 1.) *
-        //                      (1. + m_ccz4_params->kappa2) * g[m][n] * Z_dot_n);
+        //                      (1. + m_ccz4_params->kappa2) * g[m][n] *
+        //                      Z_dot_n);
         //}
     }
 }
-//my ugly stuff
+// my ugly stuff
 
 template_GQ void GeometricQuantities_t::compute_ricci_scalar_ST()
 {
@@ -3010,18 +3010,18 @@ template_GQ void GeometricQuantities_t::compute_ricci_scalar_ST()
 
     m_ricci_scalar_ST = new data_t(TensorAlgebra::compute_trace(ricci, g_UU));
 }
-//my ugly stuff
+// my ugly stuff
 template_GQ void GeometricQuantities_t::compute_ricci_scalar_ST_T()
 {
     if (m_ricci_scalar_ST_T != nullptr)
         delete m_ricci_scalar_ST_T;
 
-    const auto &ricci = get_ricci_ST_T(); //changed here
+    const auto &ricci = get_ricci_ST_T(); // changed here
     const auto &g_UU = get_metric_UU_ST();
 
     m_ricci_scalar_ST_T = new data_t(TensorAlgebra::compute_trace(ricci, g_UU));
 }
-//my ugly stuff
+// my ugly stuff
 
 template_GQ void GeometricQuantities_t::compute_ricci_squared()
 {
@@ -3045,7 +3045,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_squared_T()
         delete m_ricci_squared_T;
 
     const auto &g_UU = get_metric_UU_ST();
-    const auto &ricci = get_ricci_ST_T(); //changed this
+    const auto &ricci = get_ricci_ST_T(); // changed this
 
     m_ricci_squared_T = new data_t(0.);
     FOR_ST(a, b, c, d)
@@ -3054,7 +3054,7 @@ template_GQ void GeometricQuantities_t::compute_ricci_squared_T()
             g_UU[a][c] * g_UU[b][d] * ricci[a][b] * ricci[c][d];
     }
 }
-//my ugly stuff
+// my ugly stuff
 template_GQ void GeometricQuantities_t::compute_kretschmann()
 {
     if (m_kretschmann != nullptr)
@@ -3068,21 +3068,21 @@ template_GQ void GeometricQuantities_t::compute_kretschmann()
         weyl_squared + 4. / (GR_SPACEDIM - 1.) * ricci_squared -
         2. / (GR_SPACEDIM * (GR_SPACEDIM - 1.)) * ricci_scalar * ricci_scalar);
 }
-//my ugly stuff
+// my ugly stuff
 template_GQ void GeometricQuantities_t::compute_kretschmann_T()
 {
     if (m_kretschmann_T != nullptr)
         delete m_kretschmann_T;
 
-    const auto &ricci_squared = get_ricci_squared_T(); //changed this
-    const auto &ricci_scalar = get_ricci_scalar_ST_T(); //changed this one
+    const auto &ricci_squared = get_ricci_squared_T();  // changed this
+    const auto &ricci_scalar = get_ricci_scalar_ST_T(); // changed this one
     const auto &weyl_squared = get_weyl_squared();
 
     m_kretschmann_T = new data_t(
         weyl_squared + 4. / (GR_SPACEDIM - 1.) * ricci_squared -
         2. / (GR_SPACEDIM * (GR_SPACEDIM - 1.)) * ricci_scalar * ricci_scalar);
 }
-//my ugly stuff
+// my ugly stuff
 template_GQ void GeometricQuantities_t::compute_riemann_squared()
 {
     if (m_riemann_squared != nullptr)
@@ -3127,7 +3127,7 @@ template_GQ void GeometricQuantities_t::compute_riemann_LULU_ST()
             riemann_LLLU[a][e][c][d] * g_UU[e][b];
     }
 }
-//my ugly stuff
+// my ugly stuff
 template_GQ void GeometricQuantities_t::compute_riemann_squared_T()
 {
     if (m_riemann_squared_T != nullptr)
@@ -3172,7 +3172,7 @@ template_GQ void GeometricQuantities_t::compute_riemann_LULU_ST_T()
             riemann_LLLU[a][e][c][d] * g_UU[e][b];
     }
 }
-//my ugly stuff
+// my ugly stuff
 
 //////////////////////////////////////////////////////////////////////////
 
