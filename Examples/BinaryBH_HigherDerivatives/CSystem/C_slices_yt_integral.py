@@ -112,7 +112,7 @@ allAverageCminusCphysWithoutAH = []
 for i in range(0, len(ds), jump):
     file = ds[i]
     time = file.current_time
-    file.add_field("C_minus_Cphys", _C_minus_Cphys, units = "")
+    file.add_field("C_minus_Cphys", _C_minus_Cphys, units = "", sampling_type = "cell")
 
     puncture = punctures[punctures[:,0] == time][0][1:4]
     if z_symmetry:
