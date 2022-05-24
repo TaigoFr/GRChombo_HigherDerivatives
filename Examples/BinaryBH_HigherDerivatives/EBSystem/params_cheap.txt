@@ -41,13 +41,20 @@ print_progress_only_to_rank_0 = 1
 # provide INITIAL_DATA.dat with 'mass'
 # provide 'offset' or 'center'
 
+use_initial_data_with_solved_constraints = 0
+
+massA = 1 # careful, this is not used if we provide an INITIAl_DATA file
+massB = 0.82
+
 offsetA = -2 0 0
 offsetB = 2 0 0
 # centerA = 256 232 256
 # centerB = 256 250 256
 
-boost_velocityA = 0. -0.14 0.0
-boost_velocityB = 0. 0.14 0.0
+#boost_velocityA = 0. -0.14 0.0
+#boost_velocityB = 0. 0.14 0.0
+momentumA = 0. -0.14 0.0
+momentumB = 0. 0.14 0.0
 
 #################################################
 # Grid parameters

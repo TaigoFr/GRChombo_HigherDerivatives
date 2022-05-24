@@ -29,6 +29,7 @@
 #include "ChiPunctureExtractionTaggingCriterion.hpp"
 
 // BH ID and System defined here:
+#include "BinaryBH.hpp"
 #include "BinaryBH_SolvedConstraints.hpp"
 #include "SimulationParameters.hpp"
 
@@ -68,16 +69,30 @@ void BinaryBHHDLevel::initialData()
     if (m_verbosity)
         pout() << "BinaryBHHDLevel::initialData " << m_level << endl;
 
-    // Set up the compute class for the BinaryBH initial data
-    BinaryBH_SolvedConstraints binary(m_p.bh1_params, m_p.bh2_params, m_dx);
+    if (m_p.use_initial_data_with_solved_constraints)
+    {
+        // Set up the compute class for the BinaryBH initial data
+        BinaryBH_SolvedConstraints binary(m_p.bh1_params_newID,
+                                          m_p.bh2_params_newID, m_dx);
 
-    // First set everything to zero then desired initial data
-    BoxLoops::loop(make_compute_pack(SetValue(0.), binary), m_state_new,
-                   m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
+        // First set everything to zero then desired initial data
+        BoxLoops::loop(make_compute_pack(SetValue(0.), binary), m_state_new,
+                       m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 
-    fillAllGhosts();
-    BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
-                   EXCLUDE_GHOST_CELLS);
+        fillAllGhosts();
+        BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
+                       EXCLUDE_GHOST_CELLS);
+    }
+    else
+    {
+        // Set up the compute class for the BinaryBH initial data
+        BinaryBH binary(m_p.bh1_params_oldID, m_p.bh2_params_oldID, m_dx);
+
+        // First set everything to zero then desired initial data
+        BoxLoops::loop(make_compute_pack(SetValue(0.), binary), m_state_new,
+                       m_state_new, INCLUDE_GHOST_CELLS);
+    }
+
     fillAllGhosts();
 
     // 'GammaCalculator(m_dx)' not needed for binaries (conformally flag initial
@@ -247,8 +262,8 @@ void BinaryBHHDLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
 {
     if (m_p.track_punctures)
     {
-        const vector<double> puncture_masses = {m_p.bh1_params.mass,
-                                                m_p.bh2_params.mass};
+        const vector<double> puncture_masses = {m_p.bh1_params_newID.mass,
+                                                m_p.bh2_params_newID.mass};
         auto puncture_coords =
             m_bh_amr.m_puncture_tracker.get_puncture_coords();
         BoxLoops::loop(ChiPunctureExtractionTaggingCriterion(

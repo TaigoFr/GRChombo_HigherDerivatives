@@ -24,6 +24,7 @@ typedef CSystem System;
 #error "Please define either USE_CSYSTEM or USE_EBSYSTEM"
 #endif
 
+#include "BoostedBH.hpp"
 #include "BoostedSchwarzschild_SolvedConstraints.hpp"
 
 class SimulationParameters : public SimulationParametersBase
@@ -37,21 +38,34 @@ class SimulationParameters : public SimulationParametersBase
 
     void readParams(GRParmParse &pp)
     {
+        pp.load("use_initial_data_with_solved_constraints",
+                use_initial_data_with_solved_constraints);
+
         // Initial data
         if (pp.contains("massA") && pp.contains("massB"))
         {
-            pp.load("massA", bh1_params.mass);
-            pp.load("massB", bh2_params.mass);
+            pp.load("massA", bh1_params_newID.mass);
+            pp.load("massB", bh2_params_newID.mass);
         }
         else
         {
             // equal mass
-            pp.load("mass", bh1_params.mass);
-            bh2_params.mass = bh1_params.mass;
+            pp.load("mass", bh1_params_newID.mass);
+            bh2_params_newID.mass = bh1_params_newID.mass;
         }
+        bh1_params_oldID.mass = bh1_params_newID.mass;
+        bh2_params_oldID.mass = bh2_params_newID.mass;
 
-        pp.load("boost_velocityA", bh1_params.boost_velocity, {0.});
-        pp.load("boost_velocityB", bh2_params.boost_velocity, {0.});
+        if (use_initial_data_with_solved_constraints)
+        {
+            pp.load("boost_velocityA", bh1_params_newID.boost_velocity, {0.});
+            pp.load("boost_velocityB", bh2_params_newID.boost_velocity, {0.});
+        }
+        else
+        {
+            pp.load("momentumA", bh1_params_oldID.momentum);
+            pp.load("momentumB", bh2_params_oldID.momentum);
+        }
 
         // Get the centers of the BHs either explicitly or as
         // an offset (not both, or they will be offset from center
@@ -64,8 +78,11 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("offsetB", offsetB, {0.0, 0.0, 0.0});
         FOR(idir)
         {
-            bh1_params.center[idir] = centerA[idir] + offsetA[idir];
-            bh2_params.center[idir] = centerB[idir] + offsetB[idir];
+            bh1_params_newID.center[idir] = centerA[idir] + offsetA[idir];
+            bh2_params_newID.center[idir] = centerB[idir] + offsetB[idir];
+
+            bh1_params_oldID.center[idir] = bh1_params_newID.center[idir];
+            bh2_params_oldID.center[idir] = bh2_params_newID.center[idir];
         }
 
         // Do we want Weyl extraction, puncture tracking and constraint norm
@@ -81,9 +98,9 @@ class SimulationParameters : public SimulationParametersBase
 
 #ifdef USE_AHFINDER
         pp.load("AH_1_initial_guess", AH_1_initial_guess,
-                0.5 * bh1_params.mass);
+                0.5 * bh1_params_newID.mass);
         pp.load("AH_2_initial_guess", AH_2_initial_guess,
-                0.5 * bh2_params.mass);
+                0.5 * bh2_params_newID.mass);
         pp.load("AH_set_origins_to_punctures", AH_set_origins_to_punctures,
                 false);
 #endif
@@ -231,24 +248,46 @@ class SimulationParameters : public SimulationParametersBase
 
     void check_params()
     {
-        warn_parameter("massA", bh1_params.mass, bh1_params.mass >= 0,
-                       "should be >= 0");
-        warn_parameter("massB", bh2_params.mass, bh2_params.mass >= 0,
-                       "should be >= 0");
-        warn_array_parameter(
-            "boost_velocityA", bh1_params.boost_velocity,
-            std::sqrt(ArrayTools::norm_squared(bh1_params.boost_velocity)) < 1,
-            "should be < 1");
-        warn_array_parameter(
-            "boost_velocityB", bh2_params.boost_velocity,
-            std::sqrt(ArrayTools::norm_squared(bh2_params.boost_velocity)) < 1,
-            "should be < 1");
+        warn_parameter("massA", bh1_params_newID.mass,
+                       bh1_params_newID.mass >= 0, "should be >= 0");
+        warn_parameter("massB", bh2_params_newID.mass,
+                       bh2_params_newID.mass >= 0, "should be >= 0");
+
+        if (use_initial_data_with_solved_constraints)
+        {
+            warn_array_parameter("boost_velocityA",
+                                 bh1_params_newID.boost_velocity,
+                                 std::sqrt(ArrayTools::norm_squared(
+                                     bh1_params_newID.boost_velocity)) < 1,
+                                 "should be < 1");
+            warn_array_parameter("boost_velocityB",
+                                 bh2_params_newID.boost_velocity,
+                                 std::sqrt(ArrayTools::norm_squared(
+                                     bh2_params_newID.boost_velocity)) < 1,
+                                 "should be < 1");
+        }
+        else
+        {
+            warn_array_parameter(
+                "momentumA", bh1_params_oldID.momentum,
+                std::sqrt(ArrayTools::norm_squared(bh1_params_oldID.momentum)) <
+                    0.3 * bh1_params_oldID.mass,
+                "approximation used for boosted BH only valid for small "
+                "boosts");
+            warn_array_parameter(
+                "momentumB", bh2_params_oldID.momentum,
+                std::sqrt(ArrayTools::norm_squared(bh2_params_oldID.momentum)) <
+                    0.3 * bh2_params_oldID.mass,
+                "approximation used for boosted BH only valid for small "
+                "boosts");
+        }
+
         FOR(idir)
         {
             std::string nameA = "centerA[" + std::to_string(idir) + "]";
             std::string nameB = "centerB[" + std::to_string(idir) + "]";
-            double center_A_dir = bh1_params.center[idir];
-            double center_B_dir = bh2_params.center[idir];
+            double center_A_dir = bh1_params_newID.center[idir];
+            double center_B_dir = bh2_params_newID.center[idir];
             warn_parameter(nameA, center_A_dir,
                            (center_A_dir >= 0.0) &&
                                (center_A_dir <= (ivN[idir] + 1) * coarsest_dx),
@@ -283,8 +322,13 @@ class SimulationParameters : public SimulationParametersBase
     double tagging_buffer_ah, tagging_buffer_extraction;
 
     // Collection of parameters necessary for initial conditions
-    BoostedSchwarzschild_SolvedConstraints::params_t bh2_params;
-    BoostedSchwarzschild_SolvedConstraints::params_t bh1_params;
+    BoostedSchwarzschild_SolvedConstraints::params_t bh1_params_newID;
+    BoostedSchwarzschild_SolvedConstraints::params_t bh2_params_newID;
+
+    BoostedBH::params_t bh1_params_oldID;
+    BoostedBH::params_t bh2_params_oldID;
+
+    bool use_initial_data_with_solved_constraints;
 
 #ifdef USE_AHFINDER
     double AH_1_initial_guess;
