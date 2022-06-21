@@ -7,11 +7,12 @@ import numpy as np
 import yt
 import matplotlib.pyplot as plt
 import os
+from scipy.interpolate import make_interp_spline
 
 #################################################################
 # USER DATA
 
-width = 5.
+width = 2.
 location = '../' # base folder with /data and /hdf5 subfolders
 jump = 1 # plot every 'jump' files
 z_symmetry = True
@@ -19,6 +20,65 @@ z_symmetry = True
 #################################################################
 
 yt.enable_parallelism()
+
+
+
+#################################################################
+
+def get_AH_radius():
+    print("Reading AH data")
+    stats_AH1 = np.loadtxt(location + "data/stats_AH1.dat")
+    stats_AH3 = np.array([])
+    times = []
+    radii = []
+    i1 = 0
+    i3 = 0
+    while True:
+        if i1 < len(stats_AH1):
+            row1 = stats_AH1[i1]
+            time1 = row1[0]
+        else:
+            break #time1 = 1e10 # big number
+        if i3 < len(stats_AH3):
+            row3 = stats_AH3[i3]
+            time3 = row3[0]
+        else:
+            time3 =1e10 #break # finished
+
+        time = min(time1,time3)
+        print("On time", time, end="\r")
+
+        rows = []
+        if time1 <= time3:
+            rows.append([1, row1])
+            i1 += 1
+        if time3 <= time1:
+            rows.append([3, row3])
+            i3 += 1
+
+        compare_radius = []
+        for index, row in rows:
+            area = row[2]
+            if np.isnan(area):
+                continue
+            file = int(row[1])
+            coords = np.loadtxt(location + f"data/coords/coords_AH{index}_{file:06d}.dat")
+            compare_radius.append( np.min(coords[:,2]) )
+
+        ah_radius_min = np.max(compare_radius)
+        times.append(time)
+        radii.append(ah_radius_min)
+
+    return times, radii
+
+# use AH Finder
+times, radii = get_AH_radius()
+
+print(times, radii)
+
+AH_radius_vs_time = make_interp_spline(times, radii, k=3)
+
+
 
 # Loading dataset
 def read_hdf5(location, is_corner=False):
@@ -56,8 +116,8 @@ for i in range(0, len(ds), jump):
     if z_symmetry:
         puncture[2] = 0 # force numeric 0
     radius = np.linalg.norm(puncture-center)
-    point_min = center + (puncture-center) * (radius - width) / radius
-    point_max = center + (puncture-center) * (radius + width) / radius
+    point_min = puncture * (radius - width) / radius
+    point_max = puncture * (radius + width) / radius
     ray = file.r[point_min:point_max]
     minC = min(minC, min(np.min(ray["C"]), np.min(ray["Cphys"])))
     maxC = max(maxC, max(np.max(ray["C"]), np.max(ray["Cphys"])))
@@ -94,6 +154,10 @@ def do_plot(use_log):
         fig, ax = plt.subplots(figsize=(12, 9))
         ax.plot(radii, np.array(ray["C"][srt]),     label=r"$C$")
         ax.plot(radii, np.array(ray["Cphys"][srt]), label=r"$C_{phys}$")
+
+        ax.plot(radii, 10000*(radii - AH_radius_vs_time(time)),'k')
+        ax.plot(radii, 10000*(radii + AH_radius_vs_time(time)),'k')
+
         ax.legend(fontsize=fontsize)
 
         if use_log:

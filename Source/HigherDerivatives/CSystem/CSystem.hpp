@@ -41,6 +41,15 @@ class CSystem
         bool use_tau_radial_decay;
         double tau_asymptotic;   // if 'use_tau_radial_decay'
         double tau_decay_length; // if 'use_tau_radial_decay'
+        
+        bool use_tau_chi_decay;
+        double tau_decay_width; //  if 'use_sigma_radial_decay'
+
+        bool use_sigma_chi_decay;
+        double sigma_asymptotic;   // if 'use_sigma_radial_decay'
+        double sigma_decay_length; // if 'use_sigma_radial_decay'
+        double sigma_decay_width; //  if 'use_sigma_radial_decay'
+        
     };
 
     //!  Constructor of class CSystem, inputs are the matter parameters.
