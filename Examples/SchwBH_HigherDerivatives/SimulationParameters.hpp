@@ -113,6 +113,54 @@ class SimulationParameters : public SimulationParametersBase
                    << system_params.tau_decay_length << std::endl;
         }
 
+        pp.load("use_sigma_radial_decay", system_params.use_sigma_radial_decay);
+        pout() << "Using use_sigma_radial_decay = "
+               << system_params.use_sigma_radial_decay << std::endl;
+        if (system_params.use_sigma_radial_decay)
+        {
+            pp.load("sigma_asymptotic", system_params.sigma_asymptotic);
+            pout() << "Using sigma_asymptotic = " << system_params.sigma_asymptotic
+                   << std::endl;
+            pp.load("sigma_decay_length", system_params.sigma_decay_length);
+            pout() << "Using sigma_decay_length = "
+                   << system_params.sigma_decay_length << std::endl;
+        }
+        
+        
+        pp.load("use_tau_chi_decay", system_params.use_tau_chi_decay);
+        pout() << "Using use_tau_chi_decay = "
+               << system_params.use_tau_chi_decay << std::endl;                
+            
+        if (system_params.use_tau_chi_decay)
+        {
+            pp.load("tau_asymptotic", system_params.tau_asymptotic);
+            pout() << "Using tau_asymptotic = " << system_params.tau_asymptotic
+                   << std::endl;
+            pp.load("tau_decay_length", system_params.tau_decay_length);
+            pout() << "Using tau_decay_length = "
+                   << system_params.tau_decay_length << std::endl;
+            pp.load("tau_decay_width", system_params.tau_decay_width);
+            pout() << "Using tau_decay_width = "
+                   << system_params.tau_decay_width << std::endl;                    
+        }
+        
+        pp.load("use_sigma_chi_decay", system_params.use_sigma_chi_decay);
+        pout() << "Using use_sigma_chi_decay = "
+               << system_params.use_sigma_chi_decay << std::endl;
+        if (system_params.use_sigma_chi_decay)
+        {
+            pp.load("sigma_asymptotic", system_params.sigma_asymptotic);
+            pout() << "Using sigma_asymptotic = " << system_params.sigma_asymptotic
+                   << std::endl;
+            pp.load("sigma_decay_length", system_params.sigma_decay_length);
+            pout() << "Using sigma_decay_length = "
+                   << system_params.sigma_decay_length << std::endl;
+            pp.load("sigma_decay_width", system_params.sigma_decay_width);
+            pout() << "Using sigma_decay_width = "
+                   << system_params.sigma_decay_width << std::endl;       
+        }
+        
+
 #ifdef USE_CSYSTEM
         pp.load("c_sigma", system_params.sigma);
         pout() << "Using sigma = " << system_params.sigma << std::endl;
@@ -146,6 +194,7 @@ class SimulationParameters : public SimulationParametersBase
                        << system_params.advection_coeff << std::endl;
             }
         }
+                   
 #else
         pp.load("eb_version", system_params.version);
         pout() << "Using EB system version " << system_params.version

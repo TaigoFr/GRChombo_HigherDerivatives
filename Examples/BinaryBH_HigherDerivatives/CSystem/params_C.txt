@@ -204,9 +204,15 @@ advection_type         = 2 # only in v2 (0, 1 for simple, 2 for Luis' proposal)
 advection_coeff        = 1.0 # only for advection type 1 and 2
 Box_transition         = 0 # only if 'c_version= 1' transition from laplacian to only time derivatives
 use_tau_radial_decay   = 0 # change tau with 1/r
-tau_asymptotic         = 0.01 # if 'use_tau_radial_decay', the asymptotic tau for r->\infty
-tau_decay_length       = 50. # if 'use_tau_radial_decay', the distance from r=0 at which tau decay starts
-
+use_tau_chi_decay = 0 # change tau with chi
+tau_asymptotic         = 0.01 # if 'use_tau_radial_decay or use_tau_chi_decay ', the asymptotic tau at infinity
+tau_decay_length       = 50. #  if 'use_tau_radial_decay', the distance from r=0 at which tau decay starts. 'use_tau_chi_decay', the value of chi at which tau decay starts.
+tau_decay_width        = 0.025 # if 'use_tau_chi_decay' the width of the decay
+use_sigma_radial_decay   = 0 # change sigma with 1/r
+use_sigma_chi_decay = 0 # change sigma with chi
+sigma_asymptotic         = 1.0 # if 'use_sigma_radial_decay or use_sigma_chi_decay ', the asymptotic sigma at infinity
+sigma_decay_length       = 50. # if 'use_sigma_radial_decay', the distance from r=0 at which sigma decay starts. 'use_sigma_chi_decay', the value of chi at which sigma decay starts (for example:0.92)
+sigma_decay_width        = 0.025 # if 'use_sigma_chi_decay' the width of the decay
 # chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10
 weak_field_width     = 0.05

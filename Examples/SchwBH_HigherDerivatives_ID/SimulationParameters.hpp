@@ -109,6 +109,19 @@ class SimulationParameters : public SimulationParametersBase
             pout() << "Using tau_decay_length = "
                    << system_params.tau_decay_length << std::endl;
         }
+
+        pp.load("use_sigma_radial_decay", system_params.use_sigma_radial_decay);
+        pout() << "Using use_sigma_radial_decay = "
+               << system_params.use_sigma_radial_decay << std::endl;
+        if (system_params.use_sigma_radial_decay)
+        {
+            pp.load("sigma_asymptotic", system_params.sigma_asymptotic);
+            pout() << "Using sigma_asymptotic = " << system_params.sigma_asymptotic
+                   << std::endl;
+            pp.load("sigma_decay_length", system_params.sigma_decay_length);
+            pout() << "Using sigma_decay_length = "
+                   << system_params.sigma_decay_length << std::endl;
+        }
         
         
         pp.load("use_tau_chi_decay", system_params.use_tau_chi_decay);

@@ -42,14 +42,16 @@ class CSystem
         double tau_asymptotic;   // if 'use_tau_radial_decay'
         double tau_decay_length; // if 'use_tau_radial_decay'
         
+        bool use_sigma_radial_decay;
+        double sigma_asymptotic;   // if 'use_tau_radial_decay'
+        double sigma_decay_length; // if 'use_tau_radial_decay'
+        
+        
         bool use_tau_chi_decay;
-        double tau_decay_width; //  if 'use_sigma_radial_decay'
+        double tau_decay_width; 
 
         bool use_sigma_chi_decay;
-        double sigma_asymptotic;   // if 'use_sigma_radial_decay'
-        double sigma_decay_length; // if 'use_sigma_radial_decay'
-        double sigma_decay_width; //  if 'use_sigma_radial_decay'
-        
+        double sigma_decay_width;         
     };
 
     //!  Constructor of class CSystem, inputs are the matter parameters.
@@ -130,6 +132,14 @@ class CSystem
                                 m_params.tau_decay_length / radius +
                             m_params.tau_asymptotic);
     }
+    
+    template <class data_t> data_t sigma_from_radius(const data_t &radius) const
+    {
+        return simd_max((data_t)m_params.sigma,
+                        (m_params.sigma - m_params.sigma_asymptotic) *
+                                m_params.sigma_decay_length / radius +
+                            m_params.sigma_asymptotic);
+    }    
 };
 
 #include "CSystem.impl.hpp"
