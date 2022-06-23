@@ -150,11 +150,11 @@ nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0
 
 # dt will be dx*dt_multiplier on each grid level
 dt_multiplier = 0.25
-# stop_time = 2200.0
+stop_time = 2200.0
 # max_steps = 100
 
 # for head-ons:
-stop_time = 1000.0
+# stop_time = 1000.0
 
 # Spatial derivative order (only affects CCZ4 RHS)
 max_spatial_derivative_order = 6 # can be 4 or 6
