@@ -116,8 +116,8 @@ for i in range(0, len(ds), jump):
     if z_symmetry:
         puncture[2] = 0 # force numeric 0
     radius = np.linalg.norm(puncture-center)
-    point_min = puncture * (radius - width) / radius
-    point_max = puncture * (radius + width) / radius
+    point_min = center + (puncture-center) * (radius - width) / radius
+    point_max = center + (puncture-center) * (radius + width) / radius
     ray = file.r[point_min:point_max]
     minC = min(minC, min(np.min(ray["C"]), np.min(ray["Cphys"])))
     maxC = max(maxC, max(np.max(ray["C"]), np.max(ray["Cphys"])))
