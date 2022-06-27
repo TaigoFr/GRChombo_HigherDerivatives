@@ -6,9 +6,10 @@
 #ifndef BINARYBHHDLEVEL_HPP_
 #define BINARYBHHDLEVEL_HPP_
 
-#include "BHAMR.hpp"
 #include "DefaultLevelFactory.hpp"
 #include "GRAMRLevel.hpp"
+// TPAMR.hpp includes BHAMR.hpp
+#include "TPAMR.hpp"
 
 //!  A class for the evolution of a scalar field, minimally coupled to gravity
 /*!
@@ -26,6 +27,9 @@ class BinaryBHHDLevel : public GRAMRLevel
     using GRAMRLevel::GRAMRLevel;
 
     BHAMR &m_bh_amr = dynamic_cast<BHAMR &>(m_gr_amr);
+#ifdef USE_TWOPUNCTURES
+    TPAMR &m_tp_amr = dynamic_cast<TPAMR &>(m_gr_amr);
+#endif /* USE_TWOPUNCTURES */
 
     //! Things to do at the end of the advance step, after RK4 calculation
     virtual void specificAdvance();

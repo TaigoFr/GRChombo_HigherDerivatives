@@ -29,7 +29,15 @@ int runGRChombo(int argc, char *argv[])
     if (sim_params.just_check_params)
         return 0;
 
+#ifdef USE_TWOPUNCTURES
+    TPAMR bh_amr;
+    bh_amr.set_two_punctures_parameters(sim_params.tp_params);
+    // Run TwoPunctures solver
+    bh_amr.m_two_punctures.Run();
+#else
     BHAMR bh_amr;
+#endif
+
     // must be before 'setupAMRObject' to define punctures for tagging criteria
     if (sim_params.track_punctures)
     {
@@ -38,8 +46,8 @@ int runGRChombo(int argc, char *argv[])
         // too just in case
         int puncture_tracker_min_level = sim_params.max_level - 1;
         bh_amr.m_puncture_tracker.initial_setup(
-            {sim_params.bh1_params_newID.center,
-             sim_params.bh2_params_newID.center},
+            {sim_params.bh1_params_oldID.center,
+             sim_params.bh2_params_oldID.center},
             "punctures", sim_params.data_path, puncture_tracker_min_level);
     }
 
@@ -67,8 +75,8 @@ int runGRChombo(int argc, char *argv[])
 #ifdef USE_AHFINDER
     if (sim_params.AH_activate)
     {
-        AHSphericalGeometry sph1(sim_params.bh1_params_newID.center);
-        AHSphericalGeometry sph2(sim_params.bh2_params_newID.center);
+        AHSphericalGeometry sph1(sim_params.bh1_params_oldID.center);
+        AHSphericalGeometry sph2(sim_params.bh2_params_oldID.center);
 
         bh_amr.m_ah_finder.add_ah(sph1, sim_params.AH_1_initial_guess,
                                   sim_params.AH_params);

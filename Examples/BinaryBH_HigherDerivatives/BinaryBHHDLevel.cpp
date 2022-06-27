@@ -32,6 +32,7 @@
 #include "BinaryBH.hpp"
 #include "BinaryBH_SolvedConstraints.hpp"
 #include "SimulationParameters.hpp"
+#include "TwoPuncturesInitialData.hpp"
 
 // Problem specific includes
 #include "C2EFT.hpp"
@@ -69,6 +70,13 @@ void BinaryBHHDLevel::initialData()
     if (m_verbosity)
         pout() << "BinaryBHHDLevel::initialData " << m_level << endl;
 
+#ifdef USE_TWOPUNCTURES
+    TwoPuncturesInitialData two_punctures_initial_data(
+        m_dx, m_p.center, m_tp_amr.m_two_punctures);
+    // Can't use simd with this initial data
+    BoxLoops::loop(two_punctures_initial_data, m_state_new, m_state_new,
+                   INCLUDE_GHOST_CELLS, disable_simd());
+#else
     if (m_p.use_initial_data_with_solved_constraints)
     {
         // Set up the compute class for the BinaryBH initial data
@@ -92,10 +100,12 @@ void BinaryBHHDLevel::initialData()
         BoxLoops::loop(make_compute_pack(SetValue(0.), binary), m_state_new,
                        m_state_new, INCLUDE_GHOST_CELLS);
     }
+#endif
 
     fillAllGhosts();
 
     // 'GammaCalculator(m_dx)' not needed for binaries (conformally flag initial
+    // data)
 #ifdef USE_EBSYSTEM
     ComputeEB compute(m_dx, m_p.formulation, m_p.ccz4_params,
                       Interval(c_E11, c_E33), Interval(c_B11, c_B33),
@@ -262,8 +272,16 @@ void BinaryBHHDLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
 {
     if (m_p.track_punctures)
     {
-        const vector<double> puncture_masses = {m_p.bh1_params_newID.mass,
-                                                m_p.bh2_params_newID.mass};
+        std::vector<double> puncture_masses;
+#ifdef USE_TWOPUNCTURES
+        // use calculated bare masses from TwoPunctures
+        puncture_masses = {m_tp_amr.m_two_punctures.mm,
+                           m_tp_amr.m_two_punctures.mp};
+#else
+        puncture_masses = {m_p.bh1_params_oldID.mass,
+                           m_p.bh2_params_oldID.mass};
+#endif /* USE_TWOPUNCTURES */
+
         auto puncture_coords =
             m_bh_amr.m_puncture_tracker.get_puncture_coords();
         BoxLoops::loop(ChiPunctureExtractionTaggingCriterion(
