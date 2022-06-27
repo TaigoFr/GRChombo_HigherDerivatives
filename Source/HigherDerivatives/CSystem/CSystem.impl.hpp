@@ -78,7 +78,7 @@ void CSystem::add_matter_rhs(
         const Coordinates<data_t> &coords = gq.get_coordinates();
         tau = tau_from_radius(coords.get_radius());
     }
-    
+
     if (m_params.use_sigma_radial_decay)
     {
         const Coordinates<data_t> &coords = gq.get_coordinates();
@@ -87,14 +87,19 @@ void CSystem::add_matter_rhs(
 
     if (m_params.use_tau_chi_decay)
     {
-       tau = (m_params.tau_asymptotic-m_params.tau)/(1.0 +exp(-(vars.chi/m_params.tau_decay_length -1.0)/m_params.tau_decay_width)) + m_params.tau;
-    }    
-
-   if (m_params.use_sigma_chi_decay)
-    {
-       sigma = (m_params.sigma_asymptotic-m_params.sigma)/(1.0 +exp(-(vars.chi/m_params.sigma_decay_length -1.0)/m_params.sigma_decay_width) ) + m_params.sigma;
+        tau = (m_params.tau_asymptotic - m_params.tau) /
+                  (1.0 + exp(-(vars.chi / m_params.tau_decay_length - 1.0) /
+                             m_params.tau_decay_width)) +
+              m_params.tau;
     }
 
+    if (m_params.use_sigma_chi_decay)
+    {
+        sigma = (m_params.sigma_asymptotic - m_params.sigma) /
+                    (1.0 + exp(-(vars.chi / m_params.sigma_decay_length - 1.0) /
+                               m_params.sigma_decay_width)) +
+                m_params.sigma;
+    }
 
     data_t tau_rescaled = tau;
     data_t sigma_rescaled = sigma;
