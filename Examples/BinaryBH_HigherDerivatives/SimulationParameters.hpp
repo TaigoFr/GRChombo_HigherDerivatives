@@ -123,8 +123,8 @@ class SimulationParameters : public SimulationParametersBase
         else
         {
             // ensure excision is O(10^-4) just before the horizon
-            hd_params.chi_width =
-                (1. - hd_params.chi_threshold_percentage) / 4.;
+            hd_params.chi_width = (1. - hd_params.chi_threshold_percentage) /
+                                  (4. * hd_params.chi_threshold_percentage);
         }
         double time = 0., spin = 0.;
         hd_params.update_min_chi(time, spin);
@@ -153,21 +153,19 @@ class SimulationParameters : public SimulationParametersBase
             pout() << "Using tau_decay_length = "
                    << system_params.tau_decay_length << std::endl;
         }
-        
-        
+
         pp.load("use_sigma_radial_decay", system_params.use_sigma_radial_decay);
         pout() << "Using use_sigma_radial_decay = "
-               << system_params.use_sigma_radial_decay << std::endl;        
+               << system_params.use_sigma_radial_decay << std::endl;
         if (system_params.use_sigma_radial_decay)
         {
             pp.load("sigma_asymptotic", system_params.sigma_asymptotic);
-            pout() << "Using sigma_asymptotic = " << system_params.sigma_asymptotic
-                   << std::endl;
+            pout() << "Using sigma_asymptotic = "
+                   << system_params.sigma_asymptotic << std::endl;
             pp.load("sigma_decay_length", system_params.sigma_decay_length);
             pout() << "Using sigma_decay_length = "
                    << system_params.sigma_decay_length << std::endl;
         }
-        
 
 #ifdef USE_CSYSTEM
         pp.load("c_sigma", system_params.sigma);
@@ -201,7 +199,6 @@ class SimulationParameters : public SimulationParametersBase
                 pout() << "Using advection_coeff = "
                        << system_params.advection_coeff << std::endl;
             }
-            
         }
 
         pp.load("use_tau_chi_decay", system_params.use_tau_chi_decay);
@@ -227,8 +224,8 @@ class SimulationParameters : public SimulationParametersBase
         if (system_params.use_sigma_chi_decay)
         {
             pp.load("sigma_asymptotic", system_params.sigma_asymptotic);
-            pout() << "Using sigma_asymptotic = " << system_params.sigma_asymptotic
-                   << std::endl;
+            pout() << "Using sigma_asymptotic = "
+                   << system_params.sigma_asymptotic << std::endl;
             pp.load("sigma_decay_length", system_params.sigma_decay_length);
             pout() << "Using sigma_decay_length = "
                    << system_params.sigma_decay_length << std::endl;
