@@ -283,8 +283,8 @@ AH_num_points_v = 40
 # AH_1_initial_guess = 0.3
 # AH_2_initial_guess = 0.3
 
-AH_num_write_vars = 3
-AH_write_vars = chi WeakFieldVar WeakFieldCondition
+AH_num_extra_vars = 4
+AH_extra_vars = chi WeakFieldVar WeakFieldCondition C
 
 AH_set_origins_to_punctures = 1
 

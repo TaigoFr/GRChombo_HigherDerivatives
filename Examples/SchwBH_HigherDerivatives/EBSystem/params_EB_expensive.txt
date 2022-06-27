@@ -245,8 +245,8 @@ AH_verbose = 2
 
 # look_for_chi_contour = 0.2
 
-AH_num_write_vars = 9
-AH_write_vars = chi WeakFieldVar WeakFieldCondition E_diff B_diff E11 B11 Ephys11 Bphys11
+AH_num_extra_vars = 10
+AH_extra_vars = chi WeakFieldVar WeakFieldCondition E_diff B_diff E11 B11 Ephys11 Bphys11 C
 
 AH_coords_subpath = "data/coords"
 # AH_stats_prefix = "stats_AH"
