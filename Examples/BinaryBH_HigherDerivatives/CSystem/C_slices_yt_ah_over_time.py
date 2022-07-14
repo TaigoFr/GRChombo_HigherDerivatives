@@ -25,7 +25,12 @@ fontsizeBig = 21
 def get_AH_radius():
     print("Reading AH data")
     stats_AH1 = np.loadtxt(location + "data/stats_AH1.dat")
-    stats_AH3 = np.loadtxt(location + "data/stats_AH3.dat")
+    hasAH3 = False
+    try:
+        stats_AH3 = np.loadtxt(location + "data/stats_AH3.dat")
+        hasAH3 = True
+    except:
+        stats_AH3 = []
     times = []
     radii = []
     i1 = 0
@@ -35,12 +40,18 @@ def get_AH_radius():
             row1 = stats_AH1[i1]
             time1 = row1[0]
         else:
-            time1 = 1e10 # big number
+            if hasAH3:
+                time1 = 1e10 # big number
+            else:
+                break # finished
         if i3 < len(stats_AH3):
             row3 = stats_AH3[i3]
             time3 = row3[0]
         else:
-            break # finished
+            if hasAH3:
+                break
+            else:
+                time3 = 1e10 # big number
 
         time = min(time1,time3)
         print("On time", time, end="\r")

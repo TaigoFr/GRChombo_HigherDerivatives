@@ -12,7 +12,7 @@ from scipy.interpolate import make_interp_spline
 #################################################################
 # USER DATA
 
-width = 3.
+width = 3.0 
 location = '../' # base folder with /data and /hdf5 subfolders
 jump = 1 # plot every 'jump' files
 z_symmetry = True
@@ -127,8 +127,11 @@ for i in range(0, len(ds), jump):
     if z_symmetry:
         puncture[2] = 0 # force numeric 0
     radius = np.linalg.norm(puncture-center)
-    point_min = center + (puncture-center) * (radius - width) / radius
-    point_max = center + (puncture-center) * (radius + width) / radius
+    tangent =  np.array([-(puncture-center)[1],(puncture-center)[0],(puncture-center)[2]]) / radius
+    point_min = puncture - tangent * width
+    point_max = puncture + tangent * width
+    #point_min = center + (puncture-center) * (radius - width) / radius
+    #point_max = center + (puncture-center) * (radius + width) / radius
     ray = file.r[point_min:point_max]
     minC = min(minC, min(np.min(ray["C"]), np.min(ray["Cphys"])))
     maxC = max(maxC, max(np.max(ray["C"]), np.max(ray["Cphys"])))
@@ -152,22 +155,30 @@ def do_plot(use_log):
         if z_symmetry:
             puncture[2] = 0 # force numeric 0
         radius = np.linalg.norm(puncture-center)
-        point_min = center + (puncture-center) * (radius - width) / radius
-        point_max = center + (puncture-center) * (radius + width) / radius
+        tangent = np.array([-(puncture-center)[1],(puncture-center)[0],(puncture-center)[2]]) / radius
+        point_min = puncture - tangent * width
+        point_max = puncture + tangent * width
+        #point_min = center + (puncture-center) * (radius - width) / radius
+        #point_max = center + (puncture-center) * (radius + width) / radius
         ray = file.r[point_min:point_max]
 
-        srt = np.argsort(ray["radius"]) # ray does not have elements ordered
+        # ray does not have elements ordered
+        # sort below
 
+        # to compute the distance from the axis, compute the dot product with the unit tangent vector
         unit = file.length_unit.to('code_length')
-        points = np.transpose([ray["index", "x"][srt] - unit * center[0], ray["index", "y"][srt] - unit * center[1], ray["index", "z"][srt] - unit * center[2]])
-        radii = np.array([np.linalg.norm(point) - radius for point in points])
+        distance_to_puncture = (ray["index", "x"] - unit * puncture[0]) * tangent[0] + \
+                               (ray["index", "y"] - unit * puncture[1]) * tangent[1] + \
+                               (ray["index", "z"] - unit * puncture[2]) * tangent[2]
+
+        srt = np.argsort(distance_to_puncture)
 
         fig, ax = plt.subplots(figsize=(12, 9))
-        ax.plot(radii, np.array(ray["C"][srt]),     label=r"$C$")
-        ax.plot(radii, np.array(ray["Cphys"][srt]), label=r"$C_{phys}$")
+        ax.plot(distance_to_puncture[srt], np.array(ray["C"][srt]),     label=r"$C$")
+        ax.plot(distance_to_puncture[srt], np.array(ray["Cphys"][srt]), label=r"$C_{phys}$")
 
-        ax.plot(radii, 10000*(radii - AH_radius_vs_time(time)),'k')
-        ax.plot(radii, 10000*(radii + AH_radius_vs_time(time)),'k')
+        ax.plot(distance_to_puncture[srt], 10000*(distance_to_puncture[srt] - unit * AH_radius_vs_time(time)),'k')
+        ax.plot(distance_to_puncture[srt], 10000*(distance_to_puncture[srt] + unit * AH_radius_vs_time(time)),'k')
 
         ax.legend(fontsize=fontsize)
 
@@ -185,49 +196,13 @@ def do_plot(use_log):
 
         fig.suptitle(r'$C$ vs $C_{phys}$ ( t = %.2fM )' % time, fontsize=fontsizeBig, position=(0.5,0.93))
 
-        plt.savefig(name_start + ("CvsCphys_%04d" % i) + ".png", bbox_inches = 'tight')
+        plt.savefig(name_start + ("CvsCphys_tangent_%04d" % i) + ".png", bbox_inches = 'tight')
         plt.close()
 
     print ("Making a movie...")
-    os.system('ffmpeg -f image2 -framerate 1 -i ' + name_start + 'CvsCphys_%04d.png ' + name_start + 'CvsCphys.avi -y')
+    os.system('ffmpeg -f image2 -framerate 1 -i ' + name_start + 'CvsCphys_tangent_%04d.png ' + name_start + 'CvsCphys_tangent.avi -y')
     print ("I've finished!")
 
 do_plot(False)
 do_plot(True)
 
-
-# old attempts with ProfilePlot and LinePlot
-
-# for i in range(0, len(ds), jump):
-#     file = ds[i]
-#     sphere = file.sphere(center, 10)
-
-#     # profiles = [yt.create_profile(sphere, "radius", fields="C", weight_field=None),
-#                 # yt.create_profile(sphere, "radius", fields=["C","Cphys"], weight_field=None)]
-#     profiles = []
-#     profiles.append(yt.create_profile(sphere, "radius", ["C","Cphys"], weight_field=None))
-#     profiles.append(yt.create_profile(sphere, "radius", ["Cphys","C"], weight_field=None))
-#     labels = ["C", "Cphys"]
-#     plot = yt.ProfilePlot.from_profiles(profiles, labels=labels)
-#     # plot = yt.ProfilePlot(sphere, "radius", [("chombo", "C"), ("chombo", "Cphys")], weight_field=None, label=[r"$C$", r"$C_{phys}$"], x_log=False)
-#     # plot.set_log("radius", False)
-#     # plot.set_log("C", False)
-#     # plot.set_xlabel("Radius")
-#     plot.save("CvsCphys_%04d_log.png" % i)
-
-
-# for i in range(0, len(ds), jump):
-# # for file in ds:
-#     file = ds[i]
-#     plot = yt.LinePlot(
-#         file,
-#         ["C", "Cphys"],
-#         [0, 0, rmin],
-#         [0, 0, rmax],
-#         100,
-#         field_labels={"C": r"$C$", "Cphys": r"$C_{phys}$"}
-#     )
-#     plot.annotate_legend("C")
-#     plot.set_xlabel("Radius")
-#     plot.set_ylabel("")
-#     plot.save("CvsCphys_%04d_log.png" % i, mpl_kwargs={"xbounds" : (0.001, 0.1)})

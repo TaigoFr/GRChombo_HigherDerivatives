@@ -135,16 +135,17 @@ for i in range(0, len(ds), jump):
     for p in np.arange(width_min_deviation, width_max_deviation + 1, 1):
         # compute integral differences between C and Cphys
         power = np.power(2., p)
-        point_min = center + (puncture-center) * (radius + 0) / radius
-        point_max = center + (puncture-center) * (radius + width * power) / radius
+        tangent =  np.array([-(puncture-center)[1],(puncture-center)[0],(puncture-center)[2]]) / radius
+        point_min = puncture - tangent * 0
+        point_max = puncture + tangent * width * power
         ray = file.r[point_min:point_max]
         averageCminusCphys = ray.mean("C_minus_Cphys", weight="cell_volume")
         averageC = abs(ray.mean("C", weight="cell_volume"))
         currentAverageCminusCphys.append([width*power, averageCminusCphys / averageC * 100])
 
         # now without AH
-        point_min = center + (puncture-center) * (radius + AH_radius_vs_time(time)) / radius
-        point_max = center + (puncture-center) * (radius + width * power) / radius
+        point_min = puncture - tangent * AH_radius_vs_time(time)
+        point_max = puncture + tangent * width * power
         ray = file.r[point_min:point_max]
         averageCminusCphys = ray.mean("C_minus_Cphys", weight="cell_volume")
         averageC = abs(ray.mean("C", weight="cell_volume"))
@@ -182,5 +183,5 @@ ax.set_ylim([0, 50])
 
 # fig.suptitle(r'$C$ vs $C_{phys}$ ( t = %.2fM )' % time, fontsize=fontsizeBig, position=(0.5,0.93))
 
-plt.savefig("CvsCphys_integral", bbox_inches = 'tight')
+plt.savefig("CvsCphys_integral_tangent", bbox_inches = 'tight')
 plt.close()
