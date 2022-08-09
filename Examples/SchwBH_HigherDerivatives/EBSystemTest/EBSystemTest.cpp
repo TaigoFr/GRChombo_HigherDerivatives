@@ -119,6 +119,13 @@ int runTest(int argc, char *argv[])
     eb_params.use_tau_radial_decay = false;
     // eb_params.tau_asymptotic = 1.;   // if 'use_tau_radial_decay'
     // eb_params.tau_decay_length = 1.; // if 'use_tau_radial_decay'
+    eb_params.use_sigma_radial_decay = false;
+    // eb_params.sigma_asymptotic = 1.;   // if 'use_tau_radial_decay'
+    // eb_params.sigma_decay_length = 1.; // if 'use_tau_radial_decay'
+    eb_params.use_tau_chi_decay = false;
+    // eb_params.tau_decay_width = 1.;
+    eb_params.use_sigma_chi_decay = false;
+    // eb_params.sigma_decay_width = 1.;
 
     int failed = 0;
 
