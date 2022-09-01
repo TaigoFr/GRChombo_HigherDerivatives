@@ -120,12 +120,22 @@ for i in range(0, len(ds), jump):
         puncture[2] = 0 # force numeric 0
     radius = np.linalg.norm(puncture-center)
 
+    # radial +
     point = center + (puncture-center) * (radius + AH_radius_vs_time(time)) / radius
+    # radial -
+    #point = center + (puncture-center) * (radius - AH_radius_vs_time(time)) / radius
+
+    #tangent = np.array([-(puncture-center)[1],(puncture-center)[0],(puncture-center)[2]]) / radius
+    # tangent +
+    #point = puncture + tangent * AH_radius_vs_time(time)
+    # tangent -
+    # point = puncture - tangent * AH_radius_vs_time(time)
+
     ray = file.r[point]
-    NCC_p = abs(ray["NCC_plus"][0])
-    NCC_m = abs(ray["NCC_minus"][0])
-    NCC_p_z4 = abs(ray["NCC_Z4_plus"][0])
-    NCC_m_z4 = abs(ray["NCC_Z4_minus"][0])
+    NCC_p = ray["NCC_plus"][0]
+    NCC_m = ray["NCC_minus"][0]
+    NCC_p_z4 = ray["NCC_Z4_plus"][0]
+    NCC_m_z4 = ray["NCC_Z4_minus"][0]
 
     allNCC_p.append([time, NCC_p])
     allNCC_m.append([time, NCC_m])
@@ -144,7 +154,7 @@ print("NCC_m", NCC_m)
 print("NCC_p_z4", NCC_p_z4)
 print("NCC_m_z4", NCC_m_z4)
 
-def do_plot(times, plots, labels, use_log, name_end):
+def do_plot(times, plots, labels, name_end):
     fig, ax = plt.subplots(figsize=(12, 9))
     for time, plot, label in zip(times, plots, labels):
         ax.plot(time, plot, label=label)
@@ -153,15 +163,10 @@ def do_plot(times, plots, labels, use_log, name_end):
 
     minVal = np.min([np.min(plot) for plot in plots])
     maxVal = np.max([np.max(plot) for plot in plots])
-    if use_log:
-        ax.set_ylim([minVal * 0.9 , maxVal * 1.1])
-    else:
-        ax.set_ylim([minVal * (1.1 if minVal < 0 else 0.9), maxVal * (0.9 if maxVal < 0 else 1.1)])
+    
+    ax.set_ylim([minVal * (1.1 if minVal < 0 else 0.9), maxVal * (0.9 if maxVal < 0 else 1.1)])
 
     plt.xlabel("Time (M)", fontsize=fontsize)
-
-    if use_log:
-        plt.yscale("log")
 
     ax.tick_params(axis='both', which='major', labelsize=fontsize)
 
@@ -171,5 +176,5 @@ def do_plot(times, plots, labels, use_log, name_end):
     plt.savefig("NCC_AH" + name_end + ".png", bbox_inches = 'tight')
     plt.close()
 
-do_plot([times, times2, times3, times4], [NCC_p, NCC_m, NCC_p_z4, NCC_m_z4], ["NCC_plus", "NCC_minus", "NCC_Z4_plus", "NCC_Z4_minus"], False, "")
+do_plot([times, times2, times3, times4], [NCC_p, NCC_m, NCC_p_z4, NCC_m_z4], ["NCC_plus", "NCC_minus", "NCC_Z4_plus", "NCC_Z4_minus"], "")
 
