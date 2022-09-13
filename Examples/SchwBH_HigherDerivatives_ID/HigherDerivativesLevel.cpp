@@ -154,8 +154,15 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
+
+    // Update the sigma value on each level
+    // (enforces continuous prescription for sigma as per arXiv:2104.06978)
+    // Note both order use 6th order KO so same factor for both
+    const int ratio = pow(2, 5 * (m_level - m_p.max_level));
+    const double sigma = m_p.sigma * double(ratio);
+
     MatterCCZ4RHSWithDiffusion<C2EFT<System>> my_ccz4_matter(
-        c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, m_p.sigma,
+        c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, sigma,
         m_p.center, m_p.formulation, m_p.G_Newton);
     BoxLoops::loop(make_compute_pack(SetValue(0.), my_ccz4_matter), a_soln,
                    a_rhs, EXCLUDE_GHOST_CELLS);

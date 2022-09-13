@@ -14,7 +14,7 @@ from scipy.interpolate import make_interp_spline
 
 width = 20.
 location = '../' # base folder with /data and /hdf5 subfolders
-jump = 1 # plot every 'jump' files
+jump = 2 # plot every 'jump' files
 z_symmetry = True
 plot = False
 # plot = True
