@@ -12,11 +12,12 @@
 #define NEWMATTERCONSTRAINTSWITHGAUGE_IMPL_HPP_
 #include "DimensionDefinitions.hpp"
 
-template <class matter_t>
-MatterConstraints<matter_t>::MatterConstraints(
+template <class matter_t, class gauge_t>
+MatterConstraints<matter_t, gauge_t>::MatterConstraints(
     const matter_t a_matter, double dx, double G_Newton, int formulation,
-    CCZ4::params_t a_params, const std::array<double, CH_SPACEDIM> &a_center,
-    int a_c_Ham, const Interval &a_c_Moms, int a_c_Ham_abs_terms /* defaulted*/,
+    CCZ4_params_t<typename gauge_t::params_t> a_params,
+    const std::array<double, CH_SPACEDIM> &a_center, int a_c_Ham,
+    const Interval &a_c_Moms, int a_c_Ham_abs_terms /* defaulted*/,
     const Interval &a_c_Moms_abs_terms /*defaulted*/)
     : Constraints(dx, a_c_Ham, a_c_Moms, a_c_Ham_abs_terms, a_c_Moms_abs_terms,
                   0.0 /*No cosmological constant*/),
@@ -25,9 +26,10 @@ MatterConstraints<matter_t>::MatterConstraints(
 {
 }
 
-template <class matter_t>
+template <class matter_t, class gauge_t>
 template <class data_t>
-void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
+void MatterConstraints<matter_t, gauge_t>::compute(
+    Cell<data_t> current_cell) const
 {
     // Load local vars and calculate derivs
     const auto vars =
@@ -43,10 +45,10 @@ void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
                                      m_center);
 
     // make gauge
-    MovingPunctureGauge gauge(m_params);
+    gauge_t gauge(m_params);
 
     GeometricQuantities<data_t, MatterMetricVarsWithGauge,
-                        MatterDiff2MetricVarsWithGauge, MovingPunctureGauge>
+                        MatterDiff2MetricVarsWithGauge, gauge_t>
         gq(vars, d1, d2, "MatterConstraints::compute");
 
     gq.set_cosmological_constant(m_cosmological_constant);

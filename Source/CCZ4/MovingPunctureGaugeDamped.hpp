@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef MOVINGPUNCTUREGAUGE_HPP_
-#define MOVINGPUNCTUREGAUGE_HPP_
+#ifndef MOVINGPUNCTUREGAUGEDAMPED_HPP_
+#define MOVINGPUNCTUREGAUGEDAMPED_HPP_
 
 #include "Coordinates.hpp"
 #include "DimensionDefinitions.hpp"
@@ -18,7 +18,7 @@
  * f(lapse) = -c*lapse^(p-2)
  * and a Gamma-driver shift condition
  **/
-class MovingPunctureGauge
+class MovingPunctureGaugeDamped
 {
   public:
     struct params_t
@@ -37,13 +37,15 @@ class MovingPunctureGauge
                                          //! shift condition on/off
         double eta = 1.; //!< The eta in \f$\partial_t B^i = \partial_t \tilde
                          //!\Gamma - \eta B^i\f$
+        double eta_radius_decay; //!< decay eta as eta(r) = eta * R^2 /
+                                 //!(r^2 + R^2)
     };
 
   protected:
     params_t m_params;
 
   public:
-    MovingPunctureGauge(const params_t &a_params) : m_params(a_params) {}
+    MovingPunctureGaugeDamped(const params_t &a_params) : m_params(a_params) {}
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t>
@@ -53,19 +55,28 @@ class MovingPunctureGauge
                           const vars_t<data_t> &advec,
                           const Coordinates<data_t> *coords_ptr) const
     {
+        if (coords_ptr == nullptr)
+            MayDay::Error("Damped Gauge must set cell coordinates");
+
+        const Coordinates<data_t> coords = *coords_ptr;
+        data_t radius = coords.get_radius();
+        double R2 = m_params.eta_radius_decay * m_params.eta_radius_decay;
+        data_t eta = m_params.eta * R2 / (radius * radius + R2);
+
         rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
                     m_params.lapse_coeff *
                         pow(vars.lapse, m_params.lapse_power) *
                         (vars.K - 2 * vars.Theta);
+
         FOR(i)
         {
             rhs.shift[i] = m_params.shift_advec_coeff * advec.shift[i] +
                            m_params.shift_Gamma_coeff * vars.B[i];
             rhs.B[i] = m_params.shift_advec_coeff * advec.B[i] -
                        m_params.shift_advec_coeff * advec.Gamma[i] +
-                       rhs.Gamma[i] - m_params.eta * vars.B[i];
+                       rhs.Gamma[i] - eta * vars.B[i];
         }
     }
 };
 
-#endif /* MOVINGPUNCTUREGAUGE_HPP_ */
+#endif /* MOVINGPUNCTUREGAUGEDAMPED_HPP_ */

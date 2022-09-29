@@ -553,9 +553,9 @@ GeometricQuantities_t::set_advection_and_gauge(const Vars &a_advection,
     m_gauge = &a_gauge;
     clean_advection_and_gauge_dependent();
 }
-template_GQ void
-GeometricQuantities_t::set_formulation(int formulation,
-                                       const CCZ4_params_t<> &a_ccz4_params)
+template_GQ void GeometricQuantities_t::set_formulation(
+    int formulation,
+    const CCZ4_params_t<typename gauge_t::params_t> &a_ccz4_params)
 {
     m_formulation = formulation;
     m_ccz4_params = &a_ccz4_params;
@@ -599,7 +599,7 @@ template_GQ int GeometricQuantities_t::get_formulation() const
 {
     return m_formulation;
 }
-template_GQ const CCZ4_params_t<> &
+template_GQ const CCZ4_params_t<typename gauge_t::params_t> &
 GeometricQuantities_t::get_formulation_params() const
 {
     return *m_ccz4_params;
@@ -2117,7 +2117,7 @@ template_GQ void GeometricQuantities_t::compute_rhs_equations(Vars &rhs)
     const auto &advec = get_advection();
     {
         CH_TIME("GeometricQuantities::compute_rhs_equations::GAUGE");
-        gauge.rhs_gauge(rhs, vars, d1, d2, advec);
+        gauge.rhs_gauge(rhs, vars, d1, d2, advec, m_coords);
     }
 
     /*

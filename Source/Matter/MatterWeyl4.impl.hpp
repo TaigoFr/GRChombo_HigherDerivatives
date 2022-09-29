@@ -23,8 +23,9 @@ void MatterWeyl4<matter_t>::compute(Cell<data_t> current_cell) const
     GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2,
                                                     "MatterWeyl4::compute");
 
-    gq.set_formulation(m_formulation,
-                       CCZ4::params_t() /*params don't matter here*/);
+    gq.set_formulation(
+        m_formulation,
+        CCZ4RHS<EmptyGauge>::params_t() /*params don't matter here*/);
 
     const auto emtensor = m_matter.compute_emtensor(gq);
     gq.set_em_tensor(emtensor, m_G_Newton);

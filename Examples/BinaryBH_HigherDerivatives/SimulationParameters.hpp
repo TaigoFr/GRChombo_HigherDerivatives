@@ -31,6 +31,8 @@ typedef CSystem System;
 #include "TP_Parameters.hpp"
 #endif
 
+#include "MovingPunctureGaugeDamped.hpp"
+
 class SimulationParameters : public SimulationParametersBase
 {
   public:
@@ -239,6 +241,20 @@ class SimulationParameters : public SimulationParametersBase
 
     void read_shared_params(GRParmParse &pp)
     {
+        // repeat CCZ4 params as we are using a different gauge
+        ccz4_params_damped.lapse_advec_coeff = ccz4_params.lapse_advec_coeff;
+        ccz4_params_damped.lapse_coeff = ccz4_params.lapse_coeff;
+        ccz4_params_damped.lapse_power = ccz4_params.lapse_power;
+        ccz4_params_damped.shift_advec_coeff = ccz4_params.shift_advec_coeff;
+        ccz4_params_damped.shift_Gamma_coeff = ccz4_params.shift_Gamma_coeff;
+        ccz4_params_damped.eta = ccz4_params.eta;
+        ccz4_params_damped.kappa1 = ccz4_params.kappa1;
+        ccz4_params_damped.kappa2 = ccz4_params.kappa2;
+        ccz4_params_damped.kappa3 = ccz4_params.kappa3;
+        ccz4_params_damped.covariantZ4 = ccz4_params.covariantZ4;
+
+        pp.load("eta_radius_decay", ccz4_params_damped.eta_radius_decay);
+
         // Do we want Weyl extraction, puncture tracking and constraint norm
         // calculation?
         pp.load("activate_extraction", activate_extraction, false);
@@ -592,6 +608,8 @@ class SimulationParameters : public SimulationParametersBase
     double AH_2_initial_guess;
     bool AH_set_origins_to_punctures;
 #endif
+
+    CCZ4_params_t<MovingPunctureGaugeDamped::params_t> ccz4_params_damped;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */

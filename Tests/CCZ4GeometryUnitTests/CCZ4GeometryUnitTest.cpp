@@ -38,7 +38,7 @@ int main()
     GeometricQuantities<double, vars_t, vars_t> gq(
         vars, d1, d2, "CCZ4GeometryUnitTest::main");
 
-    gq.set_formulation(CCZ4::USE_CCZ4, CCZ4_params_t<>());
+    gq.set_formulation(CCZ4::USE_CCZ4, CCZ4_params_t<EmptyGauge::params_t>());
 
     auto h_UU = gq.get_h_UU();
     auto chris = gq.get_chris();

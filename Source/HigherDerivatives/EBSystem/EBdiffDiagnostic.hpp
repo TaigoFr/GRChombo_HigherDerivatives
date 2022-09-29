@@ -18,21 +18,24 @@
 // ASSUMES ComputeEB WAS CALLED
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-class EBdiffDiagnostic
+template <class gauge_t = MovingPunctureGauge> class EBdiffDiagnostic
 {
 
     // Use the variable definitions in MatterCCZ4RHS
     template <class data_t>
-    using Vars = typename MatterCCZ4RHS<C2EFT<EBSystem>>::template Vars<data_t>;
+    using Vars =
+        typename MatterCCZ4RHS<C2EFT<EBSystem>, gauge_t>::template Vars<data_t>;
 
     template <class data_t>
     using Diff2Vars =
-        typename MatterCCZ4RHS<C2EFT<EBSystem>>::template Diff2Vars<data_t>;
+        typename MatterCCZ4RHS<C2EFT<EBSystem>,
+                               gauge_t>::template Diff2Vars<data_t>;
 
   public:
-    EBdiffDiagnostic(double m_dx, int a_formulation,
-                     const CCZ4_params_t<> &a_ccz4_params,
-                     bool use_last_index_raised)
+    EBdiffDiagnostic(
+        double m_dx, int a_formulation,
+        const CCZ4_params_t<typename gauge_t::params_t> &a_ccz4_params,
+        bool use_last_index_raised)
         : m_deriv(m_dx), m_formulation(a_formulation),
           m_ccz4_params(a_ccz4_params),
           m_use_last_index_raised(use_last_index_raised)
@@ -45,7 +48,7 @@ class EBdiffDiagnostic
         const auto d1 = m_deriv.template diff1<Vars>(current_cell);
         const auto d2 = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-        GeometricQuantities<data_t, Vars, Diff2Vars> gq(
+        GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
             vars, d1, d2, "EBdiffDiagnostic::compute");
 
         gq.set_formulation(m_formulation, m_ccz4_params);
@@ -78,7 +81,7 @@ class EBdiffDiagnostic
   protected:
     FourthOrderDerivatives m_deriv;
     int m_formulation;
-    const CCZ4_params_t<> &m_ccz4_params;
+    const CCZ4_params_t<typename gauge_t::params_t> &m_ccz4_params;
     bool m_use_last_index_raised;
 };
 

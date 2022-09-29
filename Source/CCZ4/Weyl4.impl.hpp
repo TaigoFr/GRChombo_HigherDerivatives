@@ -21,8 +21,9 @@ template <class data_t> void Weyl4::compute(Cell<data_t> current_cell) const
     GeometricQuantities<data_t, Vars, Diff2Vars> gq(vars, d1, d2,
                                                     "Weyl4::compute");
 
-    gq.set_formulation(m_formulation,
-                       CCZ4::params_t() /*params don't matter here*/);
+    gq.set_formulation(
+        m_formulation,
+        CCZ4RHS<EmptyGauge>::params_t() /*params don't matter here*/);
 
     // Compute the E and B fields
     EBFields_t<data_t> ebfields;

@@ -26,7 +26,8 @@
    For an example of a matter_t class see ScalarField. \sa Constraints(),
    ScalarField()
 */
-template <class matter_t> class MatterConstraints : public Constraints
+template <class matter_t, class gauge_t = MovingPunctureGauge>
+class MatterConstraints : public Constraints
 {
   public:
     template <class data_t>
@@ -67,7 +68,8 @@ template <class matter_t> class MatterConstraints : public Constraints
         hardcoded ones.
     */
     MatterConstraints(const matter_t a_matter, double dx, double G_Newton,
-                      int formulation, CCZ4::params_t a_params,
+                      int formulation,
+                      CCZ4_params_t<typename gauge_t::params_t> a_params,
                       const std::array<double, CH_SPACEDIM> &a_center,
                       int a_c_Ham, const Interval &a_c_Moms,
                       int a_c_Ham_abs_terms = -1,
@@ -81,7 +83,7 @@ template <class matter_t> class MatterConstraints : public Constraints
     matter_t my_matter; //!< The matter object, e.g. a scalar field
     double m_G_Newton;  //!< Newton's constant, set to one by default.
     int m_formulation;
-    CCZ4::params_t m_params;
+    CCZ4_params_t<typename gauge_t::params_t> m_params;
     const std::array<double, CH_SPACEDIM> m_center;
 };
 

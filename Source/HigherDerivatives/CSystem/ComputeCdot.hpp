@@ -16,20 +16,22 @@
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 
-class ComputeCdot
+template <class gauge_t = MovingPunctureGauge> class ComputeCdot
 {
 
     // Use the variable definitions in MatterCCZ4RHS
     template <class data_t>
-    using Vars = typename MatterCCZ4RHS<C2EFT<EBSystem>>::template Vars<data_t>;
+    using Vars =
+        typename MatterCCZ4RHS<C2EFT<EBSystem>, gauge_t>::template Vars<data_t>;
 
     template <class data_t>
     using Diff2Vars =
-        typename MatterCCZ4RHS<C2EFT<EBSystem>>::template Diff2Vars<data_t>;
+        typename MatterCCZ4RHS<C2EFT<EBSystem>,
+                               gauge_t>::template Diff2Vars<data_t>;
 
   public:
     ComputeCdot(double m_dx, int a_formulation,
-                const CCZ4_params_t<> &a_ccz4_params,
+                const CCZ4_params_t<typename gauge_t::params_t> &a_ccz4_params,
                 bool use_last_index_raised, int a_C_dot_comp)
         : m_formulation(a_formulation), m_ccz4_params(a_ccz4_params),
           m_deriv(m_dx), m_use_last_index_raised(use_last_index_raised),
@@ -57,10 +59,12 @@ class ComputeCdot
             const auto advec =
                 m_deriv.template advection<Vars>(current_cell, vars.shift);
 
-            GeometricQuantities<data_t, Vars, Diff2Vars> gq(
+            GeometricQuantities<data_t, Vars, Diff2Vars, gauge_t> gq(
                 vars, d1, d2, "ComputeCdot::compute");
             gq.set_formulation(m_formulation, m_ccz4_params);
-            gq.set_advection_and_gauge(advec, EmptyGauge());
+
+            gauge_t gauge(m_ccz4_params);
+            gq.set_advection_and_gauge(advec, gauge);
 
             // raise last index
             const auto &h_UU = gq.get_metric_UU_spatial();
@@ -106,7 +110,7 @@ class ComputeCdot
 
   protected:
     int m_formulation;
-    const CCZ4_params_t<> &m_ccz4_params;
+    const CCZ4_params_t<typename gauge_t::params_t> &m_ccz4_params;
     FourthOrderDerivatives m_deriv;
 
     bool m_use_last_index_raised;

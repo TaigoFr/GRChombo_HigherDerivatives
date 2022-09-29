@@ -47,6 +47,8 @@
 #include "CDiagnostics.hpp"
 #endif
 
+#include "MovingPunctureGaugeDamped.hpp"
+
 // Things to do at each advance step, after the RK4 is calculated
 void BinaryBHHDLevel::specificAdvance()
 {
@@ -107,23 +109,24 @@ void BinaryBHHDLevel::initialData()
     // 'GammaCalculator(m_dx)' not needed for binaries (conformally flag initial
     // data)
 #ifdef USE_EBSYSTEM
-    ComputeEB compute(m_dx, m_p.formulation, m_p.ccz4_params,
-                      Interval(c_E11, c_E33), Interval(c_B11, c_B33),
-                      m_p.system_params.use_last_index_raised);
+    ComputeEB<MovingPunctureGaugeDamped> compute(
+        m_dx, m_p.formulation, m_p.ccz4_params_damped, Interval(c_E11, c_E33),
+        Interval(c_B11, c_B33), m_p.system_params.use_last_index_raised);
     BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 
     if (m_p.system_params.version == 2 || m_p.system_params.version == 3)
     {
         fillAllGhosts();
         bool compute_time_derivatives = true;
-        ComputeEB compute2(
-            m_dx, m_p.formulation, m_p.ccz4_params,
+        ComputeEB<MovingPunctureGaugeDamped> compute2(
+            m_dx, m_p.formulation, m_p.ccz4_params_damped,
             Interval(c_Eaux11, c_Eaux33), Interval(c_Baux11, c_Baux33),
             m_p.system_params.use_last_index_raised, compute_time_derivatives);
         BoxLoops::loop(compute2, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     }
 #elif USE_CSYSTEM
-    CDiagnostics compute(m_dx, m_p.formulation, m_p.ccz4_params, c_C, -1);
+    CDiagnostics<MovingPunctureGaugeDamped> compute(
+        m_dx, m_p.formulation, m_p.ccz4_params_damped, c_C, -1);
     BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 #endif
 
@@ -152,39 +155,41 @@ void BinaryBHHDLevel::computeDiagnostics()
 {
     fillAllGhosts();
     bool apply_weak_field = false;
-    System EBsystem(m_p.system_params);
-    C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
+    System system(m_p.system_params);
+    C2EFT<System> c2eft(system, m_p.hd_params, apply_weak_field);
 
-    MatterConstraints<C2EFT<System>> constraints(
-        c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params, m_p.center,
-        c_Ham, Interval(c_Mom, c_Mom));
+    MatterConstraints<C2EFT<System>, MovingPunctureGaugeDamped> constraints(
+        c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params_damped,
+        m_p.center, c_Ham, Interval(c_Mom, c_Mom));
 
-    WeakFieldConditionDiagnostic<System> weakField(
-        c2eft, m_dx, m_p.formulation, m_p.ccz4_params, m_p.center,
+    WeakFieldConditionDiagnostic<System, MovingPunctureGaugeDamped> weakField(
+        c2eft, m_dx, m_p.formulation, m_p.ccz4_params_damped, m_p.center,
         c_WeakField_over_Kretschmann);
-    NCCDiagnostic<System> ncc(c2eft, m_dx, m_p.formulation, m_p.ccz4_params,
-                              m_p.center, m_p.G_Newton, c_NCC_plus, c_NCC_minus,
-                              c_NCC_Z4_plus, c_NCC_Z4_minus);
+    NCCDiagnostic<System, MovingPunctureGaugeDamped> ncc(
+        c2eft, m_dx, m_p.formulation, m_p.ccz4_params_damped, m_p.center,
+        m_p.G_Newton, c_NCC_plus, c_NCC_minus, c_NCC_Z4_plus, c_NCC_Z4_minus);
     // DiffusionDiagnostic<C2EFT<System>> diffusion(
-    //     c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx, m_dt, m_p.sigma,
-    //     m_p.center, m_p.formulation, m_p.G_Newton, c_diffusion_h11,
-    //     c_rhs_h11);
+    //     c2eft, m_p.ccz4_params_damped, m_p.diffusion_params, m_dx, m_dt,
+    //     m_p.sigma, m_p.center, m_p.formulation, m_p.G_Newton,
+    //     c_diffusion_h11, c_rhs_h11);
 
 #ifdef USE_EBSYSTEM
-    EBdiffDiagnostic diff(m_dx, m_p.formulation, m_p.ccz4_params,
-                          m_p.system_params.use_last_index_raised);
-    ComputeEB computeEB(m_dx, m_p.formulation, m_p.ccz4_params,
-                        Interval(c_Ephys11, c_Ephys33),
-                        Interval(c_Bphys11, c_Bphys33),
-                        m_p.system_params.use_last_index_raised);
+    EBdiffDiagnostic<MovingPunctureGaugeDamped> diff(
+        m_dx, m_p.formulation, m_p.ccz4_params_damped,
+        m_p.system_params.use_last_index_raised);
+    ComputeEB<MovingPunctureGaugeDamped> computeEB(
+        m_dx, m_p.formulation, m_p.ccz4_params_damped,
+        Interval(c_Ephys11, c_Ephys33), Interval(c_Bphys11, c_Bphys33),
+        m_p.system_params.use_last_index_raised);
 
     if (m_p.system_params.version == 1)
     {
         // need to first store Eaux and Baux on the grid with the physical E & B
-        BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
-                                 Interval(c_Eaux11, c_Eaux33),
-                                 Interval(c_Baux11, c_Baux33),
-                                 m_p.system_params.use_last_index_raised),
+        BoxLoops::loop(ComputeEB<MovingPunctureGaugeDamped>(
+                           m_dx, m_p.formulation, m_p.ccz4_params_damped,
+                           Interval(c_Eaux11, c_Eaux33),
+                           Interval(c_Baux11, c_Baux33),
+                           m_p.system_params.use_last_index_raised),
                        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
     }
 
@@ -192,8 +197,8 @@ void BinaryBHHDLevel::computeDiagnostics()
                                      constraints, diff, computeEB),
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 #elif USE_CSYSTEM
-    CDiagnostics diff(m_dx, m_p.formulation, m_p.ccz4_params, c_Cphys,
-                      c_C_diff);
+    CDiagnostics<MovingPunctureGaugeDamped> diff(
+        m_dx, m_p.formulation, m_p.ccz4_params_damped, c_Cphys, c_C_diff);
 
     BoxLoops::loop(
         make_compute_pack(weakField, ncc /*, diffusion*/, constraints, diff),
@@ -217,10 +222,11 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
         // don't include the above BoxLoops in this one because this one
         // excludes ghost cells and the fillAllGhosts will not fill the outer
         // boundaries for sommerfeld BC
-        BoxLoops::loop(ComputeEB(m_dx, m_p.formulation, m_p.ccz4_params,
-                                 Interval(c_Eaux11, c_Eaux33),
-                                 Interval(c_Baux11, c_Baux33),
-                                 m_p.system_params.use_last_index_raised),
+        BoxLoops::loop(ComputeEB<MovingPunctureGaugeDamped>(
+                           m_dx, m_p.formulation, m_p.ccz4_params_damped,
+                           Interval(c_Eaux11, c_Eaux33),
+                           Interval(c_Baux11, c_Baux33),
+                           m_p.system_params.use_last_index_raised),
                        m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
         fillAllGhosts();
     }
@@ -235,19 +241,19 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
     if (m_p.max_spatial_derivative_order == 4)
     {
-        MatterCCZ4RHSWithDiffusion<C2EFT<System>, MovingPunctureGauge,
+        MatterCCZ4RHSWithDiffusion<C2EFT<System>, MovingPunctureGaugeDamped,
                                    FourthOrderDerivatives>
-            my_ccz4_matter(c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx,
-                           m_dt, m_p.sigma, m_p.center, m_p.formulation,
+            my_ccz4_matter(c2eft, m_p.ccz4_params_damped, m_p.diffusion_params,
+                           m_dx, m_dt, m_p.sigma, m_p.center, m_p.formulation,
                            m_p.G_Newton);
         BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
     }
     else if (m_p.max_spatial_derivative_order == 6)
     {
-        MatterCCZ4RHSWithDiffusion<C2EFT<System>, MovingPunctureGauge,
+        MatterCCZ4RHSWithDiffusion<C2EFT<System>, MovingPunctureGaugeDamped,
                                    SixthOrderDerivatives>
-            my_ccz4_matter(c2eft, m_p.ccz4_params, m_p.diffusion_params, m_dx,
-                           m_dt, m_p.sigma, m_p.center, m_p.formulation,
+            my_ccz4_matter(c2eft, m_p.ccz4_params_damped, m_p.diffusion_params,
+                           m_dx, m_dt, m_p.sigma, m_p.center, m_p.formulation,
                            m_p.G_Newton);
         BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
     }
@@ -347,10 +353,10 @@ void BinaryBHHDLevel::specificPostTimeStep()
         fillAllGhosts();
 
         bool apply_weak_field = false;
-        System EBsystem(m_p.system_params);
-        C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);
-        MatterConstraints<C2EFT<System>> constraints(
-            c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params,
+        System system(m_p.system_params);
+        C2EFT<System> c2eft(system, m_p.hd_params, apply_weak_field);
+        MatterConstraints<C2EFT<System>, MovingPunctureGaugeDamped> constraints(
+            c2eft, m_dx, m_p.G_Newton, m_p.formulation, m_p.ccz4_params_damped,
             m_p.center, c_Ham, Interval(c_Mom, c_Mom));
 
         BoxLoops::loop(constraints, m_state_new, m_state_diagnostics,

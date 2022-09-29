@@ -99,7 +99,9 @@ class GeometricQuantities
     void set_d2_vars(const Diff2Vars &a_d2_vars);
     void set_advection_and_gauge(const Vars &a_advection,
                                  const gauge_t &a_gauge);
-    void set_formulation(int formulation, const CCZ4_params_t<> &a_ccz4_params);
+    void set_formulation(
+        int formulation,
+        const CCZ4_params_t<typename gauge_t::params_t> &a_ccz4_params);
     void set_em_tensor(const emtensor_t<data_t> &a_em_tensor, double G_Newton);
     void set_cosmological_constant(double cosmological_constant);
     void set_coordinates(const Coordinates<data_t> &a_coords);
@@ -119,7 +121,8 @@ class GeometricQuantities
     //////// SET BY USER ////////
     // vars, d1, d2 and emtensor are assumed to stay in scope
     int get_formulation() const;
-    const CCZ4_params_t<> &get_formulation_params() const;
+    const CCZ4_params_t<typename gauge_t::params_t> &
+    get_formulation_params() const;
     double get_cosmological_constant() const;
     const Vars &get_vars() const;
     const Diff1Vars &get_d1_vars() const;
@@ -271,7 +274,7 @@ class GeometricQuantities
 
     std::string m_label;
     int m_formulation;
-    const CCZ4_params_t<> *m_ccz4_params;
+    const CCZ4_params_t<typename gauge_t::params_t> *m_ccz4_params;
     double m_16_pi_G_Newton;
     double m_cosmological_constant;
 
