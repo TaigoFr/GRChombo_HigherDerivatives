@@ -456,7 +456,8 @@ class SimulationParameters : public SimulationParametersBase
         {
             // ensure excision is O(10^-4) just before the horizon
             diffusion_params.chi_width =
-                (1. - diffusion_params.chi_threshold_percentage) / 4.;
+                (1. - diffusion_params.chi_threshold_percentage) /
+                (4. * diffusion_params.chi_threshold_percentage);
         }
         diffusion_params.update_min_chi(time, spin);
         /////////////
