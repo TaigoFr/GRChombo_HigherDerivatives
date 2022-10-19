@@ -61,7 +61,8 @@ data_t BoostedBH::center_dist(Coordinates<data_t> coords) const
                     pow(coords.y - m_params.center[1], 2) +
                     pow(coords.z - m_params.center[2], 2));
 
-    double minimum_r = 1e-6;
+    double minimum_r = 0.1; // was 1e-6, hack a bit for regularization inside
+                            // AH, this is too small
     return simd_max(r, minimum_r);
 }
 

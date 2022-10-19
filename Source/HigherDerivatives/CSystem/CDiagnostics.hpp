@@ -50,6 +50,14 @@ template <class gauge_t = MovingPunctureGauge> class CDiagnostics
 
         data_t C = gq.get_kretschmann();
 
+        // in Initial data
+        if (m_C_diff_comp == 0)
+        {
+            // Sch has maximum of 3/(4M^4), which gives 12 for M=1/2
+            double maximum_C = 20;
+            C = simd_min(C, maximum_C);
+        }
+
         if (m_C_diff_comp >= 0)
             current_cell.store_vars(abs(C - vars.C), m_C_diff_comp);
         if (m_C_comp >= 0)
