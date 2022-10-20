@@ -230,6 +230,9 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     m_p.hd_params.update_min_chi(a_time, spin);
     m_p.diffusion_params.update_min_chi(a_time, spin);
 
+    m_p.hd_params.epsilon = m_p.hd_params.epsilon_final/abs(m_p.hd_params.epsilon_final)*
+    min(abs(pow(a_time/m_p.hd_params.time_epsilon,2.0)*m_p.hd_params.epsilon_final), abs(m_p.hd_params.epsilon_final));
+
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);
     C2EFT<System> c2eft(EBsystem, m_p.hd_params, apply_weak_field);

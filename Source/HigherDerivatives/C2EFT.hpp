@@ -16,6 +16,8 @@ template <class System> class C2EFT
     struct params_t : public ah_chi_params_t
     {
         double epsilon;
+        double epsilon_final;        
+        double time_epsilon;        
 
         // weak field parameters
         double weak_field_threshold;

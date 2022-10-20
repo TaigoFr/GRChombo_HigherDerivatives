@@ -260,6 +260,8 @@ class SimulationParameters : public SimulationParametersBase
 #endif
 
         pp.load("epsilon", hd_params.epsilon);
+        pp.load("epsilon_final", hd_params.epsilon_final);
+        pp.load("time_epsilon", hd_params.time_epsilon);                
         pout() << "Using epsilon = " << hd_params.epsilon << std::endl;
 
         // pp.load("chi_threshold", hd_params.chi_threshold); // automatic now
@@ -287,6 +289,7 @@ class SimulationParameters : public SimulationParametersBase
         // 'epsilon' when doing 'kappa / 2 * EM-tensor'
         G_Newton = 1.;
         hd_params.epsilon /= (G_Newton * 8. * M_PI);
+        hd_params.epsilon_final /= (G_Newton * 8. * M_PI);        
 
         pp.load("tau", system_params.tau);
         pout() << "Using tau = " << system_params.tau << std::endl;
