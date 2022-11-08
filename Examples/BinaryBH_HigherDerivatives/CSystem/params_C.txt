@@ -196,7 +196,7 @@ calculate_constraint_norms = 1
 
 epsilon_final = 0.00001    # finar desired epsilon
 time_epsilon = 20.0        # time to reach the desired epsilon  
-epsilon   = 0.000         # energy scale
+# epsilon   = 0.000        # energy scale
 tau       = 0.05           # damping time scale for evolved C
 c_sigma   = 1.0            # wave evolution scale for evolved C
 c_version              = 2 # v1 or v2 (with or without laplacian)

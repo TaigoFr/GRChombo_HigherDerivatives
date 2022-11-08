@@ -259,10 +259,12 @@ class SimulationParameters : public SimulationParametersBase
                 false);
 #endif
 
-        pp.load("epsilon", hd_params.epsilon);
+        // pp.load("epsilon", hd_params.epsilon);
+        // pout() << "Using epsilon = " << hd_params.epsilon << std::endl;
         pp.load("epsilon_final", hd_params.epsilon_final);
-        pp.load("time_epsilon", hd_params.time_epsilon);                
-        pout() << "Using epsilon = " << hd_params.epsilon << std::endl;
+        pp.load("time_epsilon", hd_params.time_epsilon);
+        pout() << "Using epsilon_final = " << hd_params.epsilon_final
+               << std::endl;
 
         // pp.load("chi_threshold", hd_params.chi_threshold); // automatic now
         pp.load("weak_field_threshold", hd_params.weak_field_threshold);
@@ -288,8 +290,10 @@ class SimulationParameters : public SimulationParametersBase
         // this is such that the  'epsilon' in the EOM is replaced by
         // 'epsilon' when doing 'kappa / 2 * EM-tensor'
         G_Newton = 1.;
-        hd_params.epsilon /= (G_Newton * 8. * M_PI);
-        hd_params.epsilon_final /= (G_Newton * 8. * M_PI);        
+        // hd_params.epsilon /= (G_Newton * 8. * M_PI);
+        hd_params.epsilon_final /= (G_Newton * 8. * M_PI);
+        hd_params.epsilon =
+            hd_params.time_epsilon == 0. ? hd_params.epsilon_final : 0.;
 
         pp.load("tau", system_params.tau);
         pout() << "Using tau = " << system_params.tau << std::endl;
