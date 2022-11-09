@@ -240,6 +240,7 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
             min(abs(pow(a_time / m_p.hd_params.time_epsilon, 2.0) *
                     m_p.hd_params.epsilon_final),
                 abs(m_p.hd_params.epsilon_final));
+    pout() << "Using epsilon = " << m_p.hd_params.epsilon << std::endl;
 
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);
