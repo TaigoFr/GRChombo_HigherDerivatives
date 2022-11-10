@@ -194,7 +194,7 @@ calculate_constraint_norms = 1
 
 # provide INITIAL_DATA.dat with 'epsilon'
 
-epsilon_final = 0.00001    # finar desired epsilon
+epsilon_final = 0.00001    # final desired epsilon
 time_epsilon_start = 10.0  # time to run GR (force epsilon = 0) during gauge intense adjustment
 time_epsilon_end   = 30.0  # time to reach the desired epsilon  
 # epsilon   = 0.000        # energy scale
