@@ -232,15 +232,22 @@ void BinaryBHHDLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 
     if (m_p.hd_params.epsilon_final == 0)
         m_p.hd_params.epsilon = 0.;
-    else if (m_p.hd_params.time_epsilon == 0.)
+    else if (m_p.hd_params.time_epsilon_end == 0.)
         m_p.hd_params.epsilon = m_p.hd_params.epsilon_final;
     else
+    {
+        double time = a_time < m_p.hd_params.time_epsilon_start
+                          ? 0.
+                          : a_time - m_p.hd_params.time_epsilon_start;
+        double sign =
+            m_p.hd_params.epsilon_final / abs(m_p.hd_params.epsilon_final);
         m_p.hd_params.epsilon =
-            m_p.hd_params.epsilon_final / abs(m_p.hd_params.epsilon_final) *
-            min(abs(pow(a_time / m_p.hd_params.time_epsilon, 2.0) *
-                    m_p.hd_params.epsilon_final),
-                abs(m_p.hd_params.epsilon_final));
-    pout() << "Using epsilon = " << m_p.hd_params.epsilon << std::endl;
+            sign * min(abs(pow(time / (m_p.hd_params.time_epsilon_end -
+                                       m_p.hd_params.time_epsilon_start),
+                               2.0) *
+                           m_p.hd_params.epsilon_final),
+                       abs(m_p.hd_params.epsilon_final));
+    }
 
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);

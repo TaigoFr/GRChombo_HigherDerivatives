@@ -262,9 +262,12 @@ class SimulationParameters : public SimulationParametersBase
         // pp.load("epsilon", hd_params.epsilon);
         // pout() << "Using epsilon = " << hd_params.epsilon << std::endl;
         pp.load("epsilon_final", hd_params.epsilon_final);
-        pp.load("time_epsilon", hd_params.time_epsilon);
+        pp.load("time_epsilon_start", hd_params.time_epsilon_start);
+        pp.load("time_epsilon_end", hd_params.time_epsilon_end);
         pout() << "Using epsilon_final = " << hd_params.epsilon_final
                << std::endl;
+        CH_assert(hd_params.time_epsilon_start >= 0. &&
+                  hd_params.time_epsilon_start <= hd_params.time_epsilon_end);
 
         // pp.load("chi_threshold", hd_params.chi_threshold); // automatic now
         pp.load("weak_field_threshold", hd_params.weak_field_threshold);
@@ -293,7 +296,7 @@ class SimulationParameters : public SimulationParametersBase
         // hd_params.epsilon /= (G_Newton * 8. * M_PI);
         hd_params.epsilon_final /= (G_Newton * 8. * M_PI);
         hd_params.epsilon =
-            hd_params.time_epsilon == 0. ? hd_params.epsilon_final : 0.;
+            hd_params.time_epsilon_end == 0. ? hd_params.epsilon_final : 0.;
 
         pp.load("tau", system_params.tau);
         pout() << "Using tau = " << system_params.tau << std::endl;
