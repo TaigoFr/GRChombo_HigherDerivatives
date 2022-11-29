@@ -284,6 +284,8 @@ AH_num_points_v = 48
 # AH_stop_if_max_fails = 0
 # AH_expansion_radius_power = 1.
 
+AH_SNES_max_iterations = 500
+
 # AH_1_initial_guess = 0.3
 # AH_2_initial_guess = 0.3
 

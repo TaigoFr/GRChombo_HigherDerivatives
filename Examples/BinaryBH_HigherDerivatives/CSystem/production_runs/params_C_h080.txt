@@ -80,7 +80,7 @@ momentumB =  0.0841746  0.000510846 0.0
 # NB - if you have a non-cubic grid, you can specify 'N1' or 'N1_full',
 # 'N2' or 'N2_full' and 'N3' or 'N3_full' ( then dx_coarsest = L/N(max) )
 # NB - the N values need to be multiples of the block_factor
-N_full = 384 # 256
+N_full = 320 # 256
 L_full = 1024
 
 # Maximum number of times you can regrid above coarsest level
@@ -91,7 +91,7 @@ max_level = 8 # There are (max_level+1) grids, so min is zero
 # Generally you do not need to regrid frequently on every level
 # Level Regridding: 0   1   2   3   4   5   6   7
 regrid_interval =   0   0   1   0   0   0   0   0
-regrid_threshold = 0.03333333333 # 0.05
+regrid_threshold = 0.04 # 0.05
 
 tagging_buffer_ah = 1.7 # finest level is at 1.7x horizon radius
 tagging_buffer_extraction = 1.3 # extraction levels are at 1.3x extraction radius
@@ -100,8 +100,8 @@ tagging_buffer_extraction = 1.3 # extraction levels are at 1.3x extraction radiu
 max_box_size = 16
 min_box_size = 16
 
-tag_buffer_size = 8 # 5
-grid_buffer_size = 24 # 16
+tag_buffer_size = 6 # 5
+grid_buffer_size = 20 # 16
 # fill_ratio = 0.7
 # num_ghosts = 3
 # center = 256.0 256.0 256.0 # defaults to center of the grid
