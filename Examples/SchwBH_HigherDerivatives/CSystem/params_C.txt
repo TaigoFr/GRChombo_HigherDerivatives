@@ -170,6 +170,7 @@ rescale_sigma_by_lapse = 0 # rescale sigma by lapse (1) or lapse^2 (2), only if 
 advection_type         = 2 # only in v2 (0, 1 for simple, 2 for Luis' proposal)
 advection_coeff	       = 1.0 # only for advection type 1 and 2
 Box_transition         = 0 # only if 'c_version= 1' transition from laplacian to only time derivatives
+use_tau_radial_decay   = 0 # change tau with 1/r
 use_tau_chi_decay = 0 # change tau with chi
 tau_asymptotic         = 0.01 # if 'use_tau_radial_decay or use_tau_chi_decay ', the asymptotic tau at infinity
 tau_decay_length       = 50. #  if 'use_tau_radial_decay', the distance from r=0 at which tau decay starts. 'use_tau_chi_decay', the value of chi at which tau decay starts.
