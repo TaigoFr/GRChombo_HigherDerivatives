@@ -173,8 +173,8 @@ eta = 1.0 # eta of gamma driver, should be of order ~1/M_ADM of spacetime
 
 # CCZ4 parameters
 formulation = 0 # 1 for BSSN, 0 for CCZ4
-kappa1 = 0.1
-kappa2 = 0.
+kappa1 = 1.0
+kappa2 = -0.8
 kappa3 = 1.
 covariantZ4 = 1 # 0: keep kappa1; 1 [default]: replace kappa1 -> kappa1/lapse
 
@@ -199,8 +199,8 @@ time_epsilon_start = 10.0  # time to run GR (force epsilon = 0) during gauge int
 time_epsilon_end   = 30.0  # time to reach the desired epsilon  
 # epsilon   = 0.000        # energy scale
 
-tau       = 0.05           # damping time scale for evolved C
-c_sigma   = 1.0            # wave evolution scale for evolved C
+tau       = 0.005           # damping time scale for evolved C
+c_sigma   = 0.1            # wave evolution scale for evolved C
 c_version              = 2 # v1 or v2 (with or without laplacian)
 rescale_tau_by_lapse   = 0 # rescale tau by lapse, only if 'use_only_time_derivatives = 1'
 rescale_sigma_by_lapse = 0 # rescale sigma by lapse (1) or lapse^2 (2), only if 'use_only_time_derivatives = 1'
@@ -213,16 +213,17 @@ tau_asymptotic         = 0.01 # if 'use_tau_radial_decay or use_tau_chi_decay ',
 tau_decay_length       = 50. #  if 'use_tau_radial_decay', the distance from r=0 at which tau decay starts. 'use_tau_chi_decay', the value of chi at which tau decay starts.
 tau_decay_width        = 0.025 # if 'use_tau_chi_decay' the width of the decay
 use_sigma_radial_decay   = 0 # change sigma with 1/r
-use_sigma_chi_decay = 0 # change sigma with chi
+use_sigma_chi_decay = 1 # change sigma with chi
 sigma_asymptotic         = 1.0 # if 'use_sigma_radial_decay or use_sigma_chi_decay ', the asymptotic sigma at infinity
-sigma_decay_length       = 50. # if 'use_sigma_radial_decay', the distance from r=0 at which sigma decay starts. 'use_sigma_chi_decay', the value of chi at which sigma decay starts (for example:0.92)
+sigma_decay_length       = 0.92 # 50. # if 'use_sigma_radial_decay', the distance from r=0 at which sigma decay starts. 'use_sigma_chi_decay', the value of chi at which sigma decay starts (for example:0.92)
 sigma_decay_width        = 0.025 # if 'use_sigma_chi_decay' the width of the decay
+
 # chi_width     = 0.05 # automatic now
 weak_field_threshold = 1.e-10
 weak_field_width     = 0.05
 chi_damp_coeff = 2.
 chi_damp_timescale = 20.
-chi_threshold_percentage = 0.8
+chi_threshold_percentage = 0.35
 
 # Diffusion parameters
 diffCFLFact = 1E20
@@ -262,8 +263,8 @@ modes = 2 0  2 1  2 2
 
 AH_activate = 1
 AH_num_ranks = 20
-AH_num_points_u = 41
-AH_num_points_v = 40
+AH_num_points_u = 63
+AH_num_points_v = 48
 # AH_solve_interval = 1
 # AH_print_interval = 1
 # AH_track_center = true
@@ -280,6 +281,8 @@ AH_num_points_v = 40
 # AH_re_solve_at_restart = 0
 # AH_stop_if_max_fails = 0
 # AH_expansion_radius_power = 1.
+
+AH_SNES_max_iterations = 500
 
 # AH_1_initial_guess = 0.3
 # AH_2_initial_guess = 0.3
