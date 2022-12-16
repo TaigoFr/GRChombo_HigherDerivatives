@@ -65,12 +65,24 @@ void HigherDerivativesLevel::initialData()
     if (m_verbosity)
         pout() << "HigherDerivativesLevel::initialData " << m_level << endl;
 
-    // Set up the compute class for the SchwKS initial data
-    InitialData id(m_p.id_params, m_dx);
+    if (m_p.use_initial_data_with_solved_constraints)
+    {
+        // Set up the compute class for the SchwKS initial data
+        BoostedSchwarzschild_SolvedConstraints id(
+            m_p.id_params_with_constraints, m_dx);
 
-    // First set everything to zero then desired initial data
-    BoxLoops::loop(make_compute_pack(SetValue(0.), id), m_state_new,
-                   m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
+        // First set everything to zero then desired initial data
+        BoxLoops::loop(make_compute_pack(SetValue(0.), id), m_state_new,
+                       m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
+    }
+    else
+    {
+        SingleBH id(m_p.id_params_no_constraints, m_dx);
+
+        // First set everything to zero then desired initial data
+        BoxLoops::loop(make_compute_pack(SetValue(0.), id), m_state_new,
+                       m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
+    }
 
     fillAllGhosts();
     BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
@@ -206,6 +218,25 @@ void HigherDerivativesLevel::specificEvalRHS(GRLevelData &a_soln,
     double spin = 0.;
     m_p.hd_params.update_min_chi(a_time, spin);
     m_p.diffusion_params.update_min_chi(a_time, spin);
+
+    if (m_p.hd_params.epsilon_final == 0)
+        m_p.hd_params.epsilon = 0.;
+    else if (m_p.hd_params.time_epsilon_end == 0.)
+        m_p.hd_params.epsilon = m_p.hd_params.epsilon_final;
+    else
+    {
+        double time = a_time < m_p.hd_params.time_epsilon_start
+                          ? 0.
+                          : a_time - m_p.hd_params.time_epsilon_start;
+        double sign =
+            m_p.hd_params.epsilon_final / abs(m_p.hd_params.epsilon_final);
+        m_p.hd_params.epsilon =
+            sign * min(abs(pow(time / (m_p.hd_params.time_epsilon_end -
+                                       m_p.hd_params.time_epsilon_start),
+                               2.0) *
+                           m_p.hd_params.epsilon_final),
+                       abs(m_p.hd_params.epsilon_final));
+    }
 
     bool apply_weak_field = true;
     System EBsystem(m_p.system_params);

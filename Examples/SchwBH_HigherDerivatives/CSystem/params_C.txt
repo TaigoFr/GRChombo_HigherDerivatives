@@ -38,14 +38,17 @@ print_progress_only_to_rank_0 = 1
 
 # provide INITIAL_DATA.dat with 'mass'
 
+use_initial_data_with_solved_constraints = 0
+
 # Params for Schw BH in KS coords
-# mass = 1.0
+mass = 1.0
 # spin = 0.0 # for Kerr BH only
 # OR params for Minkowski perturbation
 # amplitude = 0.05
 # r0 = 1.
 
-boost_velocity = 0 0 0 # only boost in x direction!
+# boost_velocity = 0 0 0 # only boost in x direction!
+momentum = 0 0 0
 
 #################################################
 # Grid parameters
@@ -161,7 +164,10 @@ sigma = 2.0
 
 # provide INITIAL_DATA.dat with 'epsilon'
 
-# epsilon = 0.00001         # energy scale
+epsilon = 0.00001    # final desired epsilon
+time_epsilon_start = 10.0  # time to run GR (force epsilon = 0) during gauge intense adjustment
+time_epsilon_end   = 30.0  # time to reach the desired epsilon  
+
 tau       = 0.005           # damping time scale for evolved C
 c_sigma   = 0.1            # wave evolution scale for evolved C
 c_version              = 2 # v1 or v2 (with or without laplacian)

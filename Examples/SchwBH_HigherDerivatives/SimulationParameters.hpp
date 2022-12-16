@@ -30,6 +30,7 @@ typedef CSystem System;
 // #include "KerrBH.hpp"
 // #include "Schwarzschild_SolvedConstraints.hpp"
 #include "BoostedSchwarzschild_SolvedConstraints.hpp"
+#include "SingleBH.hpp"
 
 // which one to use:
 // typedef MinkowskiPerturbed InitialData;
@@ -37,7 +38,7 @@ typedef CSystem System;
 // typedef SchwarzschildKS InitialData;
 // typedef KerrBH InitialData;
 // typedef Schwarzschild_SolvedConstraints InitialData;
-typedef BoostedSchwarzschild_SolvedConstraints InitialData;
+// typedef BoostedSchwarzschild_SolvedConstraints InitialData;
 
 class SimulationParameters : public SimulationParametersBase
 {
@@ -51,20 +52,48 @@ class SimulationParameters : public SimulationParametersBase
 
     void readParams(GRParmParse &pp)
     {
+        pp.load("use_initial_data_with_solved_constraints",
+                use_initial_data_with_solved_constraints);
+
         // Initial data
-        pp.load("mass", id_params.mass);
+        pp.load("mass", id_params_with_constraints.mass);
+        id_params_no_constraints.mass = id_params_with_constraints.mass;
         // pp.load("spin", id_params.spin); // for Kerr only
         // pp.load("amplitude", id_params.amplitude);
         // pp.load("r0", id_params.r0);
-        id_params.center = center;
+        id_params_with_constraints.center = center;
+        id_params_no_constraints.center = center;
 
-        pp.load("boost_velocity", id_params.boost_velocity, {0.});
-        pout() << "Using boost_velocity = (" << id_params.boost_velocity[0]
-               << ", " << id_params.boost_velocity[1] << ", "
-               << id_params.boost_velocity[2] << ")" << std::endl;
+        if (use_initial_data_with_solved_constraints)
+        {
+            pp.load("boost_velocity", id_params_with_constraints.boost_velocity,
+                    {0.});
+            pout() << "Using boost_velocity = ("
+                   << id_params_with_constraints.boost_velocity[0] << ", "
+                   << id_params_with_constraints.boost_velocity[1] << ", "
+                   << id_params_with_constraints.boost_velocity[2] << ")"
+                   << std::endl;
+        }
+        else
+        {
+            pp.load("momentum", id_params_no_constraints.momentum, {0.});
+            pout() << "Using momentum = ("
+                   << id_params_no_constraints.momentum[0] << ", "
+                   << id_params_no_constraints.momentum[1] << ", "
+                   << id_params_no_constraints.momentum[2] << ")" << std::endl;
+        }
 
-        pp.load("epsilon", hd_params.epsilon);
-        pout() << "Using epsilon = " << hd_params.epsilon << std::endl;
+        // pp.load("epsilon", hd_params.epsilon);
+        // pout() << "Using epsilon = " << hd_params.epsilon << std::endl;
+
+        // not called 'epsilon_final' to leave it compatible with Ramiro's ID
+        pp.load("epsilon", hd_params.epsilon_final);
+        pp.load("time_epsilon_start", hd_params.time_epsilon_start);
+        pp.load("time_epsilon_end", hd_params.time_epsilon_end);
+        pout() << "Using epsilon_final = " << hd_params.epsilon_final
+               << std::endl;
+        CH_assert(hd_params.time_epsilon_start >= 0. &&
+                  hd_params.time_epsilon_start <= hd_params.time_epsilon_end);
 
         // pp.load("chi_threshold", hd_params.chi_threshold); // automatic now
         pp.load("weak_field_threshold", hd_params.weak_field_threshold);
@@ -91,7 +120,10 @@ class SimulationParameters : public SimulationParametersBase
         // this is such that the  'epsilon' in the EOM is replaced by
         // 'epsilon' when doing 'kappa / 2 * EM-tensor'
         G_Newton = 1.;
-        hd_params.epsilon /= (G_Newton * 8. * M_PI);
+        // hd_params.epsilon /= (G_Newton * 8. * M_PI);
+        hd_params.epsilon_final /= (G_Newton * 8. * M_PI);
+        hd_params.epsilon =
+            hd_params.time_epsilon_end == 0. ? hd_params.epsilon_final : 0.;
 
         pp.load("tau", system_params.tau);
         pout() << "Using tau = " << system_params.tau << std::endl;
@@ -254,7 +286,8 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("activate_extraction", activate_extraction, false);
 
 #ifdef USE_AHFINDER
-        pp.load("AH_initial_guess", AH_initial_guess, 0.5 * id_params.mass);
+        pp.load("AH_initial_guess", AH_initial_guess,
+                0.5 * id_params_with_constraints.mass);
 #endif
     }
 
@@ -270,19 +303,23 @@ class SimulationParameters : public SimulationParametersBase
                         "must be sufficiently below 1");
 
         // try to create InitialData -> will give error if it has to
-        InitialData id(id_params, 1. /*dummy*/);
+        Schwarzschild_SolvedConstraints id(id_params_with_constraints,
+                                           1. /*dummy*/);
+        SingleBH id2(id_params_no_constraints, 1. /*dummy*/);
     }
 
     double G_Newton;
     bool activate_extraction;
 
-    // Schwarzschild bh initial data
-    InitialData::params_t id_params;
+    BoostedSchwarzschild_SolvedConstraints::params_t id_params_with_constraints;
+    BoostedBH::params_t id_params_no_constraints;
 
     C2EFT<System>::params_t hd_params;
     System::params_t system_params;
 
     diffusion_params_t diffusion_params;
+
+    bool use_initial_data_with_solved_constraints;
 
 #ifdef USE_AHFINDER
     double AH_initial_guess;
