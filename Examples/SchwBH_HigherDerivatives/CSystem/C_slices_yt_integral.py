@@ -12,14 +12,10 @@ from scipy.interpolate import make_interp_spline
 #################################################################
 # USER DATA
 
-rmin = 0.
-rmax = 5.
+width = 20.
 location = '../'
-is_corner = False
-jump = 10 # plot every 'jump' files
-
-fontsize = 18
-fontsizeBig = 21
+jump = 1 # plot every 'jump' files
+z_symmetry = True
 
 # Plot several widths:
 # width_min_deviation = -3 # 20 * 2^-3
@@ -86,6 +82,8 @@ AH_radius_vs_time = make_interp_spline(times, radii, k=3)
 # or use a priori function
 # AH_radius_vs_time = lambda t: 1
 
+AH_centers = np.loadtxt(location + "data/stats_AH1.dat")
+
 yt.enable_parallelism()
 
 # Loading dataset
@@ -103,7 +101,10 @@ def read_hdf5(location, is_corner=False):
 
     return ds, center
 
-ds, center = read_hdf5(location + "hdf5/", is_corner)
+ds, center = read_hdf5(location + "hdf5/")
+
+fontsize = 18
+fontsizeBig = 21
 
 def _C_minus_Cphys(field, data):
     return np.abs(data["C"] - data["Cphys"])
@@ -115,21 +116,27 @@ for i in range(0, len(ds), jump):
     time = file.current_time
     file.add_field("C_minus_Cphys", _C_minus_Cphys, units = "", sampling_type = "cell")
     
+    AH_center = AH_centers[AH_centers[:,0] == time][0][17:20]
+    print("AH_center", AH_center)
+
+    if z_symmetry:
+        AH_center[2] = 0 # force numeric 0
+
     currentAverageCminusCphys = []
     currentAverageCminusCphysWithoutAH = []
     for p in np.arange(width_min_deviation, width_max_deviation + 1, 1):
         # compute integral differences between C and Cphys
         power = np.power(2., p)
-        ray = file.r[[center[0] + 0, center[1] + 0, center[2] + 0]:[center[0] + 0, center[1] + 0, center[2] + rmax*power]]
+        ray = file.r[[AH_center[0] + 0, AH_center[1] + 0, AH_center[2] + 0]:[AH_center[0] + 0, AH_center[1] + 0, AH_center[2] + width*power]]
         averageCminusCphys = ray.mean("C_minus_Cphys", weight="cell_volume")
         averageC = abs(ray.mean("C", weight="cell_volume"))
-        currentAverageCminusCphys.append([rmax*power, averageCminusCphys / averageC * 100])
+        currentAverageCminusCphys.append([width*power, averageCminusCphys / averageC * 100])
 
         # now without AH
-        ray = file.r[[center[0] + 0, center[1] + 0, center[2] + AH_radius_vs_time(time)]:[center[0] + 0, center[1] + 0, center[2] + rmax*power]]
+        ray = file.r[[AH_center[0] + 0, AH_center[1] + 0, AH_center[2] + AH_radius_vs_time(time)]:[AH_center[0] + 0, AH_center[1] + 0, AH_center[2] + width*power]]
         averageCminusCphys = ray.mean("C_minus_Cphys", weight="cell_volume")
         averageC = abs(ray.mean("C", weight="cell_volume"))
-        currentAverageCminusCphysWithoutAH.append([rmax*power, averageCminusCphys / averageC * 100])
+        currentAverageCminusCphysWithoutAH.append([width*power, averageCminusCphys / averageC * 100])
 
     allAverageCminusCphys.append([float(time), np.array(currentAverageCminusCphys)])
     allAverageCminusCphysWithoutAH.append([float(time), np.array(currentAverageCminusCphysWithoutAH)])
@@ -143,6 +150,9 @@ print("Radius + CvsCphys (from r=0)")
 print(rsAndValues_noAH if len(rsAndValues_noAH[0])>1 else [row[0,1] for row in rsAndValues_noAH])
 print("Radius + CvsCphys (from r=r_AH)")
 print(rsAndValues_withAH if len(rsAndValues_withAH[0])>1 else [row[0,1] for row in rsAndValues_withAH])
+
+np.save('data_C_slice_yt_integral.npy', [times_noAH, rsAndValues_noAH, rsAndValues_withAH])
+[times_noAH, rsAndValues_noAH, rsAndValues_withAH] = np.load('data_C_slice_yt_integral.npy', allow_pickle=True)
 
 fig, ax = plt.subplots(figsize=(12, 9))
 

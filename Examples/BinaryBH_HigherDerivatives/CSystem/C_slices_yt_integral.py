@@ -14,7 +14,7 @@ from scipy.interpolate import make_interp_spline
 
 width = 20.
 location = '../' # base folder with /data and /hdf5 subfolders
-jump = 10 # plot every 'jump' files
+jump = 1 # plot every 'jump' files
 z_symmetry = True
 
 # Plot several widths:
@@ -178,7 +178,7 @@ ax.legend(fontsize=fontsize)
 plt.xlabel("Time (M)", fontsize=fontsize)
 ax.tick_params(axis='both', which='major', labelsize=fontsize)
 
-ax.set_ylim([0, 50])
+# ax.set_ylim([0, 50])
 
 # fig.suptitle(r'$C$ vs $C_{phys}$ ( t = %.2fM )' % time, fontsize=fontsizeBig, position=(0.5,0.93))
 

@@ -13,8 +13,8 @@ from scipy.interpolate import make_interp_spline
 # USER DATA
 
 location = '../'
-is_corner = False
 jump = 1 # plot every 'jump' files
+z_symmetry = True
 
 fontsize = 18
 fontsizeBig = 21
@@ -76,6 +76,8 @@ AH_radius_vs_time = make_interp_spline(times, radii, k=3)
 # or use a priori function
 # AH_radius_vs_time = lambda t: 1
 
+AH_centers = np.loadtxt(location + "data/stats_AH1.dat")
+
 yt.enable_parallelism()
 
 # Loading dataset
@@ -93,7 +95,7 @@ def read_hdf5(location, is_corner=False):
 
     return ds, center
 
-ds, center = read_hdf5(location + "hdf5/", is_corner)
+ds, center = read_hdf5(location + "hdf5/")
 
 allC = []
 allCphys = []
@@ -101,8 +103,14 @@ allCminusCphys = []
 for i in range(0, len(ds), jump):
     file = ds[i]
     time = file.current_time
+
+    AH_center = AH_centers[AH_centers[:,0] == time][0][17:20]
+    print("AH_center", AH_center)
+
+    if z_symmetry:
+        AH_center[2] = 0 # force numeric 0
     
-    ray = file.r[[center[0] + 0, center[1] + 0, center[2] + AH_radius_vs_time(time)]]
+    ray = file.r[[AH_center[0] + 0, AH_center[1] + 0, AH_center[2] + AH_radius_vs_time(time)]]
     C_point = abs(ray["C"][0])
     Cphys_point = abs(ray["Cphys"][0])
 
@@ -119,6 +127,9 @@ print(list(times))
 print("C", C)
 print("Cphys", Cphys)
 print("CminusCphys", CminusCphys)
+
+np.save('data_C_slice_yt_ah_over_time.npy', [times, C, Cphys, CminusCphys])
+[times, C, Cphys, CminusCphys] = np.load('data_C_slice_yt_ah_over_time.npy', allow_pickle=True)
 
 def do_plot(times, C, Cphys, use_log, name_end):
     fig, ax = plt.subplots(figsize=(12, 9))
