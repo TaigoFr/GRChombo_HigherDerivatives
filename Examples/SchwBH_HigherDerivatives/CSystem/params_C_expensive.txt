@@ -70,7 +70,7 @@ max_level = 6 # There are (max_level+1) grids, so min is zero
 # Need one for each level except the top one, ie max_level items
 # Generally you do not need to regrid frequently on every level
 # Level Regridding:   0   1   2   3   4   5
-regrid_interval   =   0   0   0   0   0   0
+regrid_interval   =   0   0   1   0   0   0
 regrid_threshold = 0.004
 
 # Max and min box sizes
