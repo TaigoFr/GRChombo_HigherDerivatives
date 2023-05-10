@@ -131,7 +131,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("Box_transition", system_params.Box_transition);
         pout() << "Using Box_transition = " << system_params.Box_transition
                << std::endl;
-
+               
         pp.load("use_tau_radial_decay", system_params.use_tau_radial_decay);
         pout() << "Using use_tau_radial_decay = "
                << system_params.use_tau_radial_decay << std::endl;
@@ -202,6 +202,11 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("advection_type", system_params.advection_type);
         pout() << "Using advection_type = " << system_params.advection_type
                << std::endl;
+               
+        pp.load("Weyl_Box", system_params.Weyl_Box);
+        pout() << "Using Weyl_Box = " << system_params.Weyl_Box
+               << std::endl;               
+               
 
         if (system_params.version == 2)
         {

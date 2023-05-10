@@ -34,6 +34,9 @@ class CSystem
                                 // advection proposal)
                                 // or in system v1 (1 or 0 for on / off)
         double advection_coeff; // for advection_type 1 and 2 in v2
+        
+        bool Weyl_Box; // only for v1 adds all terms to Box of C
+                                     
 
         bool Box_transition; // for when transitioning from Box_driver
                              // to only time derivatives in v1
@@ -101,7 +104,14 @@ class CSystem
         Tensor<4, data_t, CH_SPACETIMEDIM> &riemann_LLLU,
         Tensor<4, data_t, CH_SPACETIMEDIM> &riemann_LULU,
         GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;
-
+        
+    template <class data_t, template <typename> class vars_t,
+              template <typename> class diff2_vars_t, class gauge_t>
+    void compute_Weyl(
+        Tensor<4, data_t, CH_SPACETIMEDIM> &weyl_LLLU,
+        Tensor<4, data_t, CH_SPACETIMEDIM> &weyl_LULU,
+        GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const;        
+        
     //! The function which adds in the RHS for the matter field vars,
     //! including the potential
     template <class data_t, template <typename> class vars_t,

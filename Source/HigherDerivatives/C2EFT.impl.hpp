@@ -92,8 +92,12 @@ void C2EFT<System>::compute_emtensor_4D(
     Tensor<4, data_t, CH_SPACETIMEDIM> riemann_LLLU;
     Tensor<4, data_t, CH_SPACETIMEDIM> riemann_LULU;
     m_system.compute_Riemann(riemann_LLLU, riemann_LULU, gq);
-
-    const Tensor<2, data_t, CH_SPACETIMEDIM> covd2_C =
+    
+    Tensor<4, data_t, CH_SPACETIMEDIM> weyl_LLLU;
+    Tensor<4, data_t, CH_SPACETIMEDIM> weyl_LULU;
+    m_system.compute_Weyl(weyl_LLLU, weyl_LULU, gq);    
+    
+        const Tensor<2, data_t, CH_SPACETIMEDIM> covd2_C =
         TensorAlgebra::covariant_derivative(d2_C_4D, d1_C_4D, chris_ST);
 
     FOR_ST(a, b)
@@ -101,13 +105,22 @@ void C2EFT<System>::compute_emtensor_4D(
         Tmn[a][b] = -0.5 * C * C * g[a][b];
         FOR_ST(c, d)
         {
-            Tmn[a][b] += 8. * riemann_LULU[a][c][b][d] * covd2_C[c][d];
+            //Tmn[a][b] += 8. * riemann_LULU[a][c][b][d] * covd2_C[c][d];
+
+            //FOR_ST(e)
+            //{
+            //    Tmn[a][b] += -4. * C * riemann_LULU[a][c][d][e] *
+            //                 riemann_LLLU[b][c][e][d];
+            //}
+            Tmn[a][b] += 8. * weyl_LULU[a][c][b][d] * covd2_C[c][d];
 
             FOR_ST(e)
             {
-                Tmn[a][b] += -4. * C * riemann_LULU[a][c][d][e] *
-                             riemann_LLLU[b][c][e][d];
-            }
+                Tmn[a][b] += -4. * C * weyl_LULU[a][c][d][e] *
+                             weyl_LLLU[b][c][e][d];
+            }            
+            
+            
         }
         Tmn[a][b] *= m_params.epsilon;
     }

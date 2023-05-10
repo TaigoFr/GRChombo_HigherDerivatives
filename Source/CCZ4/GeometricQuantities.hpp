@@ -208,8 +208,11 @@ class GeometricQuantities
     const Tensor<2, data_t, CH_SPACETIMEDIM> &get_em_tensor_ST();
     const data_t &get_em_tensor_trace_ST();
     const Tensor<4, data_t, CH_SPACETIMEDIM> &get_weyl_tensor_LLLL();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_weyl_tensor_LLLU();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_weyl_tensor_LULU();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_weyl_tensor_LLUU();                
     const data_t &get_weyl_squared();
-
+    const data_t &get_weyl_cubed();
     // EOM / Formulation dependent
     const Tensor<4, data_t, CH_SPACETIMEDIM> &get_riemann_LLLL_ST();
     const Tensor<4, data_t, CH_SPACETIMEDIM> &get_riemann_LLLL_ST_v2();
@@ -358,7 +361,11 @@ class GeometricQuantities
     Tensor<2, data_t, CH_SPACETIMEDIM> *m_em_tensor_ST;
     data_t *m_em_tensor_trace_ST;
     Tensor<4, data_t, CH_SPACETIMEDIM> *m_weyl_tensor_LLLL;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_weyl_tensor_LLLU;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_weyl_tensor_LULU;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_weyl_tensor_LLUU;             
     data_t *m_weyl_squared;
+    data_t *m_weyl_cubed;    
 
     // EOM dependent
     Tensor<4, data_t, CH_SPACETIMEDIM> *m_riemann_LLLL_ST;
@@ -452,7 +459,11 @@ class GeometricQuantities
     void compute_em_tensor_ST();
     void compute_em_tensor_trace_ST();
     void compute_weyl_tensor_LLLL();
+    void compute_weyl_tensor_LLLU();
+    void compute_weyl_tensor_LULU();
+    void compute_weyl_tensor_LLUU();             
     void compute_weyl_squared();
+    void compute_weyl_cubed();    
 
     // EOM dependent
     void compute_riemann_LLLL_ST();

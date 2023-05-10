@@ -110,7 +110,11 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_em_tensor_ST = nullptr;
     m_em_tensor_trace_ST = nullptr;
     m_weyl_tensor_LLLL = nullptr;
+    m_weyl_tensor_LLLU = nullptr;
+    m_weyl_tensor_LULU = nullptr;
+    m_weyl_tensor_LLUU = nullptr;                 
     m_weyl_squared = nullptr;
+    m_weyl_cubed = nullptr;    
 
     m_riemann_LLLL_ST = nullptr;
     m_riemann_LLLL_ST_v2 = nullptr;
@@ -379,12 +383,31 @@ template_GQ void GeometricQuantities_t::clean_em_tensor_dependent()
         delete m_weyl_tensor_LLLL;
         m_weyl_tensor_LLLL = nullptr;
     }
+    if (m_weyl_tensor_LLLU != nullptr)
+    {
+        delete m_weyl_tensor_LLLU;
+        m_weyl_tensor_LLLU = nullptr;
+    }
+    if (m_weyl_tensor_LULU != nullptr)
+    {
+        delete m_weyl_tensor_LULU;
+        m_weyl_tensor_LULU = nullptr;
+    }
+    if (m_weyl_tensor_LLUU != nullptr)
+    {
+        delete m_weyl_tensor_LLUU;
+        m_weyl_tensor_LLUU = nullptr;
+    }                
     if (m_weyl_squared != nullptr)
     {
         delete m_weyl_squared;
         m_weyl_squared = nullptr;
     }
-
+    if (m_weyl_cubed != nullptr)
+    {
+        delete m_weyl_cubed;
+        m_weyl_cubed = nullptr;
+    }
     clean_eom_dependent();
 }
 
@@ -1094,12 +1117,43 @@ GeometricQuantities_t::get_weyl_tensor_LLLL()
         compute_weyl_tensor_LLLL();
     return *m_weyl_tensor_LLLL;
 }
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_weyl_tensor_LLLU()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_weyl_tensor_LLLU == nullptr)
+        compute_weyl_tensor_LLLU();
+    return *m_weyl_tensor_LLLU;
+}
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_weyl_tensor_LULU()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_weyl_tensor_LULU == nullptr)
+        compute_weyl_tensor_LULU();
+    return *m_weyl_tensor_LULU;
+}
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_weyl_tensor_LLUU()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_weyl_tensor_LLUU == nullptr)
+        compute_weyl_tensor_LLUU();
+    return *m_weyl_tensor_LLUU;
+}
 template_GQ const data_t &GeometricQuantities_t::get_weyl_squared()
 {
     assert_with_label(GR_SPACEDIM == 3, m_label);
     if (m_weyl_squared == nullptr)
         compute_weyl_squared();
     return *m_weyl_squared;
+}
+template_GQ const data_t &GeometricQuantities_t::get_weyl_cubed()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_weyl_cubed == nullptr)
+        compute_weyl_cubed();
+    return *m_weyl_cubed;
 }
 //////////////////////////////////////////////////////////////////////////
 template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
@@ -2659,6 +2713,51 @@ GeometricQuantities_t::compute_weyl_tensor_LLLL(const Tensor<2, data_t> &Eij,
 
     return weyl_LLLL;
 }
+template_GQ void GeometricQuantities_t::compute_weyl_tensor_LLLU()
+{
+    if (m_weyl_tensor_LLLU != nullptr)
+        delete m_weyl_tensor_LLLU;
+
+    const auto &g_UU = get_metric_UU_ST();
+    const auto &weyl_LLLL = get_weyl_tensor_LLLL();
+
+    m_weyl_tensor_LLLU = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
+    FOR_ST(a, b, c, d, e)
+    {
+        (*m_weyl_tensor_LLLU)[a][b][c][d] +=
+            weyl_LLLL[a][b][c][e] * g_UU[e][d];
+    }
+}
+template_GQ void GeometricQuantities_t::compute_weyl_tensor_LULU()
+{
+    if (m_weyl_tensor_LULU != nullptr)
+        delete m_weyl_tensor_LULU;
+
+    const auto &g_UU = get_metric_UU_ST();
+    const auto &weyl_LLLU = get_weyl_tensor_LLLU();
+
+    m_weyl_tensor_LULU = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
+    FOR_ST(a, b, c, d, e)
+    {
+        (*m_weyl_tensor_LULU)[a][b][c][d] +=
+            weyl_LLLU[a][e][c][d] * g_UU[e][b];
+    }
+}
+template_GQ void GeometricQuantities_t::compute_weyl_tensor_LLUU()
+{
+    if (m_weyl_tensor_LLUU != nullptr)
+        delete m_weyl_tensor_LLUU;
+
+    const auto &g_UU = get_metric_UU_ST();
+    const auto &weyl_LLLU = get_weyl_tensor_LLLU();
+
+    m_weyl_tensor_LLUU = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
+    FOR_ST(a, b, c, d, e)
+    {
+        (*m_weyl_tensor_LLUU)[a][b][c][d] +=
+            weyl_LLLU[a][b][e][d] * g_UU[e][c];
+    }
+}
 template_GQ void GeometricQuantities_t::compute_weyl_squared()
 {
     if (m_weyl_squared != nullptr)
@@ -2673,6 +2772,28 @@ template_GQ void GeometricQuantities_t::compute_weyl_squared()
     {
         (*m_weyl_squared) += 8. * metric_UU[i][k] * metric_UU[j][l] *
                              (Eij[i][j] * Eij[k][l] - Bij[i][j] * Bij[k][l]);
+    }
+}
+template_GQ void GeometricQuantities_t::compute_weyl_cubed()
+{
+    if (m_weyl_cubed != nullptr)
+        delete m_weyl_cubed;
+
+    const auto &g_UU = get_metric_UU_ST();
+    const auto &weyl_LLLL = get_weyl_tensor_LLLL();    
+    const auto &weyl_LLLU = get_weyl_tensor_LLLU();
+    const auto &weyl_LULU = get_weyl_tensor_LULU();    
+    const auto &weyl_LLUU = get_weyl_tensor_LLUU();    
+
+    m_weyl_cubed = new data_t(0.);
+    //FOR_ST(a, b, c, d, e, f)
+    FOR_ST(a, b, c, d, e)
+    {
+    FOR_ST(f)
+    {
+        //(*m_weyl_cubed) += -weyl_LLUU[a][b][e][f]*weyl_LLUU[e][f][c][d]*weyl_LLUU[c][d][a][b] +4.0*weyl_LULU[a][e][c][f]*weyl_LULU[e][b][f][d]*weyl_LULU[b][a][d][c];
+        (*m_weyl_cubed) += -weyl_LLUU[a][b][e][f]*weyl_LLUU[e][f][c][d]*weyl_LLUU[c][d][a][b] +4.0*weyl_LULU[a][e][c][f]*weyl_LULU[e][b][f][d]*weyl_LULU[b][a][d][c];        
+    }    
     }
 }
 //////////////////////////////////////////////////////////////////////////
@@ -2817,6 +2938,7 @@ template_GQ void GeometricQuantities_t::compute_kretschmann()
         weyl_squared + 4. / (GR_SPACEDIM - 1.) * ricci_squared -
         2. / (GR_SPACEDIM * (GR_SPACEDIM - 1.)) * ricci_scalar * ricci_scalar);
 }
+
 template_GQ void GeometricQuantities_t::compute_riemann_squared()
 {
     if (m_riemann_squared != nullptr)

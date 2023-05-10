@@ -53,6 +53,16 @@ void CSystem::compute_Riemann(
     riemann_LULU = gq.get_riemann_LULU_ST();
 }
 
+template <class data_t, template <typename> class vars_t,
+          template <typename> class diff2_vars_t, class gauge_t>
+void CSystem::compute_Weyl(
+    Tensor<4, data_t, CH_SPACETIMEDIM> &weyl_LLLU,
+    Tensor<4, data_t, CH_SPACETIMEDIM> &weyl_LULU,
+    GeometricQuantities<data_t, vars_t, diff2_vars_t, gauge_t> &gq) const
+{
+    weyl_LLLU = gq.get_weyl_tensor_LLLU();
+    weyl_LULU = gq.get_weyl_tensor_LULU();
+}
 // Adds in the RHS for the matter vars
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t, class gauge_t,
@@ -65,6 +75,8 @@ void CSystem::add_matter_rhs(
     const auto &vars = gq.get_vars();
     const auto &advec = gq.get_advection();
     const auto &kretschmann = gq.get_kretschmann();
+    const auto &kretschmann_weyl = gq.get_weyl_squared();
+    const auto &weyl_cubed = gq.get_weyl_cubed();        
 
     CH_assert(m_params.sigma != 0.);
 
@@ -126,7 +138,7 @@ void CSystem::add_matter_rhs(
         const auto &d2 = gq.get_d2_vars();
         const auto &g_UU = gq.get_metric_UU_ST();
         const auto &Gamma_ST = gq.get_Gamma_ST();
-
+        
         total_rhs.dCdt =
             -tau / vars.lapse * (vars.dCdt - advfac * factor * advec.C) +
             kretschmann - vars.C - factor * sigma * Gamma_ST[0] * vars.dCdt;
@@ -142,7 +154,14 @@ void CSystem::add_matter_rhs(
                     factor * sigma * g_UU[i + 1][j + 1] * d2.C[i][j];
             }
         }
-        total_rhs.dCdt /= (-sigma * g_UU[0][0]);
+        
+        if (m_params.Weyl_Box)
+        {
+        	total_rhs.dCdt -=2.0*sigma*weyl_cubed;        
+        }
+        
+        total_rhs.dCdt /= (-sigma * g_UU[0][0]);        
+                
     }
     else if (m_params.version == 2)
     {
@@ -153,7 +172,7 @@ void CSystem::add_matter_rhs(
             dCdt -= m_params.advection_coeff * advec.C;
         }
         total_rhs.dCdt =
-            (-tau_rescaled * dCdt + kretschmann - vars.C) / sigma_rescaled;
+            (-tau_rescaled * dCdt + kretschmann_weyl - vars.C) / sigma_rescaled;
 
         if (m_params.advection_type == 2)
         {

@@ -343,6 +343,10 @@ class SimulationParameters : public SimulationParametersBase
         pout() << "Using advection_type = " << system_params.advection_type
                << std::endl;
 
+        pp.load("Weyl_Box", system_params.Weyl_Box);
+        pout() << "Using Weyl_Box = " << system_params.Weyl_Box
+               << std::endl; 
+
         if (system_params.version == 2)
         {
             pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
