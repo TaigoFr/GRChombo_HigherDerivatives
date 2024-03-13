@@ -126,6 +126,45 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_Gamma_ST = nullptr;
     m_Gamma_L_ST = nullptr;
     // m_d1_Z_L_ST = nullptr;
+    
+    
+///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+/////////////////NEW STUFF///////////////////////////////
+////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+    m_LIE_acceleration_U_ST = nullptr;
+    m_acceleration_U_ST = nullptr;
+    m_CDCD_n_ULL_ST = nullptr;     
+    m_CD_n_UL_ST = nullptr;   
+    m_Chris_ULL_ST = nullptr;
+    m_d1_Chris_ULLL_ST = nullptr;
+    m_d1_g_UUL_ST = nullptr;  
+    m_d1_g_LLL_ST = nullptr;
+    m_d2_g_LLLL_ST = nullptr;            
+    m_d1_3metric_LLL_ST = nullptr;
+    m_d2_3metric_LLLL_ST = nullptr;    
+    m_d1_gammatilde_LLL_ST = nullptr;
+    m_d2_mixed_gammatilde_LLLL = nullptr;
+    m_d2_gammatilde_LLLL_ST = nullptr;
+    m_d1_chi_L_ST = nullptr;                   
+    m_d2_mixed_chi_LL = nullptr;
+    m_d2_chi_LL_ST = nullptr;    
+    m_d2_mixed_shift_ULL = nullptr;
+    m_d2_shift_ULL_ST = nullptr;    
+    m_d2_mixed_lapse_LL = nullptr;
+    m_d2_lapse_LL_ST = nullptr;
+    m_d1_n_UL_ST = nullptr;     
+    m_d2_mixed_n_ULL = nullptr;       
+    m_d2_n_ULL_ST = nullptr;
+    m_d1_n_LL_ST = nullptr;
+    m_d2_n_LLL_ST = nullptr;                         
+///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+/////////////////NEW STUFF///////////////////////////////
+////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////    
+    
 }
 
 template_GQ void GeometricQuantities_t::clean()
@@ -347,6 +386,173 @@ template_GQ void GeometricQuantities_t::clean()
         delete m_acceleration_ST;
         m_acceleration_ST = nullptr;
     }
+    
+///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+/////////////////NEW STUFF///////////////////////////////
+////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+    if (m_LIE_acceleration_U_ST != nullptr)
+    {
+        delete m_LIE_acceleration_U_ST;
+        m_LIE_acceleration_U_ST = nullptr;
+    }
+
+    if (m_acceleration_U_ST != nullptr)
+    {
+        delete m_acceleration_U_ST;
+        m_acceleration_U_ST = nullptr;
+    }
+
+    if (m_CDCD_n_ULL_ST != nullptr)
+    {
+        delete m_CDCD_n_ULL_ST;
+        m_CDCD_n_ULL_ST = nullptr;
+    }
+
+    if (m_CD_n_UL_ST != nullptr)
+    {
+        delete m_CD_n_UL_ST;
+        m_CD_n_UL_ST = nullptr;
+    }
+
+    if (m_Chris_ULL_ST != nullptr)
+    {
+        delete m_Chris_ULL_ST;
+        m_Chris_ULL_ST = nullptr;
+    }
+
+    if (m_d1_Chris_ULLL_ST != nullptr)
+    {
+        delete m_d1_Chris_ULLL_ST;
+        m_d1_Chris_ULLL_ST = nullptr;
+    }
+
+    if (m_d1_g_UUL_ST != nullptr)
+    {
+        delete m_d1_g_UUL_ST;
+        m_d1_g_UUL_ST = nullptr;
+    }
+
+    if (m_d1_g_LLL_ST != nullptr)
+    {
+        delete m_d1_g_LLL_ST;
+        m_d1_g_LLL_ST = nullptr;
+    }
+    
+    if (m_d2_g_LLLL_ST != nullptr)
+    {
+        delete m_d2_g_LLLL_ST;
+        m_d2_g_LLLL_ST = nullptr;
+    }    
+ 
+    if (m_d1_3metric_LLL_ST != nullptr)
+    {
+        delete m_d1_3metric_LLL_ST;
+        m_d1_3metric_LLL_ST = nullptr;
+    }
+
+    if (m_d2_3metric_LLLL_ST != nullptr)
+    {
+        delete m_d2_3metric_LLLL_ST;
+        m_d2_3metric_LLLL_ST = nullptr;
+    }
+    
+    if (m_d1_gammatilde_LLL_ST != nullptr)
+    {
+        delete m_d1_gammatilde_LLL_ST;
+        m_d1_gammatilde_LLL_ST = nullptr;
+    }
+    
+    if (m_d2_mixed_gammatilde_LLLL != nullptr)
+    {
+        delete m_d2_mixed_gammatilde_LLLL;
+        m_d2_mixed_gammatilde_LLLL = nullptr;
+    }
+    
+    if (m_d2_gammatilde_LLLL_ST != nullptr)
+    {
+        delete m_d2_gammatilde_LLLL_ST;
+        m_d2_gammatilde_LLLL_ST = nullptr;
+    }
+    
+    if (m_d1_chi_L_ST != nullptr)
+    {
+        delete m_d1_chi_L_ST;
+        m_d1_chi_L_ST = nullptr;
+    }                    
+
+    if (m_d2_mixed_chi_LL != nullptr)
+    {
+        delete m_d2_mixed_chi_LL;
+        m_d2_mixed_chi_LL = nullptr;
+    }
+    
+    if (m_d2_chi_LL_ST != nullptr)
+    {
+        delete m_d2_chi_LL_ST;
+        m_d2_chi_LL_ST = nullptr;
+    }    
+    
+    if (m_d2_mixed_shift_ULL != nullptr)
+    {
+        delete m_d2_mixed_shift_ULL;
+        m_d2_mixed_shift_ULL = nullptr;
+    }
+    
+    if (m_d2_shift_ULL_ST != nullptr)
+    {
+        delete m_d2_shift_ULL_ST;
+        m_d2_shift_ULL_ST = nullptr;
+    }             
+
+    if (m_d2_mixed_lapse_LL != nullptr)
+    {
+        delete m_d2_mixed_lapse_LL;
+        m_d2_mixed_lapse_LL = nullptr;
+    }
+    
+    if (m_d2_lapse_LL_ST != nullptr)
+    {
+        delete m_d2_lapse_LL_ST;
+        m_d2_lapse_LL_ST = nullptr;
+    }
+
+    if (m_d1_n_UL_ST != nullptr)
+    {
+        delete m_d1_n_UL_ST;
+        m_d1_n_UL_ST = nullptr;
+    } 
+    
+    if (m_d2_mixed_n_ULL != nullptr)
+    {
+        delete m_d2_mixed_n_ULL;
+        m_d2_mixed_n_ULL = nullptr;
+    }
+    
+    if (m_d2_n_ULL_ST != nullptr)
+    {
+        delete m_d2_n_ULL_ST;
+        m_d2_n_ULL_ST = nullptr;
+    }
+    
+    if (m_d1_n_LL_ST != nullptr)
+    {
+        delete m_d1_n_LL_ST;
+        m_d1_n_LL_ST = nullptr;
+    }
+    
+    if (m_d2_n_LLL_ST != nullptr)
+    {
+        delete m_d2_n_LLL_ST;
+        m_d2_n_LLL_ST = nullptr;
+    }                             
+///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+/////////////////NEW STUFF///////////////////////////////
+////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////// 
+
 
     clean_em_tensor_dependent();
 }
@@ -1197,6 +1403,250 @@ GeometricQuantities_t::get_Gamma_L_ST()
         compute_Gamma_L_ST();
     return *m_Gamma_L_ST;
 }
+
+
+//////////////////////////NEW STUFF//////////////////////////////
+////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_LIE_acceleration_U_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_LIE_acceleration_U_ST == nullptr)
+        compute_LIE_acceleration_U_ST();
+    return *m_LIE_acceleration_U_ST;
+}
+
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_acceleration_U_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_acceleration_U_ST == nullptr)
+        compute_acceleration_U_ST();
+    return *m_acceleration_U_ST;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_CDCD_n_ULL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_CDCD_n_ULL_ST == nullptr)
+        compute_CDCD_n_ULL_ST();
+    return *m_CDCD_n_ULL_ST;
+}
+
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_CD_n_UL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_CD_n_UL_ST == nullptr)
+        compute_CD_n_UL_ST();
+    return *m_CD_n_UL_ST;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_Chris_ULL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_Chris_ULL_ST == nullptr)
+        compute_Chris_ULL_ST();
+    return *m_Chris_ULL_ST;
+}
+
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d1_Chris_ULLL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d1_Chris_ULLL_ST == nullptr)
+        compute_d1_Chris_ULLL_ST();
+    return *m_d1_Chris_ULLL_ST;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d1_g_UUL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d1_g_UUL_ST == nullptr)
+        compute_d1_g_UUL_ST();
+    return *m_d1_g_UUL_ST;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d1_g_LLL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d1_g_LLL_ST == nullptr)
+        compute_d1_g_LLL_ST();
+    return *m_d1_g_LLL_ST;
+}
+
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_g_LLLL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_g_LLLL_ST == nullptr)
+        compute_d2_g_LLLL_ST();
+    return *m_d2_g_LLLL_ST;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d1_3metric_LLL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d1_3metric_LLL_ST == nullptr)
+        compute_d1_3metric_LLL_ST();
+    return *m_d1_3metric_LLL_ST;
+}
+
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_3metric_LLLL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_3metric_LLLL_ST == nullptr)
+        compute_d2_3metric_LLLL_ST();
+    return *m_d2_3metric_LLLL_ST;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d1_gammatilde_LLL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d1_gammatilde_LLL_ST == nullptr)
+        compute_d1_gammatilde_LLL_ST();
+    return *m_d1_gammatilde_LLL_ST;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_mixed_gammatilde_LLLL()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_mixed_gammatilde_LLLL == nullptr)
+        compute_d2_mixed_gammatilde_LLLL();
+    return *m_d2_mixed_gammatilde_LLLL;
+}
+
+template_GQ const Tensor<4, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_gammatilde_LLLL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_gammatilde_LLLL_ST == nullptr)
+        compute_d2_gammatilde_LLLL_ST();
+    return *m_d2_gammatilde_LLLL_ST;
+}
+
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d1_chi_L_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d1_chi_L_ST == nullptr)
+        compute_d1_chi_L_ST();
+    return *m_d1_chi_L_ST;
+}
+
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_mixed_chi_LL()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_mixed_chi_LL == nullptr)
+        compute_d2_mixed_chi_LL();
+    return *m_d2_mixed_chi_LL;
+}
+
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_chi_LL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_chi_LL_ST == nullptr)
+        compute_d2_chi_LL_ST();
+    return *m_d2_chi_LL_ST;
+}
+
+
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_mixed_shift_ULL()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_mixed_shift_ULL == nullptr)
+        compute_d2_mixed_shift_ULL();
+    return *m_d2_mixed_shift_ULL;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_shift_ULL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_shift_ULL_ST == nullptr)
+        compute_d2_shift_ULL_ST();
+    return *m_d2_shift_ULL_ST;
+}
+
+template_GQ const Tensor<1, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_mixed_lapse_LL()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_mixed_lapse_LL == nullptr)
+        compute_d2_mixed_lapse_LL();
+    return *m_d2_mixed_lapse_LL;
+}
+
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_lapse_LL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_lapse_LL_ST == nullptr)
+        compute_d2_lapse_LL_ST();
+    return *m_d2_lapse_LL_ST;
+}
+
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d1_n_UL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d1_n_UL_ST == nullptr)
+        compute_d1_n_UL_ST();
+    return *m_d1_n_UL_ST;
+}
+
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_mixed_n_ULL()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_mixed_n_ULL == nullptr)
+        compute_d2_mixed_n_ULL();
+    return *m_d2_mixed_n_ULL;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_n_ULL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_n_ULL_ST == nullptr)
+        compute_d2_n_ULL_ST();
+    return *m_d2_n_ULL_ST;
+}
+
+template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d1_n_LL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d1_n_LL_ST == nullptr)
+        compute_d1_n_LL_ST();
+    return *m_d1_n_LL_ST;
+}
+
+template_GQ const Tensor<3, data_t, CH_SPACETIMEDIM> &
+GeometricQuantities_t::get_d2_n_LLL_ST()
+{
+    assert_with_label(GR_SPACEDIM == 3, m_label);
+    if (m_d2_n_LLL_ST == nullptr)
+        compute_d2_n_LLL_ST();
+    return *m_d2_n_LLL_ST;
+}
+//////////////////////////NEW STUFF//////////////////////////////
+////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+
+
 /*
 template_GQ const Tensor<2, data_t, CH_SPACETIMEDIM> &
 GeometricQuantities_t::get_d1_Z_L_ST()
@@ -3174,4 +3624,787 @@ GeometricQuantities_t::compute_dt_weyl_magnetic_part(
     }
     return dt_B;
 }
+
+///////////////////////NEW STUFF//////////////////////////////
+/////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+template_GQ void GeometricQuantities_t::compute_LIE_acceleration_U_ST()
+{
+    if (m_LIE_acceleration_U_ST != nullptr)
+        delete m_LIE_acceleration_U_ST;
+
+    const auto &normal = get_normal_U_ST(); 
+    const auto &CDn = get_CD_n_UL_ST();
+    const auto &CDCDn = get_CDCD_n_ULL_ST();    
+    const auto &acceleration = get_acceleration_U_ST();                 
+      
+    m_LIE_acceleration_U_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>({0.});
+    
+    FOR_ST(a)
+    {  
+    	FOR_ST(b)
+    	{    	
+            (*m_LIE_acceleration_U_ST)[a] += acceleration[b]*CDn[a][b] ;
+    	}	
+    	FOR_ST(b, c)
+    	{
+            (*m_LIE_acceleration_U_ST)[a] += CDn[c][b]*CDn[a][c]*normal[b] + normal[c]*normal[b]*CDCDn[a][c][b] ;    	
+    	}	 
+    }
+            
+}
+
+template_GQ void GeometricQuantities_t::compute_acceleration_U_ST()
+{
+    if (m_acceleration_U_ST != nullptr)
+        delete m_acceleration_U_ST;
+
+    const auto &normal = get_normal_U_ST(); 
+    const auto &CDn = get_CD_n_UL_ST();           
+      
+    m_acceleration_U_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>({0.});
+    
+    FOR_ST(a)
+    {
+    	FOR_ST(b)    	
+    		(*m_acceleration_U_ST)[a] = normal[b]*CDn[a][b] ; 
+    	 	    	
+    }
+            
+}
+
+template_GQ void GeometricQuantities_t::compute_CDCD_n_ULL_ST()
+{
+    if (m_CDCD_n_ULL_ST != nullptr)
+        delete m_CDCD_n_ULL_ST;
+
+    const auto &normal = get_normal_U_ST(); 
+    const auto &d1n = get_d1_n_UL_ST();
+    const auto &d2n = get_d2_n_ULL_ST();    
+    const auto &Chris = get_Chris_ULL_ST();
+    const auto &d1Chris = get_d1_Chris_ULLL_ST();
+    const auto &CDn = get_CD_n_UL_ST();           
+      
+    m_CDCD_n_ULL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+    FOR_ST(a, b, c)
+    {
+    	(*m_CDCD_n_ULL_ST)[a][b][c] = d2n[a][b][c] ; 
+    	
+    	FOR_ST(d)
+    	{    
+    	    (*m_CDCD_n_ULL_ST)[a][b][c] += d1Chris[a][b][d][c]*normal[d] + Chris[a][b][d]*d1n[d][c] 
+					 + Chris[a][c][d]*CDn[d][b] - Chris[d][c][b]*CDn[a][d]  ;
+    	}  	    	
+    }
+            
+}
+
+template_GQ void GeometricQuantities_t::compute_CD_n_UL_ST()
+{
+    if (m_CD_n_UL_ST != nullptr)
+        delete m_CD_n_UL_ST;
+
+    const auto &normal = get_normal_U_ST(); 
+    const auto &d1n = get_d1_n_UL_ST();
+    const auto &Chris = get_Chris_ULL_ST();   
+      
+    m_CD_n_UL_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>({0.});
+    
+    FOR_ST(a, b)
+    {
+    	FOR_ST(c)
+    	{    
+    	    (*m_CD_n_UL_ST)[a][b] += d1n[a][b] + Chris[a][c][b]*normal[c] ;
+    	}  	    	
+    }
+            
+}
+
+
+template_GQ void GeometricQuantities_t::compute_Chris_ULL_ST()
+{
+    if (m_Chris_ULL_ST != nullptr)
+        delete m_Chris_ULL_ST;
+
+    const auto &vars = get_vars();
+    const auto &g = get_metric_ST();
+    const auto &gUU = get_metric_UU_ST();
+    const auto &d1g = get_d1_g_LLL_ST();       
+         
+
+    m_Chris_ULL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR_ST(a, b, c)
+    {
+    	FOR_ST(d)
+    	{    
+    	    (*m_d1_Chris_ULLL_ST)[a][b][c] += 1./2.*gUU[a][d]*(d1g[d][c][b] + d1g[b][d][c] - d1g[b][c][d] ) ;
+    	}  	    	
+    }
+            
+}
+
+template_GQ void GeometricQuantities_t::compute_d1_Chris_ULLL_ST()
+{
+    if (m_d1_Chris_ULLL_ST != nullptr)
+        delete m_d1_Chris_ULLL_ST;
+
+    const auto &gUU = get_metric_UU_ST();
+    const auto &d1gUUL = get_d1_g_UUL_ST();
+    const auto &d1g = get_d1_g_LLL_ST();
+    const auto &d2g = get_d2_g_LLLL_ST();      
+         
+
+    m_d1_Chris_ULLL_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR_ST(a, b, c, d )
+    {
+	FOR_ST(e)
+	{    
+    		(*m_d1_Chris_ULLL_ST)[a][b][c][d] += 1./2.*d1gUUL[a][e][d]*( d1g[e][c][b] + d1g[b][e][c] - d1g[b][c][e] )
+						   + 1./2.*gUU[a][e]*( d2g[e][c][d][b] + d2g[b][e][d][c] - d2g[b][c][d][e] ) ;
+    	}	     	    	
+    }
+            
+}
+
+template_GQ void GeometricQuantities_t::compute_d1_g_UUL_ST()
+{
+    if (m_d1_g_UUL_ST != nullptr)
+        delete m_d1_g_UUL_ST;
+      
+    const auto &gUU = get_metric_UU_ST();
+    const auto &Chris = get_Chris_ULL_ST();       
+         
+
+    m_d1_g_UUL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR_ST(a, b, c)
+    {
+        FOR_ST(d)    
+    	    (*m_d1_g_UUL_ST)[a][b][c] += -Chris[a][c][d]*gUU[d][b] -Chris[b][c][d]*gUU[a][d]  ; 
+    	    	
+    }
+            
+}
+
+template_GQ void GeometricQuantities_t::compute_d1_g_LLL_ST()
+{
+    if (m_d1_g_LLL_ST != nullptr)
+        delete m_d1_g_LLL_ST;
+
+    const auto &vars = get_vars();
+    const auto &d1gammaST = get_d1_3metric_LLL_ST();
+    const auto &normal = get_normal_L_ST();       
+    const auto &d1nST = get_d1_n_LL_ST();       
+         
+
+    m_d1_g_LLL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR_ST(a, b, c)
+    {
+    	(*m_d1_g_LLL_ST)[a][b][c] = d1gammaST[a][b][c] - d1nST[a][c]*normal[b] -normal[a]*d1nST[b][c] ; 
+    	    	
+    }
+            
+}
+
+
+template_GQ void GeometricQuantities_t::compute_d2_g_LLLL_ST()
+{
+    if (m_d2_g_LLLL_ST != nullptr)
+        delete m_d2_g_LLLL_ST;
+
+    const auto &vars = get_vars();
+    const auto &d1gammaST = get_d1_3metric_LLL_ST();
+    const auto &d2gammaST = get_d2_3metric_LLLL_ST();    
+    const auto &normal = get_normal_L_ST();
+    const auto &d1nST = get_d1_n_LL_ST();
+    const auto &d2nST = get_d2_n_LLL_ST();
+         
+
+    m_d2_g_LLLL_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR_ST(a, b, c, d)
+    {
+    	(*m_d2_g_LLLL_ST)[a][b][c][d] = d2gammaST[a][b][c][d] -d1nST[a][c]*d1nST[b][d]  
+					- d2nST[a][c][d]*normal[b] - d1nST[a][d]*d1nST[b][c]
+    					- normal[a]*d2nST[b][c][d] ; 
+    	    	
+    }
+            
+}
+
+
+
+template_GQ void GeometricQuantities_t::compute_d1_3metric_LLL_ST()
+{
+    if (m_d1_3metric_LLL_ST != nullptr)
+        delete m_d1_3metric_LLL_ST;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &rhs = get_rhs_equations();    
+
+    m_d1_3metric_LLL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR(i, j)
+    {
+    	(*m_d1_3metric_LLL_ST)[i+1][j+1][0] = rhs.h[i][j]*pow(vars.chi,-1) - pow(vars.chi,-2)*rhs.chi*vars.h[i][j] ;
+    	    	
+    }
+    
+    FOR(i, j, k)
+    {
+    	(*m_d1_3metric_LLL_ST)[i+1][j+1][k+1] = d1.h[i][j][k]*pow(vars.chi,-1) -pow(vars.chi,-2)*d1.chi[k]*vars.h[i][j];
+    }
+    
+
+    (*m_d1_3metric_LLL_ST)[0][0][0] = 0; //this are all 0 because it has no tt component
+    
+    FOR(i)
+    {    
+    	(*m_d1_3metric_LLL_ST)[0][0][i+1] = 0; //this are all 0 because it has no tt component
+    	(*m_d1_3metric_LLL_ST)[0][i+1][0] = 0; //this are all 0 because it has no ti components   	
+    }
+    
+    FOR(i, j)
+    {
+    	(*m_d1_3metric_LLL_ST)[j+1][0][i+1] = 0; //this are all 0 because it has no time components        
+    	(*m_d1_3metric_LLL_ST)[0][j+1][i+1] = 0; //this are all 0 because it has no time components
+    }    	
+            
+}
+
+template_GQ void GeometricQuantities_t::compute_d2_3metric_LLLL_ST()
+{
+    if (m_d2_3metric_LLLL_ST != nullptr)
+        delete m_d2_3metric_LLLL_ST;
+
+    const auto &vars = get_vars();
+    const auto &d1chiST = get_d1_chi_L_ST();
+    const auto &d2chiST = get_d2_chi_LL_ST();
+    const auto &d1gammatildeST = get_d1_gammatilde_LLL_ST();            
+    const auto &d2gammatildeST = get_d2_gammatilde_LLLL_ST();
+    
+    m_d2_3metric_LLLL_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
+    
+    FOR_ST(a, b)
+    {
+    	FOR(i, j)
+    	{
+    		(*m_d2_3metric_LLLL_ST)[i+1][j+1][a][b] = 2.*pow(vars.chi,-3)*d1chiST[a]*d1chiST[b]*vars.h[i][j] -pow(vars.chi,-2)*d1chiST[a]*d1gammatildeST[i+1][j+1][b] 
+    							  -pow(vars.chi,-2)*d1chiST[b]*d1gammatildeST[i+1][j+1][a] + pow(vars.chi,-1)*d2gammatildeST[i+1][j+1][a][b];
+    	}
+    	
+    	(*m_d2_3metric_LLLL_ST)[0][0][a][b] = 0.; // no tt component on gamma
+    	
+    	FOR(i)
+    	{    	
+    		(*m_d2_3metric_LLLL_ST)[i+1][0][a][b] = 0.; // no it component on gamma
+    		(*m_d2_3metric_LLLL_ST)[0][i+1][a][b] = 0.; // no ti component on gamma   		     	
+    	}   	
+    }
+            
+}
+
+
+template_GQ void GeometricQuantities_t::compute_d1_gammatilde_LLL_ST()
+{
+    if (m_d1_gammatilde_LLL_ST != nullptr)
+        delete m_d1_gammatilde_LLL_ST;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &rhs = get_rhs_equations();    
+
+    m_d1_gammatilde_LLL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+    (*m_d1_gammatilde_LLL_ST)[0][0][0] = 0; //this are all 0 because it has no time components
+
+    FOR(i, j)
+    {
+    	(*m_d1_gammatilde_LLL_ST)[i+1][j+1][0] = rhs.h[i][j] ;
+    	
+    	(*m_d1_gammatilde_LLL_ST)[0][0][i+1] = 0; //this are all 0 because it has no time component
+    	
+    }
+    
+    
+    FOR(i, j, k)
+    {
+    	(*m_d1_gammatilde_LLL_ST)[i+1][j+1][k+1] = d1.h[i][j][k];
+    }        
+}
+
+
+template_GQ void GeometricQuantities_t::compute_d2_mixed_gammatilde_LLLL()
+{
+    if (m_d2_mixed_gammatilde_LLLL != nullptr)
+        delete m_d2_mixed_gammatilde_LLLL;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();     
+    const auto &rhs = get_rhs_equations();    
+
+    m_d2_mixed_gammatilde_LLLL = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+    FOR(i, j, k)
+    {
+    	(*m_d2_mixed_gammatilde_LLLL)[i][j][k] = -2.*d1.lapse[k]*vars.A[i][j] -2.*vars.lapse*d1.A[i][j][k] ;
+    	
+    	FOR(l)
+	{    	
+    		(*m_d2_mixed_gammatilde_LLLL)[i][j][k] += d1.shift[l][k]*d1.h[i][j][l] + vars.shift[l]*d2.h[i][j][k][l] + d1.h[l][i][k]*d1.shift[l][j] + vars.h[l][i]*d2.shift[l][j][k]
+							+ d1.h[l][j][k]*d1.shift[l][i] + vars.h[l][j]*d2.shift[l][k][i] -2./3.*(d2.shift[l][l][k]*vars.h[i][j] + d1.shift[l][l]*d1.h[i][j][k]) ;	
+    	}
+    }
+              
+}
+
+
+template_GQ void GeometricQuantities_t::compute_d2_gammatilde_LLLL_ST()
+{
+    if (m_d2_gammatilde_LLLL_ST != nullptr)
+        delete m_d2_gammatilde_LLLL_ST;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();     
+    const auto &rhs = get_rhs_equations();
+    const auto &d2mixedgammatilde = get_d2_mixed_gammatilde_LLLL();
+    const auto &d2mixedshift = get_d2_mixed_shift_ULL();              
+
+    m_d2_gammatilde_LLLL_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
+    
+    FOR(i, j, k, l)
+    {
+    	(*m_d2_gammatilde_LLLL_ST)[i+1][j+1][k+1][l+1] = d2.h[i][j][k][l];
+    	    	
+    }
+    
+    FOR(i, j, k)
+    {
+    	(*m_d2_gammatilde_LLLL_ST)[i+1][j+1][0][k+1] = d2mixedgammatilde[i][j][k];
+    	(*m_d2_gammatilde_LLLL_ST)[i+1][j+1][k+1][0] = d2mixedgammatilde[i][j][k];    	    	
+    }
+    
+    FOR(i, j)
+    {
+    	(*m_d2_gammatilde_LLLL_ST)[i+1][j+1][0][0] = -2.*rhs.lapse*vars.A[i][j] -2.*vars.lapse*rhs.A[i][j];
+    	
+    	
+    	FOR(k)
+	{    	
+    		(*m_d2_gammatilde_LLLL_ST)[i+1][j+1][0][0] += rhs.shift[k]*d1.h[i][j][k] + vars.shift[k]*d2mixedgammatilde[i][j][k] + rhs.h[k][i]*d1.shift[k][j] + vars.h[k][i]*d2mixedshift[k][j]
+							+ rhs.h[k][j]*d1.shift[k][i] + vars.h[k][j]*d2mixedshift[k][i] -2./3.*(d2mixedshift[k][k]*vars.h[i][j] + d1.shift[k][k]*rhs.h[i][j]) ;	
+    	}
+    	 	    	
+    }    
+                     
+}
+
+template_GQ void GeometricQuantities_t::compute_d1_chi_L_ST()
+{
+    if (m_d1_chi_L_ST != nullptr)
+        delete m_d1_chi_L_ST;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();    
+    const auto &rhs = get_rhs_equations();    
+      
+    m_d1_chi_L_ST = new Tensor<1, data_t, CH_SPACETIMEDIM>({0.});
+
+    (*m_d1_chi_L_ST)[0] = rhs.chi;    
+    
+    FOR(i)
+    {
+    	(*m_d1_chi_L_ST)[i+1] = d1.chi[i];
+    }
+    	 
+}
+
+
+template_GQ void GeometricQuantities_t::compute_d2_mixed_chi_LL()
+{
+    if (m_d2_mixed_chi_LL != nullptr)
+        delete m_d2_mixed_chi_LL;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();    
+    const auto &rhs = get_rhs_equations();    
+
+    m_d2_mixed_chi_LL = new Tensor<1, data_t, CH_SPACETIMEDIM>({0.});
+    
+   
+    FOR(i)
+    {
+    	(*m_d2_mixed_chi_LL)[i] =   2./3.*d1.chi[i]*vars.lapse*vars.K  + 2.3*vars.chi*(d1.alpha[i]*vars.K + vars.lapse*d1.K[i]) ;
+    	
+	    FOR(k)
+	    {
+	    	(*m_d2_mixed_chi_LL)[i] += d1.shift[k][i]*d1.chi[k] + vars.shift[k]*d2.chi[i][k]- 2./3.*d1.chi[i]*d1.shift[k][k] - 2.3*vars.chi*d2.shift[k][k][i] ;
+	    }
+	    
+    }     
+}
+
+template_GQ void GeometricQuantities_t::compute_d2_chi_LL_ST()
+{
+    if (m_d2_chi_LL_ST != nullptr)
+        delete m_d2_chi_LL_ST;
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();    
+    const auto &rhs = get_rhs_equations();    
+    const auto &d2mixedchi = get_d2_mixed_chi_LL();
+    const auto &d2mixedshift = get_d2_mixed_shift_ULL();    
+    
+    m_d2_chi_LL_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>({0.});
+    
+    FOR(i, j)
+    {
+    	(*m_d2_chi_LL_ST)[i+1][j+1] = d2.chi[i][j];
+    }
+    
+    FOR(i)
+    {
+    	(*m_d2_chi_LL_ST)[0][i+1] = d2mixedchi[i] ;
+    	(*m_d2_chi_LL_ST)[i+1][0] = d2mixedchi[i] ;    	
+    }        
+
+
+    (*m_d2_chi_LL_ST)[0][0] = 2./3.*rhs.chi*vars.lapse*vars.K  + 2.3*vars.chi*(rhs.lapse*vars.K + vars.lapse*rhs.K) ;
+
+    FOR(k)
+    {
+	(*m_d2_chi_LL_ST)[0][0] += rhs.shift[k]*d1.chi[k] + vars.shift[k]*d2mixedchi[k]- 2./3.*rhs.chi*d1.shift[k][k] - 2.3*vars.chi*d2mixedshift[k][k] ;
+    }
+	 
+}
+
+template_GQ void GeometricQuantities_t::compute_d2_mixed_shift_ULL()
+{
+    if (m_d2_mixed_shift_ULL != nullptr)
+        delete m_d2_mixed_shift_ULL;
+
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();    
+    const auto &rhs = get_rhs_equations();    
+
+    m_d2_mixed_shift_ULL = new Tensor<2, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR(i, j)
+    {
+    	(*m_d2_mixed_shift_ULL)[i][j] =  m_ccz4_params->shift_Gamma_coeff*d1.B[i][j] ;
+
+    	
+	    FOR(k)
+	    {
+	    	(*m_d2_mixed_shift_ULL)[i][j] += m_ccz4_params->shift_advec_coeff*d1.shift[k][j]*d1.shift[i][k] + m_ccz4_params->shift_advec_coeff*vars.shift[k]*d2.shift[i][k][j];
+
+	    }
+	    
+    }     
+
+}
+
+template_GQ void GeometricQuantities_t::compute_d2_shift_ULL_ST()
+{
+    if (m_d2_shift_ULL_ST != nullptr)
+        delete m_d2_shift_ULL_ST;
+
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();    
+    const auto &rhs = get_rhs_equations();    
+    const auto &d2mixedshift = get_d2_mixed_shift_ULL();
+      
+    m_d2_shift_ULL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR(i, j, k)
+    {
+    	(*m_d2_shift_ULL_ST)[k][i+1][j+1] =  d2.shift[k][i][j] ;
+	    
+    }
+    
+    FOR(i, k)
+    {
+    	(*m_d2_shift_ULL_ST)[k][0][i+1] = d2mixedshift[k][i]  ;
+    	(*m_d2_shift_ULL_ST)[k][i+1][0] = d2mixedshift[k][i]  ;	    
+    }
+    
+    
+    FOR(i)
+    {
+    	(*m_d2_shift_ULL_ST)[i][0][0] = m_ccz4_params->shift_Gamma_coeff*rhs.B[i]  ;
+    	
+    	FOR(k)
+    	{
+    		(*m_d2_shift_ULL_ST)[i][0][0] += m_ccz4_params->shift_advec_coeff*rhs.shift[k]*d1.shift[i][k] + m_ccz4_params->shift_advec_coeff*vars.shift[k]*d2mixedshift[i][k];	
+    	}    
+    }      
+         
+}
+
+template_GQ void GeometricQuantities_t::compute_d2_mixed_lapse_LL()
+{
+    if (m_d2_mixed_lapse_LL != nullptr)
+        delete m_d2_mixed_lapse_LL;
+
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();    
+    const auto &rhs = get_rhs_equations();    
+
+    m_d2_mixed_lapse_LL = new Tensor<1, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR(i)
+    {
+    	(*m_d2_mixed_lapse_LL)[i] =  -m_ccz4_params->lapse_coeff*(m_ccz4_params->lapse_power*d1.lapse[i]*pow(vars.lapse, m_ccz4_params->lapse_power-1)*(vars.K - 2.*vars.Theta) + pow(vars.lapse, m_ccz4_params->lapse_power)*(d1.K[i] -2.*d1.Theta[i]) ) ;
+
+	    FOR(k)
+	    {
+	    	(*m_d2_mixed_lapse_LL)[i] += m_ccz4_params->lapse_advec_coeff*(d1.shift[k][i]*d1.lapse[k] + vars.shift[k]*d2.lapse[i][k]) ;
+
+	    }
+    }     
+
+}
+
+template_GQ void GeometricQuantities_t::compute_d2_lapse_LL_ST()
+{
+    if (m_d2_lapse_LL_ST != nullptr)
+        delete m_d2_lapse_LL_ST;
+
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();    
+    const auto &rhs = get_rhs_equations();    
+    const auto &d2mixedlapse = get_d2_mixed_lapse_LL();
+      
+    m_d2_lapse_LL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR(i, j)
+    {
+    	(*m_d2_lapse_LL_ST)[i+1][j+1] =  d2.lapse[i][j] ;
+	    
+    }
+    
+    FOR(i)
+    {
+    	(*m_d2_lapse_LL_ST)[0][i+1] = d2mixedlapse[i]  ;
+    	(*m_d2_lapse_LL_ST)[i+1][0] = d2mixedlapse[i]  ;	    
+    }
+    
+    (*m_d2_lapse_LL_ST)[0][0] = -m_ccz4_params->lapse_coeff*(m_ccz4_params->lapse_power*rhs.lapse*pow(vars.lapse, m_ccz4_params->lapse_power-1)*(vars.K - 2.*vars.Theta) + pow(vars.lapse, m_ccz4_params->lapse_power)*(rhs.K -2.*rhs.Theta) ) ;
+    
+    FOR(k)
+    {
+    	(*m_d2_lapse_LL_ST)[0][0] += m_ccz4_params->lapse_advec_coeff*(rhs.shift[k]*d1.lapse[k] + vars.shift[k]*d2mixedlapse[k])  ;
+    }	
+         
+}
+
+
+template_GQ void GeometricQuantities_t::compute_d1_n_UL_ST()
+{
+    if (m_d1_n_UL_ST != nullptr)
+        delete m_d1_n_UL_ST;
+
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &rhs = get_rhs_equations();
+ 
+    m_d1_n_UL_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>({0.});
+    
+    
+    FOR(i)
+    {
+    	(*m_d1_n_UL_ST)[0][i+1] = -pow(vars.lapse,-2)*d1.lapse[i] ;	    
+    }
+    
+    FOR(i, j)
+    {
+    	(*m_d1_n_UL_ST)[i+1][j+1] = pow(vars.lapse,-2)*vars.shift[i]*d1.lapse[j] -pow(vars.lapse,-1)*d1.shift[i][j] ;
+    }
+    
+    (*m_d1_n_UL_ST)[0][0] = -pow(vars.lapse,-2)*rhs.lapse ;
+    
+    FOR(i)
+    {
+    (*m_d1_n_UL_ST)[i+1][0] = pow(vars.lapse,-2)*vars.shift[i]*rhs.lapse -pow(vars.lapse,-1)*rhs.shift[i] ;
+    }        
+                        
+}
+
+
+template_GQ void GeometricQuantities_t::compute_d2_mixed_n_ULL()
+{
+    if (m_d2_mixed_n_ULL != nullptr)
+        delete m_d2_mixed_n_ULL;
+
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();    
+    const auto &rhs = get_rhs_equations();
+    const auto &d2mixedlapse = get_d2_mixed_lapse_LL();
+    const auto &d2mixedshift = get_d2_mixed_shift_ULL();            
+
+    m_d2_mixed_n_ULL = new Tensor<2, data_t, CH_SPACETIMEDIM>({0.});
+    
+
+    FOR(i)
+    {
+    	(*m_d2_mixed_n_ULL)[0][i+1] = 2.*pow(vars.lapse,-3)*rhs.lapse*d1.lapse[i] -pow(vars.lapse,-2)*d2mixedlapse[i];
+	    
+    }
+    
+    FOR(i, j)
+    {
+    	(*m_d2_mixed_n_ULL)[i+1][j+1] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*d1.lapse[j] +pow(vars.lapse,-2)*vars.shift[i]*d2mixedlapse[j] 
+					+ pow(vars.lapse,-2)*d1.shift[i][j]*rhs.lapse - pow(vars.lapse,-1)*d2mixedshift[i][j] + pow(vars.lapse,-2)*rhs.shift[i]*d1.lapse[j]  ;
+	    
+    } 
+         
+}
+
+template_GQ void GeometricQuantities_t::compute_d2_n_ULL_ST()
+{
+    if (m_d2_n_ULL_ST != nullptr)
+        delete m_d2_n_ULL_ST;
+
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &d2 = get_d2_vars();    
+    const auto &rhs = get_rhs_equations();
+    const auto &d2mixedlapse = get_d2_mixed_lapse_LL();
+    const auto &d2mixedshift = get_d2_mixed_shift_ULL();            
+    const auto &d2mixedn = get_d2_mixed_n_ULL();
+    const auto &d2lapseST = get_d2_lapse_LL_ST();
+    const auto &d2shiftST = get_d2_shift_ULL_ST();    
+    
+
+     
+    m_d2_n_ULL_ST = new Tensor<3, data_t, CH_SPACETIMEDIM>({0.});
+    
+    
+    FOR(i, j)
+    {
+    	(*m_d2_n_ULL_ST)[0][i+1][j+1] = 2.*pow(vars.lapse,-3)*d1.lapse[i]*d1.lapse[j] -pow(vars.lapse,-2)*d2.lapse[i,j];
+	    
+    }
+    
+    FOR(i, j, k)
+    {
+    	(*m_d2_n_ULL_ST)[k+1][i+1][j+1] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*d1.lapse[k]*d1.lapse[j] +pow(vars.lapse,-2)*vars.shift[i]*d2.lapse[j][k] 
+					+ pow(vars.lapse,-2)*d1.shift[i][j]*d1.lapse[k] - pow(vars.lapse,-1)*d2.shift[i][j][k] + pow(vars.lapse,-2)*d1.shift[i][k]*d1.lapse[j]  ;
+	    
+    }
+    
+    FOR(i)
+    {
+    	(*m_d2_n_ULL_ST)[0][0][i+1] = d2mixedn[0][i+1] ;
+    	(*m_d2_n_ULL_ST)[0][i+1][0] = d2mixedn[0][i+1] ;    	
+	    
+    }
+    
+    FOR(i, j)
+    {
+    	(*m_d2_n_ULL_ST)[j+1][0][i+1] = d2mixedn[j][i+1] ;
+    	(*m_d2_n_ULL_ST)[j+1][i+1][0] = d2mixedn[j][i+1] ;    	
+	    
+    } 
+    
+    
+    
+    (*m_d2_n_ULL_ST)[0][0][0] = 2.*pow(vars.lapse,-3)*rhs.lapse*rhs.lapse -pow(vars.lapse,-2)*d2lapseST[0][0];
+    
+    
+    FOR(i)
+    {
+    	(*m_d2_n_ULL_ST)[i+1][0][0] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*rhs.lapse +pow(vars.lapse,-2)*vars.shift[i]*d2lapseST[0][0] 
+					+ pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse - pow(vars.lapse,-1)*d2shiftST[i][0][0] + pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse ;
+	    
+    }                
+                     
+}
+
+template_GQ void GeometricQuantities_t::compute_d1_n_LL_ST()
+{
+    if (m_d1_n_LL_ST != nullptr)
+        delete m_d1_n_LL_ST;
+
+
+    const auto &vars = get_vars();
+    const auto &d1 = get_d1_vars();
+    const auto &rhs = get_rhs_equations();
+ 
+    m_d1_n_LL_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>({0.});
+    
+    
+    (*m_d1_n_LL_ST)[0][0] = -rhs.lapse ;    
+    
+    FOR(i)
+    {
+    	(*m_d1_n_LL_ST)[0][i+1] = -d1.lapse[i] ;	    
+    }
+    
+    FOR(i, j)
+    {
+    	(*m_d1_n_LL_ST)[i+1][j+1] = 0.0 ; // n_L has no i component
+    }
+    
+    FOR(i)
+    {
+    	(*m_d1_n_LL_ST)[i+1][0] = 0.0 ; // n_L has no i component
+    }
+                            
+}
+
+template_GQ void GeometricQuantities_t::compute_d2_n_LLL_ST()
+{
+    if (m_d2_n_LLL_ST != nullptr)
+        delete m_d2_n_LLL_ST;
+
+    const auto &d2lapseST = get_d2_lapse_LL_ST();    
+ 
+    m_d2_n_LLL_ST = new Tensor<2, data_t, CH_SPACETIMEDIM>({0.});
+        
+    FOR_ST(a, b)
+    {
+    	(*m_d2_n_LLL_ST)[a][b] = -d2lapseST[a][b]  ;	    
+    }
+                                
+}
+
+///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+
+
+
 #endif /* GEOMETRICQUANTITIES_IMPL_HPP_ */

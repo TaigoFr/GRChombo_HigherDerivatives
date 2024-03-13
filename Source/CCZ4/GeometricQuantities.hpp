@@ -227,6 +227,35 @@ class GeometricQuantities
     const Tensor<1, data_t, CH_SPACETIMEDIM> &get_Gamma_L_ST();
     // const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d1_Z_L_ST();
     // // commented, but working!
+    
+    //To define the Lie of n// 
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_LIE_acceleration_U_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_acceleration_U_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_CDCD_n_ULL_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_CD_n_UL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_Chris_ULL_ST();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_d1_Chris_ULLL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d1_g_UUL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d1_g_LLL_ST();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_d2_g_LLLL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d1_3metric_LLL_ST();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_d2_3metric_LLLL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d1_gammatilde_LLL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d2_mixed_gammatilde_LLLL();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_d2_gammatilde_LLLL_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_d1_chi_L_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_d2_mixed_chi_LL();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d2_chi_LL_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d2_mixed_shift_ULL();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d2_shift_ULL_ST();
+    const Tensor<1, data_t, CH_SPACETIMEDIM> &get_d2_mixed_lapse_LL();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d2_lapse_LL_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d1_n_UL_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d2_mixed_n_ULL();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d2_n_ULL_ST();
+    const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d1_n_LL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d2_n_LLL_ST();
+
 
     //////// EXTRA ////////
     ricci_t<data_t> compute_ricci_qDZ(int q); // computes Rij + q * DiZj
@@ -376,6 +405,36 @@ class GeometricQuantities
     Tensor<1, data_t, CH_SPACETIMEDIM> *m_Gamma_ST;
     Tensor<1, data_t, CH_SPACETIMEDIM> *m_Gamma_L_ST;
     // Tensor<2, data_t, CH_SPACETIMEDIM> *m_d1_Z_L_ST;
+    
+    
+    //To define the Lie of n//       
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_LIE_acceleration_U_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_acceleration_U_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_CDCD_n_ULL_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_CD_n_UL_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_Chris_ULL_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_d1_Chris_ULLL_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d1_g_UUL_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d1_g_LLL_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_d2_g_LLLL_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d1_3metric_LLL_ST;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_d2_3metric_LLLL_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d1_gammatilde_LLL_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d2_mixed_gammatilde_LLLL;
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_d2_gammatilde_LLLL_ST;        
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_d1_chi_L_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_d2_mixed_chi_LL;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_d2_chi_LL_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_d2_mixed_shift_ULL;    
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d2_shift_ULL_ST;
+    Tensor<1, data_t, CH_SPACETIMEDIM> *m_d2_mixed_lapse_LL;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_d2_lapse_LL_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_d1_n_UL_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_d2_mixed_n_ULL;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d2_n_ULL_ST;
+    Tensor<2, data_t, CH_SPACETIMEDIM> *m_d1_n_LL_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d2_n_LLL_ST;
+    
 
     //////// spatial ////////
     // spatial conformal
@@ -470,6 +529,36 @@ class GeometricQuantities
     void compute_Gamma_ST();
     void compute_Gamma_L_ST();
     // void compute_d1_Z_L_ST();
+    
+    //To define the Lie of n//
+    void compute_LIE_acceleration_U_ST();
+    void compute_acceleration_U_ST();
+    void compute_CDCD_n_ULL_ST();
+    void compute_CD_n_UL_ST();
+    void compute_Chris_ULL_ST();
+    void compute_d1_Chris_ULLL_ST();
+    void compute_d1_g_UUL_ST();
+    void compute_d1_g_LLL_ST();
+    void compute_d2_g_LLLL_ST();
+    void compute_d1_3metric_LLL_ST();
+    void compute_d2_3metric_LLLL_ST();
+    void compute_d1_gammatilde_LLL_ST();
+    void compute_d2_mixed_gammatilde_LLLL();
+    void compute_d2_gammatilde_LLLL_ST();    
+   // void compute_d2_gammatilde_LLLL_ST();
+    void compute_d1_chi_L_ST();
+    void compute_d2_mixed_chi_LL();
+    void compute_d2_chi_LL_ST();
+    void compute_d2_mixed_shift_ULL();
+    void compute_d2_shift_ULL_ST();
+    void compute_d2_mixed_lapse_LL();
+    void compute_d2_lapse_LL_ST();
+    void compute_d1_n_UL_ST();
+    void compute_d2_mixed_n_ULL();
+    void compute_d2_n_ULL_ST();
+    void compute_d1_n_LL_ST();
+    void compute_d2_n_LLL_ST();    
+
 };
 
 #include "GeometricQuantities.impl.hpp"
