@@ -232,6 +232,7 @@ class GeometricQuantities
     const Tensor<1, data_t, CH_SPACETIMEDIM> &get_LIE_acceleration_U_ST();
     const Tensor<1, data_t, CH_SPACETIMEDIM> &get_acceleration_U_ST();
     const Tensor<3, data_t, CH_SPACETIMEDIM> &get_CDCD_n_ULL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d1CD_n_ULL_ST();    
     const Tensor<2, data_t, CH_SPACETIMEDIM> &get_CD_n_UL_ST();
     const Tensor<3, data_t, CH_SPACETIMEDIM> &get_Chris_ULL_ST();
     const Tensor<4, data_t, CH_SPACETIMEDIM> &get_d1_Chris_ULLL_ST();
@@ -255,6 +256,8 @@ class GeometricQuantities
     const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d2_n_ULL_ST();
     const Tensor<2, data_t, CH_SPACETIMEDIM> &get_d1_n_LL_ST();
     const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d2_n_LLL_ST();
+    const Tensor<3, data_t, CH_SPACETIMEDIM> &get_d1_3metric_UUL();
+    const Tensor<4, data_t, CH_SPACETIMEDIM> &get_d1_chris_spatial_ULLL();
 
 
     //////// EXTRA ////////
@@ -411,6 +414,7 @@ class GeometricQuantities
     Tensor<1, data_t, CH_SPACETIMEDIM> *m_LIE_acceleration_U_ST;
     Tensor<1, data_t, CH_SPACETIMEDIM> *m_acceleration_U_ST;
     Tensor<3, data_t, CH_SPACETIMEDIM> *m_CDCD_n_ULL_ST;
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d1CD_n_ULL_ST;    
     Tensor<2, data_t, CH_SPACETIMEDIM> *m_CD_n_UL_ST;
     Tensor<3, data_t, CH_SPACETIMEDIM> *m_Chris_ULL_ST;
     Tensor<4, data_t, CH_SPACETIMEDIM> *m_d1_Chris_ULLL_ST;
@@ -434,7 +438,9 @@ class GeometricQuantities
     Tensor<3, data_t, CH_SPACETIMEDIM> *m_d2_n_ULL_ST;
     Tensor<2, data_t, CH_SPACETIMEDIM> *m_d1_n_LL_ST;
     Tensor<3, data_t, CH_SPACETIMEDIM> *m_d2_n_LLL_ST;
-    
+    Tensor<3, data_t, CH_SPACETIMEDIM> *m_d1_3metric_UUL;    
+    Tensor<4, data_t, CH_SPACETIMEDIM> *m_d1_chris_spatial_ULLL;    
+
 
     //////// spatial ////////
     // spatial conformal
@@ -534,6 +540,7 @@ class GeometricQuantities
     void compute_LIE_acceleration_U_ST();
     void compute_acceleration_U_ST();
     void compute_CDCD_n_ULL_ST();
+    void compute_d1CD_n_ULL_ST();    
     void compute_CD_n_UL_ST();
     void compute_Chris_ULL_ST();
     void compute_d1_Chris_ULLL_ST();
@@ -545,7 +552,6 @@ class GeometricQuantities
     void compute_d1_gammatilde_LLL_ST();
     void compute_d2_mixed_gammatilde_LLLL();
     void compute_d2_gammatilde_LLLL_ST();    
-   // void compute_d2_gammatilde_LLLL_ST();
     void compute_d1_chi_L_ST();
     void compute_d2_mixed_chi_LL();
     void compute_d2_chi_LL_ST();
@@ -557,8 +563,10 @@ class GeometricQuantities
     void compute_d2_mixed_n_ULL();
     void compute_d2_n_ULL_ST();
     void compute_d1_n_LL_ST();
-    void compute_d2_n_LLL_ST();    
-
+    void compute_d2_n_LLL_ST();
+    void compute_d1_3metric_UUL();    
+    void compute_d1_chris_spatial_ULLL();
+        
 };
 
 #include "GeometricQuantities.impl.hpp"

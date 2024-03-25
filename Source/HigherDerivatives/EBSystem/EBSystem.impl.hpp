@@ -549,6 +549,221 @@ void EBSystem::add_matter_rhs(
             total_rhs.Baux[i][j] /= (-sigma * g_UU[0][0]);
         }
     }
+    else if (m_params.version == 4)
+    {
+        // recall: Eaux and Baux are the 1st time derivative of E and B
+        const auto &d1 = gq.get_d1_vars();
+        const auto &d2 = gq.get_d2_vars();
+        const auto &advec = gq.get_advection();
+        const auto &g_UU = gq.get_metric_UU_ST();
+        const auto &g_LL = gq.get_metric_ST();        
+        const auto &CDn = gq.get_CD_n_UL_ST();  
+        const auto &n = gq.get_normal_U_ST();
+        const auto &Chris = gq.get_Chris_ULL_ST();        
+        const auto &lieK = gq.get_lie_extrinsic_curvature();
+        const auto &metric_spatial = gq.get_metric_spatial();         
+        const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
+        const auto &levi_civita_spatial = gq.get_levi_civita_spatial();
+        const auto &Kij = gq.get_extrinsic_curvature();
+        const auto &Lie_acceleration = gq.get_LIE_acceleration_U_ST();        
+        const auto &acceleration = gq.get_acceleration_U_ST();                        
+        const auto &covD_K_tensor = gq.get_covd_extrinsic_curvature();
+        const auto &chris_spatial = gq.get_chris_spatial();   ///this is ULL                             
+        const auto &d1_chris_spatial_ULLL = gq.get_d1_chris_spatial_ULLL();
+              
+    	Tensor<1, data_t, CH_SPACETIMEDIM> acceleration_L;    	    	
+        acceleration_L = TensorAlgebra::compute_dot_product(acceleration, g_LL);
+
+        //Tensor<2, data_t> Eij = gq.get_weyl_electric_part();
+        //Tensor<2, data_t> Bij = gq.get_weyl_magnetic_part();
+               
+    	Tensor<2, data_t> Eij_LU, Bij_LU;    	    	
+        Eij_LU = TensorAlgebra::compute_dot_product(vars.Eij, metric_UU_spatial);
+        Bij_LU = TensorAlgebra::compute_dot_product(vars.Bij, metric_UU_spatial);
+        
+        Tensor<2, data_t> Eij_UU, Bij_UU ;
+        Eij_UU = TensorAlgebra::compute_dot_product(metric_UU_spatial, Eij_LU, 0, 0);         
+        Bij_UU = TensorAlgebra::compute_dot_product(metric_UU_spatial, Bij_LU, 0, 0);
+
+        Tensor<3, data_t> D_Eij;        
+        D_Eij = TensorAlgebra::covariant_derivative(d1.Eij, vars.Eij, chris_spatial);
+        
+        Tensor<3, data_t> D_Eij_LUL;  // this is as : D_Bij[i][j][k]  D_[k] Bij_[i]^[j]
+        FOR(i, j, k)
+        {
+            FOR(l)
+            {
+        	D_Eij_LUL[i][j][k] = D_Eij[i][l][k]*metric_UU_spatial[l][j] ;
+            }	 
+        }        
+        
+        Tensor<3, data_t> D_Bij;        
+        D_Bij = TensorAlgebra::covariant_derivative(d1.Bij, vars.Bij, chris_spatial);
+        
+        Tensor<3, data_t> D_Bij_LUL;  // this is as : D_Bij[i][j][k]  D_[k] Bij_[i]^[j]
+        FOR(i, j, k)
+        {
+            FOR(l)
+            {
+        	D_Bij_LUL[i][j][k] = D_Bij[i][l][k]*metric_UU_spatial[l][j] ;
+            }	 
+        }          
+        
+        Tensor<4, data_t> DD_Eij; /// this is as : DD_Eij[i][j][l][m] D_m D_l Eij[i][j] 
+        
+        FOR(i, j , l , m)
+        {
+            DD_Eij[i][j][l][m] = d2.Eij[i][j][m][l] ;
+            FOR(k)
+            {
+            DD_Eij[i][j][l][m] += - d1_chris_spatial_ULLL[k][i][l][m]*vars.Eij[k][j] - chris_spatial[k][i][l]*d1.Eij[k][j][m]
+            		          - d1_chris_spatial_ULLL[k][l][j][m]*vars.Eij[i][k]  - chris_spatial[k][l][j]*d1.Eij[i][k][m] 
+				  - chris_spatial[k][m][l]*D_Eij[i][j][k] - chris_spatial[k][m][i]*D_Eij[k][j][l] - chris_spatial[k][m][j]*D_Eij[i][k][l] ;            		                     
+            }                         
+        }
+        
+        Tensor<4, data_t> DD_Bij; /// this is as : DD_Bij[i][j][l][m] D_m D_l Bij[i][j] 
+        
+        FOR(i, j , l , m)
+        {
+            DD_Bij[i][j][l][m] = d2.Bij[i][j][m][l] ;
+            FOR(k)
+            {
+            DD_Bij[i][j][l][m] += - d1_chris_spatial_ULLL[k][i][l][m]*vars.Bij[k][j] - chris_spatial[k][i][l]*d1.Bij[k][j][m]
+            		          - d1_chris_spatial_ULLL[k][l][j][m]*vars.Bij[i][k]  - chris_spatial[k][l][j]*d1.Bij[i][k][m] 
+				  - chris_spatial[k][m][l]*D_Bij[i][j][k] - chris_spatial[k][m][i]*D_Bij[k][j][l] - chris_spatial[k][m][j]*D_Bij[i][k][l] ;            		                     
+            }
+        }                 
+        
+    	Tensor<2, data_t> Kij_LU ;    	
+        Kij_LU = TensorAlgebra::compute_dot_product(Kij, metric_UU_spatial);
+        
+        Tensor<2, data_t> Kij_UU ;
+        Kij_UU = TensorAlgebra::compute_dot_product(metric_UU_spatial, Kij_LU, 0, 0);        
+        
+        Tensor<3, data_t> DKij_UUL ;
+	FOR(i, j, k)
+	{
+	    FOR(l,m)
+	    {
+	        DKij_UUL[i][j][k] += covD_K_tensor[l][m][k]*metric_UU_spatial[i][l]*metric_UU_spatial[j][m] ;
+	    }    
+ 	}
+        
+    	Tensor<2, data_t> Baux_LU, Eaux_LU ;    	    	
+        Baux_LU = TensorAlgebra::compute_dot_product(vars.Baux, metric_UU_spatial);
+        Eaux_LU = TensorAlgebra::compute_dot_product(vars.Baux, metric_UU_spatial);                              
+        
+        FOR(i, j) // No contractions
+        {
+
+            total_rhs.Eij[i][j] = -vars.Eaux[i][j];
+            total_rhs.Bij[i][j] = -vars.Baux[i][j];            
+            FOR(k) // One spatial contraction
+            {
+            	total_rhs.Eij[i][j] += vars.shift[k]*d1.Eij[i][j][k] -vars.lapse*(vars.Eij[i][k]*CDn[k+1][j+1] + vars.Eij[k][j]*CDn[k+1][i+1]) ;
+            	total_rhs.Bij[i][j] += vars.shift[k]*d1.Bij[i][j][k] -vars.lapse*(vars.Bij[i][k]*CDn[k+1][j+1] + vars.Bij[k][j]*CDn[k+1][i+1]) ;            	
+            	
+            	FOR_ST(a) // One ST contraction
+            	{
+             	    total_rhs.Eij[i][j] += vars.lapse*(n[a]*(Chris[k+1][i+1][a]*vars.Eij[k][j]  + Chris[k+1][j+1][a]*vars.Eij[i][k])) ;
+             	    total_rhs.Bij[i][j] += vars.lapse*(n[a]*(Chris[k+1][i+1][a]*vars.Bij[k][j]  + Chris[k+1][j+1][a]*vars.Bij[i][k])) ;              	        
+            	}
+            }
+            
+            ////////////////////////WE START WITH THE SECOND ORDER EQUATION////////
+
+	    total_rhs.Eaux[i][j] = vars.K*vars.Eaux[i][j] ; // no contractions
+            
+            FOR(k) // One spatial contraction
+            {
+            	total_rhs.Eaux[i][j] += vars.shift[k]*d1.Eaux[i][j][k]/vars.lapse - (vars.Eaux[i][k]*CDn[k+1][j+1] + vars.Eaux[k][j]*CDn[k+1][i+1]) ;
+            	total_rhs.Baux[i][j] += vars.shift[k]*d1.Baux[i][j][k]/vars.lapse - (vars.Baux[i][k]*CDn[k+1][j+1] + vars.Baux[k][j]*CDn[k+1][i+1]) ;
+            	            	
+            	FOR_ST(a) // One ST contraction
+            	{
+             	    total_rhs.Eaux[i][j] += (n[a]*(Chris[k+1][i+1][a]*vars.Eaux[k][j]  + Chris[k+1][j+1][a]*vars.Eaux[i][k])) ;
+             	    total_rhs.Baux[i][j] += (n[a]*(Chris[k+1][i+1][a]*vars.Baux[k][j]  + Chris[k+1][j+1][a]*vars.Baux[i][k])) ;             	        
+            	}
+            	
+	    }
+	    	    
+	    FOR_ST(a) // One sT contraction
+	    {
+	        total_rhs.Eaux[i][j] -= -4.*acceleration[a]*acceleration_L[a]*vars.Eij[i][j];
+	        total_rhs.Baux[i][j] -= -4.*acceleration[a]*acceleration_L[a]*vars.Bij[i][j];	        
+	    }
+	    	    
+	    FOR(k) // One spatial contraction
+	    {
+	        total_rhs.Eaux[i][j] -= - Eij_LU[i][k]*lieK[j][k] - Eij_LU[j][k]*lieK[i][k] 
+					+ 2.*Kij_LU[i][k]*vars.Eaux[j][k] + 2.*Kij_LU[j][k]*vars.Eaux[i][k] 
+	        			+ 3.*acceleration[k+1]*acceleration_L[i+1]*vars.Eij[j][k] 
+	        			+ 3.*acceleration[k+1]*acceleration_L[j+1]*vars.Eij[i][k]
+	        			+ vars.K*Eij_LU[i][k]*Kij[j][k] + vars.K*Eij_LU[j][k]*Kij[i][k]	        			
+	        			- 6.*(vars.Eij[k][i]*Eij_LU[j][k] - vars.Bij[k][i]*Bij_LU[j][k]);
+	        			
+	        total_rhs.Baux[i][j] -= - Bij_LU[i][k]*lieK[j][k] - Bij_LU[j][k]*lieK[i][k] 
+					+ 2.*Kij_LU[i][k]*vars.Baux[j][k] + 2.*Kij_LU[j][k]*vars.Baux[i][k] 
+	        			+ 3.*acceleration[k+1]*acceleration_L[i+1]*vars.Bij[j][k] 
+	        			+ 3.*acceleration[k+1]*acceleration_L[j+1]*vars.Bij[i][k]
+	        			+ vars.K*Bij_LU[i][k]*Kij[j][k] + vars.K*Bij_LU[j][k]*Kij[i][k]	        			
+	        			- 6.*(vars.Eij[k][i]*Bij_LU[j][k] + vars.Eij[k][j]*Bij_LU[i][k]);	        			
+
+	        			
+	        FOR(l) // two spatial contractions
+	        {
+	            total_rhs.Eaux[i][j] -= -Bij_LU[i][l]*levi_civita_spatial[j][l][k]*Lie_acceleration[k+1] -Bij_LU[j][l]*levi_civita_spatial[i][l][k]*Lie_acceleration[k+1]
+	                                    + DD_Eij[i][j][l][k]*metric_UU_spatial[l][k]
+	            			    -2.*Baux_LU[i][l]*levi_civita_spatial[j][l][k]*acceleration[k+1] -2.*Baux_LU[j][l]*levi_civita_spatial[i][l][k]*acceleration[k+1]
+	            			    -2.*acceleration[k+1]*acceleration[l+1]*vars.Eij[l][k]*metric_spatial[i][j]
+	            			    +acceleration[k+1]*0.5*Bij_LU[i][l]*levi_civita_spatial[j][k][l]*vars.K
+	            			    +acceleration[k+1]*0.5*Bij_LU[j][l]*levi_civita_spatial[i][k][l]*vars.K	            			    
+					    +4.*Kij[l][k]*Kij_UU[l][k]*vars.Eij[i][j] 
+					    -6.*Kij[l][k]*Eij_LU[i][l]*Kij_LU[j][k] -6.*Kij[l][k]*Eij_LU[j][l]*Kij_LU[i][k]
+					    -2.*Eij_UU[l][k]*Kij[i][l]*Kij[j][k]
+					    +2.*metric_spatial[i][j]*(vars.Eij[l][k]*Eij_UU[l][k] - vars.Bij[l][k]*Bij_UU[l][k]);
+					    
+	            total_rhs.Baux[i][j] -= -Eij_LU[i][l]*levi_civita_spatial[j][l][k]*Lie_acceleration[k+1] -Eij_LU[j][l]*levi_civita_spatial[i][l][k]*Lie_acceleration[k+1]
+	                                    + DD_Bij[i][j][l][k]*metric_UU_spatial[l][k]
+	            			    +2.*Eaux_LU[i][l]*levi_civita_spatial[j][l][k]*acceleration[k+1] +2.*Eaux_LU[j][l]*levi_civita_spatial[i][l][k]*acceleration[k+1]
+	            			    -2.*acceleration[k+1]*acceleration[l+1]*vars.Bij[l][k]*metric_spatial[i][j]
+	            			    -acceleration[k+1]*0.5*Eij_LU[i][l]*levi_civita_spatial[j][k][l]*vars.K
+	            			    -acceleration[k+1]*0.5*Eij_LU[j][l]*levi_civita_spatial[i][k][l]*vars.K	            			    
+					    +4.*Kij[l][k]*Kij_UU[l][k]*vars.Bij[i][j] 
+					    -6.*Kij[l][k]*Bij_LU[i][l]*Kij_LU[j][k] -6.*Kij[l][k]*Bij_LU[j][l]*Kij_LU[i][k]
+					    -2.*Bij_UU[l][k]*Kij[i][l]*Kij[j][k]
+					    +4.*metric_spatial[i][j]*vars.Eij[l][k]*Bij_UU[l][k] ;					    
+					    
+		   FOR(m) // three spatial contractions
+		   {
+		       total_rhs.Eaux[i][j] -= Bij_LU[i][l]*levi_civita_spatial[j][l][k]*DKij_UUL[m][k][m]
+		       			     + Bij_LU[j][l]*levi_civita_spatial[i][l][k]*DKij_UUL[m][k][m]
+		       			     + 2.*D_Bij_LUL[i][k][l]*levi_civita_spatial[j][k][m]*Kij_UU[l][m]
+		       			     + 2.*D_Bij_LUL[j][k][l]*levi_civita_spatial[i][k][m]*Kij_UU[l][m] 
+					     - 2.*acceleration[k+1]*Bij_UU[l][m]*Kij[l][i]*levi_civita_spatial[j][k][m]
+		       			     - 2.*acceleration[k+1]*Bij_UU[l][m]*Kij[l][j]*levi_civita_spatial[i][k][m]
+		       			     - acceleration[k+1]*0.5*Bij_LU[i][l]*(levi_civita_spatial[j][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[j][k][m]*Kij_LU[l][m])
+		       			     - acceleration[k+1]*0.5*Bij_LU[j][l]*(levi_civita_spatial[i][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[i][k][m]*Kij_LU[l][m])
+		       			     + 2.*Eij_UU[l][k]*Kij_LU[l][m]*Kij[k][m]*metric_spatial[i][j];
+		       			     
+		       total_rhs.Baux[i][j] -= -Eij_LU[i][l]*levi_civita_spatial[j][l][k]*DKij_UUL[m][k][m]
+		       			     + -Eij_LU[j][l]*levi_civita_spatial[i][l][k]*DKij_UUL[m][k][m]
+		       			     - 2.*D_Eij_LUL[i][k][l]*levi_civita_spatial[j][k][m]*Kij_UU[l][m]
+		       			     - 2.*D_Eij_LUL[j][k][l]*levi_civita_spatial[i][k][m]*Kij_UU[l][m] 
+					     + 2.*acceleration[k+1]*Eij_UU[l][m]*Kij[l][i]*levi_civita_spatial[j][k][m]
+		       			     + 2.*acceleration[k+1]*Eij_UU[l][m]*Kij[l][j]*levi_civita_spatial[i][k][m]
+		       			     + acceleration[k+1]*0.5*Eij_LU[i][l]*(levi_civita_spatial[j][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[j][k][m]*Kij_LU[l][m])
+		       			     + acceleration[k+1]*0.5*Eij_LU[j][l]*(levi_civita_spatial[i][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[i][k][m]*Kij_LU[l][m])
+		       			     + 2.*Bij_UU[l][k]*Kij_LU[l][m]*Kij[k][m]*metric_spatial[i][j];		       			     
+		   }			    			    
+	        }				
+	    }
+	    	    
+	    total_rhs.Eaux[i][j] *= vars.lapse;
+	    total_rhs.Baux[i][j] *= vars.lapse;	    
+        }
+    }
     else
     {
         MayDay::Error("Version not implemented");
@@ -728,7 +943,7 @@ void EBSystem::compute_d2_Eij_and_Bij(
             d2_Bij[i][j][0][0] = -1. / tau * (rhs.Bij[i][j] - dt_Bij[i][j]);
         }
     }
-    else if (m_params.version == 2 || m_params.version == 3)
+    else if (m_params.version == 2 || m_params.version == 3 )
     {
         const auto &d1 = gq.get_d1_vars();
         const auto &d2 = gq.get_d2_vars();
@@ -758,6 +973,98 @@ void EBSystem::compute_d2_Eij_and_Bij(
             d2_Bij[i][j][0][0] = rhs.Baux[i][j];
         }
     }
+    else if (m_params.version == 4 )
+    {
+        const auto &vars = gq.get_vars();    
+        const auto &d1 = gq.get_d1_vars();
+        const auto &d2 = gq.get_d2_vars();
+        const auto &n = gq.get_normal_U_ST();
+        const auto &d1n = gq.get_d1_n_UL_ST();        
+        const auto &CDn = gq.get_CD_n_UL_ST();
+        const auto &d1CDn = gq.get_d1CD_n_ULL_ST();
+        const auto &Chris = gq.get_Chris_ULL_ST();
+        const auto &d1Chris = gq.get_d1_Chris_ULLL_ST();        
+        
+        FOR(i, j)
+        {
+            FOR(k)
+            {
+                FOR(l) // 2nd spatial ders
+                {
+                    d2_Eij[i][j][k + 1][l + 1] = d2.Eij[i][j][k][l];
+                    d2_Bij[i][j][k + 1][l + 1] = d2.Bij[i][j][k][l];
+                }
+
+                // mixed ders
+
+                d2_Eij[i][j][0][k + 1] = -d1.Eaux[i][j][k] ;
+                d2_Bij[i][j][0][k + 1] = -d1.Baux[i][j][k] ;
+                                
+                FOR(l)
+                {
+                    d2_Eij[i][j][0][k + 1] += d1.shift[l][k]*d1.Eij[i][j][l] 
+                    			      + vars.shift[l]*d2.Eij[i][j][l][k]
+                    			      + d1.lapse[k]*(-vars.Eij[i][l]*CDn[l+1][j+1] -vars.Eij[l][j]*CDn[l+1][i+1]) 
+                    			      - vars.lapse*(d1.Eij[i][l][k]*CDn[l+1][j+1] + vars.Eij[i][l]*d1CDn[l+1][j+1][k+1] + d1.Eij[l][j][k]*CDn[l+1][i+1] + vars.Eij[l][j]*d1CDn[l+1][i+1][k+1]);
+                    			      
+                    d2_Bij[i][j][0][k + 1] += d1.shift[l][k]*d1.Bij[i][j][l] 
+                    			      + vars.shift[l]*d2.Bij[i][j][l][k]
+                    			      + d1.lapse[k]*(-vars.Bij[i][l]*CDn[l+1][j+1] -vars.Bij[l][j]*CDn[l+1][i+1]) 
+                    			      - vars.lapse*(d1.Bij[i][l][k]*CDn[l+1][j+1] + vars.Bij[i][l]*d1CDn[l+1][j+1][k+1] + d1.Bij[l][j][k]*CDn[l+1][i+1] + vars.Bij[l][j]*d1CDn[l+1][i+1][k+1]);	      
+                    			                      
+                    FOR_ST(a)
+                    {
+                        d2_Eij[i][j][0][k + 1] += d1.lapse[k]*n[a]*(Chris[l+1][i+1][a]*vars.Eij[l][j] + Chris[l+1][j+1][a]*vars.Eij[i][l])
+                    			          + vars.lapse*d1n[a][k+1]*(Chris[l+1][i+1][a]*vars.Eij[l][j] + Chris[l+1][j+1][a]*vars.Eij[i][l])
+                    			          + vars.lapse*n[a]*(d1Chris[l+1][i+1][a][k+1]*vars.Eij[l][j] + Chris[l+1][i+1][a]*d1.Eij[l][j][k] 
+                                                  + d1Chris[l+1][j+1][a][k+1]*vars.Eij[i][l] + Chris[l+1][j+1][a]*d1.Eij[i][l][k]) ;
+                                              
+                        d2_Bij[i][j][0][k + 1] += d1.lapse[k]*n[a]*(Chris[l+1][i+1][a]*vars.Bij[l][j] + Chris[l+1][j+1][a]*vars.Bij[i][l])
+                    			          + vars.lapse*d1n[a][k+1]*(Chris[l+1][i+1][a]*vars.Bij[l][j] + Chris[l+1][j+1][a]*vars.Bij[i][l])
+                    	   		          + vars.lapse*n[a]*(d1Chris[l+1][i+1][a][k+1]*vars.Bij[l][j] + Chris[l+1][i+1][a]*d1.Bij[l][j][k] 
+                                                  + d1Chris[l+1][j+1][a][k+1]*vars.Bij[i][l] + Chris[l+1][j+1][a]*d1.Bij[i][l][k]) ;                                              
+                    }                
+                } 
+                d2_Eij[i][j][k + 1][0] = d2_Eij[i][j][0][k + 1];
+                d2_Bij[i][j][k + 1][0] = d2_Bij[i][j][0][k + 1];
+            }
+
+        }
+        
+
+            // 2nd time ders
+        FOR(i, j)
+        {            
+                d2_Eij[i][j][0][0] = -rhs.Eaux[i][j] ;
+                d2_Bij[i][j][0][0] = -rhs.Baux[i][j] ;                
+                
+                FOR(l)
+                {
+                    d2_Eij[i][j][0][0] += rhs.shift[l]*d1.Eij[i][j][l] 
+                    			  + vars.shift[l]*d2_Eij[i][j][l+1][0]
+                    			  + rhs.lapse*(-vars.Eij[i][l]*CDn[l+1][j+1] -vars.Eij[l][j]*CDn[l+1][i+1]) 
+                    			  - vars.lapse*(rhs.Eij[i][l]*CDn[l+1][j+1] + vars.Eij[i][l]*d1CDn[l+1][j+1][0] + rhs.Eij[l][j]*CDn[l+1][i+1] + vars.Eij[l][j]*d1CDn[l+1][i+1][0]);
+                    			      
+                    d2_Bij[i][j][0][0] += rhs.shift[l]*d1.Bij[i][j][l] 
+                    			  + vars.shift[l]*d2_Bij[i][j][l+1][0]
+                    			  + rhs.lapse*(-vars.Bij[i][l]*CDn[l+1][j+1] -vars.Bij[l][j]*CDn[l+1][i+1]) 
+                    			  - vars.lapse*(rhs.Bij[i][l]*CDn[l+1][j+1] + vars.Bij[i][l]*d1CDn[l+1][j+1][0] + rhs.Bij[l][j]*CDn[l+1][i+1] + vars.Bij[l][j]*d1CDn[l+1][i+1][0]);
+                
+                    FOR_ST(a)
+                    {
+                        d2_Eij[i][j][0][0] += rhs.lapse*n[a]*(Chris[l+1][i+1][a]*vars.Eij[l][j] + Chris[l+1][j+1][a]*vars.Eij[i][l])
+                    			      + vars.lapse*d1n[a][0]*(Chris[l+1][i+1][a]*vars.Eij[l][j] + Chris[l+1][j+1][a]*vars.Eij[i][l])
+                    			      + vars.lapse*n[a]*(d1Chris[l+1][i+1][a][0]*vars.Eij[l][j] + Chris[l+1][i+1][a]*rhs.Eij[l][j] 
+                                              + d1Chris[l+1][j+1][a][0]*vars.Eij[i][l] + Chris[l+1][j+1][a]*rhs.Eij[i][l]) ;
+                                              
+                        d2_Bij[i][j][0][0] += rhs.lapse*n[a]*(Chris[l+1][i+1][a]*vars.Bij[l][j] + Chris[l+1][j+1][a]*vars.Bij[i][l])
+                    			      + vars.lapse*d1n[a][0]*(Chris[l+1][i+1][a]*vars.Bij[l][j] + Chris[l+1][j+1][a]*vars.Bij[i][l])
+                    			      + vars.lapse*n[a]*(d1Chris[l+1][i+1][a][0]*vars.Bij[l][j] + Chris[l+1][i+1][a]*rhs.Bij[l][j] 
+                                              + d1Chris[l+1][j+1][a][0]*vars.Bij[i][l] + Chris[l+1][j+1][a]*rhs.Bij[i][l]) ;
+                    }
+                }                         
+        }             
+    }    
     else
     {
         MayDay::Error("Version not implemented");

@@ -401,7 +401,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("eb_version", system_params.version);
         pout() << "Using EB system version " << system_params.version
                << std::endl;
-        CH_assert(system_params.version >= 1 && system_params.version <= 3);
+        CH_assert(system_params.version >= 1 && system_params.version <= 4);
 
         pp.load("rescale_tau_by_lapse", system_params.rescale_tau_by_lapse);
         pp.load("rescale_sigma_by_lapse", system_params.rescale_sigma_by_lapse);
@@ -416,7 +416,7 @@ class SimulationParameters : public SimulationParametersBase
         pout() << "Using use_last_index_raised = "
                << system_params.use_last_index_raised << std::endl;
 
-        if (system_params.version == 2 || system_params.version == 3)
+        if (system_params.version == 2 || system_params.version == 3 || system_params.version == 4)
         {
             pp.load("advection_type", system_params.advection_type);
             pp.load("eb_sigma", system_params.sigma);

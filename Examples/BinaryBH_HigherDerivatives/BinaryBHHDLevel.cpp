@@ -112,7 +112,7 @@ void BinaryBHHDLevel::initialData()
                       m_p.system_params.use_last_index_raised);
     BoxLoops::loop(compute, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 
-    if (m_p.system_params.version == 2 || m_p.system_params.version == 3)
+    if (m_p.system_params.version == 2 || m_p.system_params.version == 3 || m_p.system_params.version == 4)
     {
         fillAllGhosts();
         bool compute_time_derivatives = true;
