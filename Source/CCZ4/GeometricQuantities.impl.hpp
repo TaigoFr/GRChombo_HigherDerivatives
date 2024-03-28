@@ -3695,7 +3695,7 @@ template_GQ void GeometricQuantities_t::compute_LIE_acceleration_U_ST()
     {  
     	FOR_ST(b)
     	{    	
-            (*m_LIE_acceleration_U_ST)[a] += acceleration[b]*CDn[a][b] ;
+            (*m_LIE_acceleration_U_ST)[a] += -acceleration[b]*CDn[a][b] ;
     	}	
     	FOR_ST(b, c)
     	{
@@ -3718,7 +3718,7 @@ template_GQ void GeometricQuantities_t::compute_acceleration_U_ST()
     FOR_ST(a)
     {
     	FOR_ST(b)    	
-    		(*m_acceleration_U_ST)[a] = normal[b]*CDn[a][b] ; 
+    		(*m_acceleration_U_ST)[a] += normal[b]*CDn[a][b] ; 
     	 	    	
     }
             
@@ -3789,9 +3789,10 @@ template_GQ void GeometricQuantities_t::compute_CD_n_UL_ST()
     
     FOR_ST(a, b)
     {
+    	(*m_CD_n_UL_ST)[a][b] = d1n[a][b]    
     	FOR_ST(c)
     	{    
-    	    (*m_CD_n_UL_ST)[a][b] += d1n[a][b] + Chris[a][c][b]*normal[c] ;
+    	    (*m_CD_n_UL_ST)[a][b] +=  Chris[a][c][b]*normal[c] ;
     	}  	    	
     }
             
@@ -4215,24 +4216,24 @@ template_GQ void GeometricQuantities_t::compute_d2_shift_ULL_ST()
 
     FOR(i, j, k)
     {
-    	(*m_d2_shift_ULL_ST)[k][i+1][j+1] =  d2.shift[k][i][j] ;
+    	(*m_d2_shift_ULL_ST)[k+1][i+1][j+1] =  d2.shift[k][i][j] ;
 	    
     }
     
     FOR(i, k)
     {
-    	(*m_d2_shift_ULL_ST)[k][0][i+1] = d2mixedshift[k][i]  ;
-    	(*m_d2_shift_ULL_ST)[k][i+1][0] = d2mixedshift[k][i]  ;	    
+    	(*m_d2_shift_ULL_ST)[k+1][0][i+1] = d2mixedshift[k][i]  ;
+    	(*m_d2_shift_ULL_ST)[k+1][i+1][0] = d2mixedshift[k][i]  ;	    
     }
     
     
     FOR(i)
     {
-    	(*m_d2_shift_ULL_ST)[i][0][0] = m_ccz4_params->shift_Gamma_coeff*rhs.B[i]  ;
+    	(*m_d2_shift_ULL_ST)[i+1][0][0] = m_ccz4_params->shift_Gamma_coeff*rhs.B[i]  ;
     	
     	FOR(k)
     	{
-    		(*m_d2_shift_ULL_ST)[i][0][0] += m_ccz4_params->shift_advec_coeff*rhs.shift[k]*d1.shift[i][k] + m_ccz4_params->shift_advec_coeff*vars.shift[k]*d2mixedshift[i][k];	
+    		(*m_d2_shift_ULL_ST)[i+1][0][0] += m_ccz4_params->shift_advec_coeff*rhs.shift[k]*d1.shift[i][k] + m_ccz4_params->shift_advec_coeff*vars.shift[k]*d2mixedshift[i][k];	
     	}    
     }      
          
@@ -4359,8 +4360,8 @@ template_GQ void GeometricQuantities_t::compute_d2_mixed_n_ULL()
     
     FOR(i, j)
     {
-    	(*m_d2_mixed_n_ULL)[i+1][j+1] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*d1.lapse[j] +pow(vars.lapse,-2)*vars.shift[i]*d2mixedlapse[j] 
-					+ pow(vars.lapse,-2)*d1.shift[i][j]*rhs.lapse - pow(vars.lapse,-1)*d2mixedshift[i][j] + pow(vars.lapse,-2)*rhs.shift[i]*d1.lapse[j]  ;
+    	(*m_d2_mixed_n_ULL)[i+1][j+1] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*d1.lapse[j] + pow(vars.lapse,-2)*d1.shift[i][j]*rhs.lapse - pow(vars.lapse,-1)*d2mixedshift[i][j]  
+					 + pow(vars.lapse,-2)*vars.shift[i]*d2mixedlapse[j] + pow(vars.lapse,-2)*rhs.shift[i]*d1.lapse[j]  ;
 	    
     } 
          
@@ -4395,8 +4396,8 @@ template_GQ void GeometricQuantities_t::compute_d2_n_ULL_ST()
     
     FOR(i, j, k)
     {
-    	(*m_d2_n_ULL_ST)[k+1][i+1][j+1] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*d1.lapse[k]*d1.lapse[j] +pow(vars.lapse,-2)*vars.shift[i]*d2.lapse[j][k] 
-					+ pow(vars.lapse,-2)*d1.shift[i][j]*d1.lapse[k] - pow(vars.lapse,-1)*d2.shift[i][j][k] + pow(vars.lapse,-2)*d1.shift[i][k]*d1.lapse[j]  ;
+    	(*m_d2_n_ULL_ST)[k+1][i+1][j+1] = -2.0*pow(vars.lapse,-3)*vars.shift[k]*d1.lapse[i]*d1.lapse[j] + pow(vars.lapse,-2)*d1.shift[k][j]*d1.lapse[i] 
+					 - pow(vars.lapse,-1)*d2.shift[k][i][j] +pow(vars.lapse,-2)*vars.shift[k]*d2.lapse[i][j]  +  pow(vars.lapse,-2)*d1.shift[k][i]*d1.lapse[j]  ;
 	    
     }
     
@@ -4421,8 +4422,8 @@ template_GQ void GeometricQuantities_t::compute_d2_n_ULL_ST()
     
     FOR(i)
     {
-    	(*m_d2_n_ULL_ST)[i+1][0][0] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*rhs.lapse +pow(vars.lapse,-2)*vars.shift[i]*d2lapseST[0][0] 
-					+ pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse - pow(vars.lapse,-1)*d2shiftST[i][0][0] + pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse ;
+    	(*m_d2_n_ULL_ST)[i+1][0][0] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*rhs.lapse + pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse  - pow(vars.lapse,-1)*d2shiftST[i][0][0]
+					+pow(vars.lapse,-2)*vars.shift[i]*d2lapseST[0][0] + pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse ;
 	    
     }                
                      
