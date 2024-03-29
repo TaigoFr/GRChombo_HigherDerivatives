@@ -3789,7 +3789,7 @@ template_GQ void GeometricQuantities_t::compute_CD_n_UL_ST()
     
     FOR_ST(a, b)
     {
-    	(*m_CD_n_UL_ST)[a][b] = d1n[a][b]    
+    	(*m_CD_n_UL_ST)[a][b] = d1n[a][b] ;
     	FOR_ST(c)
     	{    
     	    (*m_CD_n_UL_ST)[a][b] +=  Chris[a][c][b]*normal[c] ;
