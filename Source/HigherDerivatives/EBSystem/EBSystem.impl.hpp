@@ -574,8 +574,18 @@ void EBSystem::add_matter_rhs(
     	Tensor<1, data_t, CH_SPACETIMEDIM> acceleration_L;    	    	
         acceleration_L = TensorAlgebra::compute_dot_product(acceleration, g_LL);
 
-        //Tensor<2, data_t> Eij = gq.get_weyl_electric_part();
-        //Tensor<2, data_t> Bij = gq.get_weyl_magnetic_part();
+        // first compute the LL ones, but when evolving the raised E and B
+        // these need to be raised
+        Tensor<2, data_t> Eij = gq.get_weyl_electric_part();
+        Tensor<2, data_t> Bij = gq.get_weyl_magnetic_part();
+
+        if (m_params.use_last_index_raised)
+        {
+            // raising them here
+            const auto &metric_UU_spatial = gq.get_metric_UU_spatial();
+            Eij = TensorAlgebra::compute_dot_product(Eij, metric_UU_spatial);
+            Bij = TensorAlgebra::compute_dot_product(Bij, metric_UU_spatial);
+        }
                
     	Tensor<2, data_t> Eij_LU, Bij_LU;    	    	
         Eij_LU = TensorAlgebra::compute_dot_product(vars.Eij, metric_UU_spatial);
@@ -652,7 +662,7 @@ void EBSystem::add_matter_rhs(
         
     	Tensor<2, data_t> Baux_LU, Eaux_LU ;    	    	
         Baux_LU = TensorAlgebra::compute_dot_product(vars.Baux, metric_UU_spatial);
-        Eaux_LU = TensorAlgebra::compute_dot_product(vars.Baux, metric_UU_spatial);                              
+        Eaux_LU = TensorAlgebra::compute_dot_product(vars.Eaux, metric_UU_spatial);                              
         
         FOR(i, j) // No contractions
         {
@@ -761,7 +771,13 @@ void EBSystem::add_matter_rhs(
 	    }
 	    	    
 	    total_rhs.Eaux[i][j] *= vars.lapse;
-	    total_rhs.Baux[i][j] *= vars.lapse;	    
+	    total_rhs.Baux[i][j] *= vars.lapse;	 
+	    
+	    
+	    // NOW THE FIXING PART
+	    
+	    total_rhs.Eaux[i][j] += -vars.lapse*tau_rescaled/sigma_rescaled*vars.Eaux[i][j] + vars.lapse/sigma_rescaled*(vars.Eij[i][j] - Eij[i][j] );
+	    total_rhs.Baux[i][j] += -vars.lapse*tau_rescaled/sigma_rescaled*vars.Baux[i][j] + vars.lapse/sigma_rescaled*(vars.Bij[i][j] - Bij[i][j] );	       
         }
     }
     else
