@@ -684,6 +684,7 @@ void EBSystem::add_matter_rhs(
             ////////////////////////WE START WITH THE SECOND ORDER EQUATION////////
 
 	    total_rhs.Eaux[i][j] = vars.K*vars.Eaux[i][j] ; // no contractions
+	    total_rhs.Baux[i][j] = vars.K*vars.Baux[i][j] ; // no contractions	    
             
             FOR(k) // One spatial contraction
             {
@@ -1013,7 +1014,7 @@ void EBSystem::compute_d2_Eij_and_Bij(
 
                 // mixed ders
 
-                d2_Eij[i][j][0][k + 1] = -d1.Eaux[i][j][k] ;
+                d2_Eij[i][j][0][k + 1] = -d1.Eaux[i][j][k] ; 
                 d2_Bij[i][j][0][k + 1] = -d1.Baux[i][j][k] ;
                                 
                 FOR(l)
