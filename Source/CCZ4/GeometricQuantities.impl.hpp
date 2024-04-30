@@ -140,28 +140,29 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
     m_CD_n_UL_ST = nullptr;   
     m_Chris_ULL_ST = nullptr;
     m_d1_Chris_ULLL_ST = nullptr;
-    m_d1_g_UUL_ST = nullptr;  
-    m_d1_g_LLL_ST = nullptr;
-    m_d2_g_LLLL_ST = nullptr;            
-    m_d1_3metric_LLL_ST = nullptr;     
-    m_d2_3metric_LLLL_ST = nullptr;    
-    m_d1_gammatilde_LLL_ST = nullptr;
-    m_d2_mixed_gammatilde_LLLL = nullptr;
-    m_d2_gammatilde_LLLL_ST = nullptr;
-    m_d1_chi_L_ST = nullptr;                   
-    m_d2_mixed_chi_LL = nullptr;
-    m_d2_chi_LL_ST = nullptr;    
-    m_d2_mixed_shift_ULL = nullptr;
-    m_d2_shift_ULL_ST = nullptr;    
-    m_d2_mixed_lapse_LL = nullptr;
-    m_d2_lapse_LL_ST = nullptr;
-    m_d1_n_UL_ST = nullptr;     
-    m_d2_mixed_n_ULL = nullptr;       
-    m_d2_n_ULL_ST = nullptr;
+    m_d1_n_UL_ST = nullptr;    //CHECKED 
+    m_d2_mixed_n_ULL = nullptr; //CHECKED      
+    m_d2_n_ULL_ST = nullptr; //CHECKED AND CORRECTED
     m_d1_n_LL_ST = nullptr;
     m_d2_n_LLL_ST = nullptr;
     m_d1_3metric_UUL = nullptr;    
-    m_d1_chris_spatial_ULLL = nullptr;                         
+    m_d1_chris_spatial_ULLL = nullptr; 
+    m_d1_g_UUL_ST = nullptr;  
+    m_d1_g_LLL_ST = nullptr;
+    m_d2_g_LLLL_ST = nullptr;            
+    m_d1_3metric_LLL_ST = nullptr;  //CHECKED   
+    m_d2_3metric_LLLL_ST = nullptr; //CHECKED   
+    m_d1_gammatilde_LLL_ST = nullptr; //CHECKED
+    m_d2_mixed_gammatilde_LLLL = nullptr; //CHECKED
+    m_d2_gammatilde_LLLL_ST = nullptr; //CHECKED
+    m_d1_chi_L_ST = nullptr; //CHECKED                  
+    m_d2_mixed_chi_LL = nullptr; //CHECKED
+    m_d2_chi_LL_ST = nullptr; //CHECKED   
+    m_d2_mixed_shift_ULL = nullptr; //CHECKED
+    m_d2_shift_ULL_ST = nullptr; //CHECKED   
+    m_d2_mixed_lapse_LL = nullptr; //CHECKED
+    m_d2_lapse_LL_ST = nullptr; //CHECKED
+                        
 ///////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 /////////////////NEW STUFF///////////////////////////////
@@ -3934,7 +3935,7 @@ template_GQ void GeometricQuantities_t::compute_d1_3metric_LLL_ST()
 
     FOR(i, j)
     {
-    	(*m_d1_3metric_LLL_ST)[i+1][j+1][0] = rhs.h[i][j]*pow(vars.chi,-1) - pow(vars.chi,-2)*rhs.chi*vars.h[i][j] ;
+    	(*m_d1_3metric_LLL_ST)[i+1][j+1][0] = rhs.h[i][j]*pow(vars.chi,-1) - pow(vars.chi,-2)*rhs.chi*vars.h[i][j];
     	    	
     }
     
@@ -4354,13 +4355,13 @@ template_GQ void GeometricQuantities_t::compute_d2_mixed_n_ULL()
 
     FOR(i)
     {
-    	(*m_d2_mixed_n_ULL)[0][i+1] = 2.*pow(vars.lapse,-3)*rhs.lapse*d1.lapse[i] -pow(vars.lapse,-2)*d2mixedlapse[i];
+    	(*m_d2_mixed_n_ULL)[0][i] = 2.*pow(vars.lapse,-3)*rhs.lapse*d1.lapse[i] -pow(vars.lapse,-2)*d2mixedlapse[i];
 	    
     }
     
     FOR(i, j)
     {
-    	(*m_d2_mixed_n_ULL)[i+1][j+1] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*d1.lapse[j] + pow(vars.lapse,-2)*d1.shift[i][j]*rhs.lapse - pow(vars.lapse,-1)*d2mixedshift[i][j]  
+    	(*m_d2_mixed_n_ULL)[i+1][j] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*d1.lapse[j] + pow(vars.lapse,-2)*d1.shift[i][j]*rhs.lapse - pow(vars.lapse,-1)*d2mixedshift[i][j]  
 					 + pow(vars.lapse,-2)*vars.shift[i]*d2mixedlapse[j] + pow(vars.lapse,-2)*rhs.shift[i]*d1.lapse[j]  ;
 	    
     } 
@@ -4403,15 +4404,15 @@ template_GQ void GeometricQuantities_t::compute_d2_n_ULL_ST()
     
     FOR(i)
     {
-    	(*m_d2_n_ULL_ST)[0][0][i+1] = d2mixedn[0][i+1] ;
-    	(*m_d2_n_ULL_ST)[0][i+1][0] = d2mixedn[0][i+1] ;    	
+    	(*m_d2_n_ULL_ST)[0][0][i+1] = d2mixedn[0][i] ;
+    	(*m_d2_n_ULL_ST)[0][i+1][0] = d2mixedn[0][i] ;    	
 	    
     }
     
     FOR(i, j)
     {
-    	(*m_d2_n_ULL_ST)[j+1][0][i+1] = d2mixedn[j][i+1] ;
-    	(*m_d2_n_ULL_ST)[j+1][i+1][0] = d2mixedn[j][i+1] ;    	
+    	(*m_d2_n_ULL_ST)[j+1][0][i+1] = d2mixedn[j+1][i] ;
+    	(*m_d2_n_ULL_ST)[j+1][i+1][0] = d2mixedn[j+1][i] ;    	
 	    
     } 
     
@@ -4422,7 +4423,7 @@ template_GQ void GeometricQuantities_t::compute_d2_n_ULL_ST()
     
     FOR(i)
     {
-    	(*m_d2_n_ULL_ST)[i+1][0][0] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*rhs.lapse + pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse  - pow(vars.lapse,-1)*d2shiftST[i][0][0]
+    	(*m_d2_n_ULL_ST)[i+1][0][0] = -2.0*pow(vars.lapse,-3)*vars.shift[i]*rhs.lapse*rhs.lapse + pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse  - pow(vars.lapse,-1)*d2shiftST[i+1][0][0]
 					+pow(vars.lapse,-2)*vars.shift[i]*d2lapseST[0][0] + pow(vars.lapse,-2)*rhs.shift[i]*rhs.lapse ;
 	    
     }                

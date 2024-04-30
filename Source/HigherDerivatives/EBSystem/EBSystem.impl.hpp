@@ -113,8 +113,8 @@ void EBSystem::compute_C(
     // depending on the option)
     FOR(i, j)
     {
-        d1_Eij[i][j][0] = rhs.Eij[i][j];
-        d1_Bij[i][j][0] = rhs.Bij[i][j];
+        d1_Eij[i][j][0] = rhs.Eij[i][j]; 
+        d1_Bij[i][j][0] = rhs.Bij[i][j]; 
 
         FOR(k)
         {
