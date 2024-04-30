@@ -133,23 +133,23 @@ template_GQ void GeometricQuantities_t::set_all_to_null()
 /////////////////NEW STUFF///////////////////////////////
 ////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
-    m_LIE_acceleration_U_ST = nullptr;
-    m_acceleration_U_ST = nullptr;
-    m_CDCD_n_ULL_ST = nullptr;
-    m_d1CD_n_ULL_ST = nullptr;         
-    m_CD_n_UL_ST = nullptr;   
-    m_Chris_ULL_ST = nullptr;
-    m_d1_Chris_ULLL_ST = nullptr;
-    m_d1_n_UL_ST = nullptr;    //CHECKED 
+    m_LIE_acceleration_U_ST = nullptr; //CHECKED
+    m_acceleration_U_ST = nullptr; //CHECKED
+    m_CDCD_n_ULL_ST = nullptr; //CHECKED
+    m_d1CD_n_ULL_ST = nullptr; //CHECKED         
+    m_CD_n_UL_ST = nullptr; //CHECKED  
+    m_Chris_ULL_ST = nullptr; //CHECKED
+    m_d1_Chris_ULLL_ST = nullptr; //CHECKED
+    m_d1_3metric_UUL = nullptr; //CHECKED   
+    m_d1_chris_spatial_ULLL = nullptr; //CHECKED
+    m_d1_g_UUL_ST = nullptr; //CHECKED  
+    m_d1_g_LLL_ST = nullptr; //CHECKED
+    m_d2_g_LLLL_ST = nullptr; //CHECKED
+    m_d1_n_UL_ST = nullptr; //CHECKED 
     m_d2_mixed_n_ULL = nullptr; //CHECKED      
     m_d2_n_ULL_ST = nullptr; //CHECKED AND CORRECTED
-    m_d1_n_LL_ST = nullptr;
-    m_d2_n_LLL_ST = nullptr;
-    m_d1_3metric_UUL = nullptr;    
-    m_d1_chris_spatial_ULLL = nullptr; 
-    m_d1_g_UUL_ST = nullptr;  
-    m_d1_g_LLL_ST = nullptr;
-    m_d2_g_LLLL_ST = nullptr;            
+    m_d1_n_LL_ST = nullptr; //CHECKED
+    m_d2_n_LLL_ST = nullptr; //CHECKED            
     m_d1_3metric_LLL_ST = nullptr;  //CHECKED   
     m_d2_3metric_LLLL_ST = nullptr; //CHECKED   
     m_d1_gammatilde_LLL_ST = nullptr; //CHECKED
