@@ -667,8 +667,8 @@ void EBSystem::add_matter_rhs(
         FOR(i, j) // No contractions
         {
 
-            total_rhs.Eij[i][j] = -vars.Eaux[i][j];
-            total_rhs.Bij[i][j] = -vars.Baux[i][j];            
+            total_rhs.Eij[i][j] = -vars.lapse*vars.Eaux[i][j];
+            total_rhs.Bij[i][j] = -vars.lapse*vars.Baux[i][j];            
             FOR(k) // One spatial contraction
             {
             	total_rhs.Eij[i][j] += vars.shift[k]*d1.Eij[i][j][k] -vars.lapse*(vars.Eij[i][k]*CDn[k+1][j+1] + vars.Eij[k][j]*CDn[k+1][i+1]) ;
