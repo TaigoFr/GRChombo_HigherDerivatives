@@ -1014,8 +1014,8 @@ void EBSystem::compute_d2_Eij_and_Bij(
 
                 // mixed ders
 
-                d2_Eij[i][j][0][k + 1] = -d1.Eaux[i][j][k] ; 
-                d2_Bij[i][j][0][k + 1] = -d1.Baux[i][j][k] ;
+                d2_Eij[i][j][0][k + 1] = -vars.lapse*d1.Eaux[i][j][k] - vars.Eaux[i][j]*d1.lapse[k] ; 
+                d2_Bij[i][j][0][k + 1] = -vars.lapse*d1.Baux[i][j][k] - vars.Baux[i][j]*d1.lapse[k] ;
                                 
                 FOR(l)
                 {
@@ -1052,8 +1052,8 @@ void EBSystem::compute_d2_Eij_and_Bij(
             // 2nd time ders
         FOR(i, j)
         {            
-                d2_Eij[i][j][0][0] = -rhs.Eaux[i][j] ;
-                d2_Bij[i][j][0][0] = -rhs.Baux[i][j] ;                
+                d2_Eij[i][j][0][0] = -vars.lapse*rhs.Eaux[i][j] - Eaux[i][j]*rhs.lapse ;
+                d2_Bij[i][j][0][0] = -vars.lapse*rhs.Baux[i][j] - Baux[i][j]*rhs.lapse ;                
                 
                 FOR(l)
                 {
