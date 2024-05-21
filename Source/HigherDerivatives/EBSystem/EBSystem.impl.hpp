@@ -684,7 +684,7 @@ void EBSystem::add_matter_rhs(
             ////////////////////////WE START WITH THE SECOND ORDER EQUATION////////
 
 	    total_rhs.Eaux[i][j] = vars.K*vars.Eaux[i][j] ; // no contractions
-	    total_rhs.Baux[i][j] = vars.K*vars.Baux[i][j] ; // no contractions	    
+	    total_rhs.Baux[i][j] = vars.K*vars.Baux[i][j] ; // no contractions
             
             FOR(k) // One spatial contraction
             {
@@ -777,8 +777,12 @@ void EBSystem::add_matter_rhs(
 	    
 	    // NOW THE FIXING PART
 	    
-	    total_rhs.Eaux[i][j] += -vars.lapse*tau_rescaled/sigma_rescaled*vars.Eaux[i][j] + vars.lapse/sigma_rescaled*(vars.Eij[i][j] - Eij[i][j] );
-	    total_rhs.Baux[i][j] += -vars.lapse*tau_rescaled/sigma_rescaled*vars.Baux[i][j] + vars.lapse/sigma_rescaled*(vars.Bij[i][j] - Bij[i][j] );	       
+	   // total_rhs.Eaux[i][j] += -vars.lapse*tau_rescaled/sigma_rescaled*vars.Eaux[i][j] + vars.lapse/sigma_rescaled*(vars.Eij[i][j] - Eij[i][j] );
+	   //total_rhs.Baux[i][j] += -vars.lapse*tau_rescaled/sigma_rescaled*vars.Baux[i][j] + vars.lapse/sigma_rescaled*(vars.Bij[i][j] - Bij[i][j] );
+	    
+	    
+	    total_rhs.Eaux[i][j] += -tau_rescaled/sigma_rescaled*(-total_rhs.Eij[i][j]) + sigma_rescaled*(vars.Eij[i][j] - Eij[i][j] );
+	    total_rhs.Baux[i][j] += -tau_rescaled/sigma_rescaled*(-total_rhs.Bij[i][j]) + sigma_rescaled*(vars.Bij[i][j] - Bij[i][j] );	       
         }
     }
     else
