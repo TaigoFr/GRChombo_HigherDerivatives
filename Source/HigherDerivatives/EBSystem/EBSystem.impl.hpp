@@ -1056,8 +1056,8 @@ void EBSystem::compute_d2_Eij_and_Bij(
             // 2nd time ders
         FOR(i, j)
         {            
-                d2_Eij[i][j][0][0] = -vars.lapse*rhs.Eaux[i][j] - Eaux[i][j]*rhs.lapse ;
-                d2_Bij[i][j][0][0] = -vars.lapse*rhs.Baux[i][j] - Baux[i][j]*rhs.lapse ;                
+                d2_Eij[i][j][0][0] = -vars.lapse*rhs.Eaux[i][j] - vars.Eaux[i][j]*rhs.lapse ;
+                d2_Bij[i][j][0][0] = -vars.lapse*rhs.Baux[i][j] - vars.Baux[i][j]*rhs.lapse ;                
                 
                 FOR(l)
                 {
