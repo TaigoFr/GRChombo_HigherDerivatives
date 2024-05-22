@@ -52,6 +52,8 @@ class EBSystem
 
         bool use_sigma_chi_decay;
         double sigma_decay_width;
+        
+        double epsilon;
     };
 
     //!  Constructor of class EBSystem, inputs are the matter parameters.

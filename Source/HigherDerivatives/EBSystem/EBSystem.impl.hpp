@@ -682,9 +682,6 @@ void EBSystem::add_matter_rhs(
             }
             
             ////////////////////////WE START WITH THE SECOND ORDER EQUATION////////
-
-	    total_rhs.Eaux[i][j] = vars.K*vars.Eaux[i][j] ; // no contractions
-	    total_rhs.Baux[i][j] = vars.K*vars.Baux[i][j] ; // no contractions
             
             FOR(k) // One spatial contraction
             {
@@ -698,6 +695,12 @@ void EBSystem::add_matter_rhs(
             	}
             	
 	    }
+
+	    if (m_params.epsilon > 0.0)
+            {
+	    		    
+	    total_rhs.Eaux[i][j] = vars.K*vars.Eaux[i][j] ; // no contractions
+	    total_rhs.Baux[i][j] = vars.K*vars.Baux[i][j] ; // no contractions
 	    	    
 	    FOR_ST(a) // One sT contraction
 	    {
@@ -770,7 +773,7 @@ void EBSystem::add_matter_rhs(
 		   }			    			    
 	        }				
 	    }
-	    	    
+	    }	    
 	    total_rhs.Eaux[i][j] *= vars.lapse;
 	    total_rhs.Baux[i][j] *= vars.lapse;	 
 	    
