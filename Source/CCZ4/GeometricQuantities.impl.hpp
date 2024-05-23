@@ -3838,9 +3838,9 @@ template_GQ void GeometricQuantities_t::compute_d1_Chris_ULLL_ST()
     m_d1_Chris_ULLL_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
     
 
-    FOR_ST(a, b, c, d )
+    FOR_ST(a, b, c )
     {
-	FOR_ST(e)
+	FOR_ST(e, d)
 	{    
     		(*m_d1_Chris_ULLL_ST)[a][b][c][d] += 1./2.*d1gUUL[a][e][d]*( d1g[e][c][b] + d1g[b][e][c] - d1g[b][c][e] )
 						   + 1./2.*gUU[a][e]*( d2g[e][c][d][b] + d2g[b][e][d][c] - d2g[b][c][d][e] ) ;
@@ -4513,7 +4513,7 @@ template_GQ void GeometricQuantities_t::compute_d1_chris_spatial_ULLL()
     {
     	FOR(l)
     	{
-    		(*m_d1_chris_spatial_ULLL)[k][i][j][m] = 0.5*(d1_3metric_UUL[k][l][m]*(d1_3metric_LLL_ST[l+1][j+1][i+1]  + d1_3metric_LLL_ST[i+1][l+1][j+1] - d1_3metric_LLL_ST[i+1][j+1][l+1])
+    		(*m_d1_chris_spatial_ULLL)[k][i][j][m] += 0.5*(d1_3metric_UUL[k][l][m]*(d1_3metric_LLL_ST[l+1][j+1][i+1]  + d1_3metric_LLL_ST[i+1][l+1][j+1] - d1_3metric_LLL_ST[i+1][j+1][l+1])
     							 + metric_UU[k][l]*(d2_3metric_LLLL_ST[l+1][j+1][i+1][m+1] + d2_3metric_LLLL_ST[l+1][i+1][j+1][m+1] - d2_3metric_LLLL_ST[i+1][j+1][l+1][m+1]))  ;
     	}	    
     }
