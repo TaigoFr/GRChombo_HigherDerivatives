@@ -603,7 +603,7 @@ void EBSystem::add_matter_rhs(
         {
             FOR(l)
             {
-        	D_Eij_LUL[i][j][k] = D_Eij[i][l][k]*metric_UU_spatial[l][j] ;
+        	D_Eij_LUL[i][j][k] += D_Eij[i][l][k]*metric_UU_spatial[l][j] ;
             }	 
         }        
         
@@ -615,7 +615,7 @@ void EBSystem::add_matter_rhs(
         {
             FOR(l)
             {
-        	D_Bij_LUL[i][j][k] = D_Bij[i][l][k]*metric_UU_spatial[l][j] ;
+        	D_Bij_LUL[i][j][k] += D_Bij[i][l][k]*metric_UU_spatial[l][j] ;
             }	 
         }          
         
@@ -699,8 +699,8 @@ void EBSystem::add_matter_rhs(
 	    if (m_params.epsilon > 0.0)
             {
 	    		    
-	    total_rhs.Eaux[i][j] = vars.K*vars.Eaux[i][j] ; // no contractions
-	    total_rhs.Baux[i][j] = vars.K*vars.Baux[i][j] ; // no contractions
+	    total_rhs.Eaux[i][j] += vars.K*vars.Eaux[i][j] ; // no contractions
+	    total_rhs.Baux[i][j] += vars.K*vars.Baux[i][j] ; // no contractions
 	    	    
 	    FOR_ST(a) // One sT contraction
 	    {
