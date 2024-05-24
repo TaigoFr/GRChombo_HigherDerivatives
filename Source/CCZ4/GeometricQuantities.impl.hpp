@@ -3791,6 +3791,7 @@ template_GQ void GeometricQuantities_t::compute_CD_n_UL_ST()
     FOR_ST(a, b)
     {
     	(*m_CD_n_UL_ST)[a][b] = d1n[a][b] ;
+    	
     	FOR_ST(c)
     	{    
     	    (*m_CD_n_UL_ST)[a][b] +=  Chris[a][c][b]*normal[c] ;
@@ -3838,9 +3839,9 @@ template_GQ void GeometricQuantities_t::compute_d1_Chris_ULLL_ST()
     m_d1_Chris_ULLL_ST = new Tensor<4, data_t, CH_SPACETIMEDIM>({0.});
     
 
-    FOR_ST(a, b, c )
+    FOR_ST(a, b, c, d )
     {
-	FOR_ST(e, d)
+	FOR_ST(e)
 	{    
     		(*m_d1_Chris_ULLL_ST)[a][b][c][d] += 1./2.*d1gUUL[a][e][d]*( d1g[e][c][b] + d1g[b][e][c] - d1g[b][c][e] )
 						   + 1./2.*gUU[a][e]*( d2g[e][c][d][b] + d2g[b][e][d][c] - d2g[b][c][d][e] ) ;

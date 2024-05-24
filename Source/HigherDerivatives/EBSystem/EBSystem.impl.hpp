@@ -727,7 +727,7 @@ void EBSystem::add_matter_rhs(
 	        			
 	        FOR(l) // two spatial contractions
 	        {
-	            total_rhs.Eaux[i][j] -= -Bij_LU[i][l]*levi_civita_spatial[j][l][k]*Lie_acceleration[k+1] -Bij_LU[j][l]*levi_civita_spatial[i][l][k]*Lie_acceleration[k+1]
+	            total_rhs.Eaux[i][j] -= +Bij_LU[i][l]*levi_civita_spatial[j][l][k]*Lie_acceleration[k+1] +Bij_LU[j][l]*levi_civita_spatial[i][l][k]*Lie_acceleration[k+1]
 	                                    + DD_Eij[i][j][l][k]*metric_UU_spatial[l][k]
 	            			    -2.*Baux_LU[i][l]*levi_civita_spatial[j][l][k]*acceleration[k+1] -2.*Baux_LU[j][l]*levi_civita_spatial[i][l][k]*acceleration[k+1]
 	            			    -2.*acceleration[k+1]*acceleration[l+1]*vars.Eij[l][k]*metric_spatial[i][j]
