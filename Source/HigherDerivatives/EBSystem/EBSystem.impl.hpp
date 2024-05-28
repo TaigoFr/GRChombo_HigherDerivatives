@@ -731,8 +731,8 @@ void EBSystem::add_matter_rhs(
 	                                    + DD_Eij[i][j][l][k]*metric_UU_spatial[l][k]
 	            			    -2.*Baux_LU[i][l]*levi_civita_spatial[j][l][k]*acceleration[k+1] -2.*Baux_LU[j][l]*levi_civita_spatial[i][l][k]*acceleration[k+1]
 	            			    -2.*acceleration[k+1]*acceleration[l+1]*vars.Eij[l][k]*metric_spatial[i][j]
-	            			    +acceleration[k+1]*0.5*Bij_LU[i][l]*levi_civita_spatial[j][k][l]*vars.K
-	            			    +acceleration[k+1]*0.5*Bij_LU[j][l]*levi_civita_spatial[i][k][l]*vars.K	            			    
+	            			    +acceleration[k+1]*Bij_LU[i][l]*levi_civita_spatial[j][k][l]*vars.K
+	            			    +acceleration[k+1]*Bij_LU[j][l]*levi_civita_spatial[i][k][l]*vars.K	            			    
 					    +4.*Kij[l][k]*Kij_UU[l][k]*vars.Eij[i][j] 
 					    -6.*Kij[l][k]*Eij_LU[i][l]*Kij_LU[j][k] -6.*Kij[l][k]*Eij_LU[j][l]*Kij_LU[i][k]
 					    -2.*Eij_UU[l][k]*Kij[i][l]*Kij[j][k]
@@ -742,8 +742,8 @@ void EBSystem::add_matter_rhs(
 	                                    + DD_Bij[i][j][l][k]*metric_UU_spatial[l][k]
 	            			    +2.*Eaux_LU[i][l]*levi_civita_spatial[j][l][k]*acceleration[k+1] +2.*Eaux_LU[j][l]*levi_civita_spatial[i][l][k]*acceleration[k+1]
 	            			    -2.*acceleration[k+1]*acceleration[l+1]*vars.Bij[l][k]*metric_spatial[i][j]
-	            			    -acceleration[k+1]*0.5*Eij_LU[i][l]*levi_civita_spatial[j][k][l]*vars.K
-	            			    -acceleration[k+1]*0.5*Eij_LU[j][l]*levi_civita_spatial[i][k][l]*vars.K	            			    
+	            			    -acceleration[k+1]*Eij_LU[i][l]*levi_civita_spatial[j][k][l]*vars.K
+	            			    -acceleration[k+1]*Eij_LU[j][l]*levi_civita_spatial[i][k][l]*vars.K	            			    
 					    +4.*Kij[l][k]*Kij_UU[l][k]*vars.Bij[i][j] 
 					    -6.*Kij[l][k]*Bij_LU[i][l]*Kij_LU[j][k] -6.*Kij[l][k]*Bij_LU[j][l]*Kij_LU[i][k]
 					    -2.*Bij_UU[l][k]*Kij[i][l]*Kij[j][k]
@@ -757,8 +757,8 @@ void EBSystem::add_matter_rhs(
 		       			     + 2.*D_Bij_LUL[j][k][l]*levi_civita_spatial[i][k][m]*Kij_UU[l][m] 
 					     - 2.*acceleration[k+1]*Bij_UU[l][m]*Kij[l][i]*levi_civita_spatial[j][k][m]
 		       			     - 2.*acceleration[k+1]*Bij_UU[l][m]*Kij[l][j]*levi_civita_spatial[i][k][m]
-		       			     - acceleration[k+1]*0.5*Bij_LU[i][l]*(levi_civita_spatial[j][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[j][k][m]*Kij_LU[l][m])
-		       			     - acceleration[k+1]*0.5*Bij_LU[j][l]*(levi_civita_spatial[i][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[i][k][m]*Kij_LU[l][m])
+		       			     - acceleration[k+1]*Bij_LU[i][l]*(levi_civita_spatial[j][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[j][k][m]*Kij_LU[l][m])
+		       			     - acceleration[k+1]*Bij_LU[j][l]*(levi_civita_spatial[i][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[i][k][m]*Kij_LU[l][m])
 		       			     + 2.*Eij_UU[l][k]*Kij_LU[l][m]*Kij[k][m]*metric_spatial[i][j];
 		       			     
 		       total_rhs.Baux[i][j] -= -Eij_LU[i][l]*levi_civita_spatial[j][l][k]*DKij_UUL[m][k][m]
@@ -767,9 +767,9 @@ void EBSystem::add_matter_rhs(
 		       			     - 2.*D_Eij_LUL[j][k][l]*levi_civita_spatial[i][k][m]*Kij_UU[l][m] 
 					     + 2.*acceleration[k+1]*Eij_UU[l][m]*Kij[l][i]*levi_civita_spatial[j][k][m]
 		       			     + 2.*acceleration[k+1]*Eij_UU[l][m]*Kij[l][j]*levi_civita_spatial[i][k][m]
-		       			     + acceleration[k+1]*0.5*Eij_LU[i][l]*(levi_civita_spatial[j][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[j][k][m]*Kij_LU[l][m])
-		       			     + acceleration[k+1]*0.5*Eij_LU[j][l]*(levi_civita_spatial[i][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[i][k][m]*Kij_LU[l][m])
-		       			     + 2.*Bij_UU[l][k]*Kij_LU[l][m]*Kij[k][m]*metric_spatial[i][j];		       			     
+		       			     + acceleration[k+1]*Eij_LU[i][l]*(levi_civita_spatial[j][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[j][k][m]*Kij_LU[l][m])
+		       			     + acceleration[k+1]*Eij_LU[j][l]*(levi_civita_spatial[i][l][m]*Kij_LU[k][m] + 2.*levi_civita_spatial[i][k][m]*Kij_LU[l][m])
+		       			     + 2.*Bij_UU[l][k]*Kij_LU[l][m]*Kij[k][m]*metric_spatial[i][j];	       			     
 		   }			    			    
 	        }				
 	    }
