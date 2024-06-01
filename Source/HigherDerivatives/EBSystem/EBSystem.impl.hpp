@@ -784,8 +784,8 @@ void EBSystem::add_matter_rhs(
 	   //total_rhs.Baux[i][j] += -vars.lapse*tau_rescaled/sigma_rescaled*vars.Baux[i][j] + vars.lapse/sigma_rescaled*(vars.Bij[i][j] - Bij[i][j] );
 	    
 	    
-	    total_rhs.Eaux[i][j] += -tau_rescaled/sigma_rescaled*(-total_rhs.Eij[i][j]) + sigma_rescaled*(vars.Eij[i][j] - Eij[i][j] );
-	    total_rhs.Baux[i][j] += -tau_rescaled/sigma_rescaled*(-total_rhs.Bij[i][j]) + sigma_rescaled*(vars.Bij[i][j] - Bij[i][j] );	       
+	    total_rhs.Eaux[i][j] += -tau_rescaled/sigma_rescaled*(-total_rhs.Eij[i][j]) + 1.0/sigma_rescaled*(vars.Eij[i][j] - Eij[i][j] );
+	    total_rhs.Baux[i][j] += -tau_rescaled/sigma_rescaled*(-total_rhs.Bij[i][j]) + 1.0/sigma_rescaled*(vars.Bij[i][j] - Bij[i][j] );	       
         }
     }
     else
